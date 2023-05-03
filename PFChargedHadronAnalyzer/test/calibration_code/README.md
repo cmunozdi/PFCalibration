@@ -12,7 +12,7 @@ Response as a function of E(true) are categorised into three regions: barrel ($\
 
 2. Then search "summary" in the same code and you will get list of commented functions. (you can find from lines [2522-2555](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L2522-L2555))
 
-    i)  There we have in total 12 `drawGausFit` functions for response wrt true energy which is used to fit 1D raw, energy corrected and eta corrected energy response distributions for different regions. `drawGausFit` function is defined in lines [166-388](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L167-L388). 
+    i)  There we have in total 12 `drawGausFit` functions which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for different regions in the various E(true) bins. `drawGausFit` function is defined in lines [166-388](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L167-L388) and these 1D fitted distributions for various E(true) bins will be saved in projections_*.root file. Final summary plot will be saved in resp_reso_*.root file.
     
     ii) There are 14 calibration coefficients plots for H barrel, H endcap, EH barrel & EH endcap in lines [2578-2601](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L2578-L2601).
     
@@ -46,7 +46,8 @@ These response plots as function of $\eta$ covers full eta coverage for both EH 
 
 2. Then search "summary" in the same code and you will get list of commented functions. (you can find from lines [2562-2568](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L2562-L2568))
     
-    i)  There are 6 `drawEtaDependence` functions for response wrt $|\eta|$ which which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for EH and H hadrons in the eta fine bin spectrum.
+    i)  There are 6 `drawEtaDependence` functions which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for EH and H hadrons in the eta fine bin spectrum. These 1D fitted distributions for various E(true) bins will be saved in projectionseta_*.root file and final summary plot will be saved in resp_reso_*_wrtEta.root file,
+
     ii) You need to uncomment the required lines to get the corresponding plot depending on the correction.
 
 3. To run the code :
