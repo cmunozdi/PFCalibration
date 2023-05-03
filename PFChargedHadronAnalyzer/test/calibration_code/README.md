@@ -24,19 +24,19 @@ Response as a function of E(true) are categorised into three regions: barrel ($\
 	./PFCalib
 ```
 
-   For example :
+For example :
 
-	If you want to look into the calibration coefficients for H barrel then you need to :
-	   1. mention the _region_. (char* _region_ = (char*)"barrel")
-	   2. uncomment the H barrel calibration coefficients functions only.
-	   Note: comment out all the other plots.    
-	   3. Now, a run and complile the code
+If you want to look into the calibration coefficients for H barrel then you need to :
+1. mention the _region_. (char* _region_ = (char*)"barrel")
+2. uncomment the H barrel calibration coefficients functions only.
+Note: comment out all the other plots.    
+3. Now, a run and complile the code
 
-	If you want to look into the final corrected response wrt true energy for H barrel hadrons then you need to :
-	   1. mention the _region_ . (char* _region_ = (char*)"barrel")
-	   2. uncomment the drawGausFit(corrEtaBarrelHcal,responseCor,resolutionCor) function.
-	   Note: comment out all the other plots.    
-	   3. Now, run and complile the code.
+If you want to look into the final corrected response wrt true energy for H barrel hadrons then you need to :
+1. mention the _region_ . (char* _region_ = (char*)"barrel")
+2. uncomment the drawGausFit(corrEtaBarrelHcal,responseCor,resolutionCor) function.
+Note: comment out all the other plots.
+3. Now, run and complile the code.
 
 
 ## To get summary response plots as a function of $|\eta|$
@@ -55,9 +55,9 @@ These response plots as function of $\eta$ covers full eta coverage for both EH 
 	./PFCalib
 ```
 
-    For example :
-    If you want to look into the final corrected response wrt eta for H hadrons then you need to :
-    1. mention the _region_ . (char* _region_ = (char*)"Full")
-    2. uncomment the drawEtaDependence(corrEtaDependenceH, responseEtaEtaH) function.
-    Note: comment out all the other plots.
-    3. Now, run and complile the code.
+For example :
+If you want to look into the final corrected response wrt eta for H hadrons then you need to :
+1. mention the _region_ . (char* _region_ = (char*)"Full")
+2. uncomment the drawEtaDependence(corrEtaDependenceH, responseEtaEtaH) function.
+Note: comment out all the other plots.
+3. Now, run and complile the code.
