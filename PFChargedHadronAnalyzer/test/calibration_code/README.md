@@ -12,7 +12,7 @@ Response as a function of E(true) are categorised into three regions: barrel ($\
 
 2. Then search "summary" in the same code and you will get list of commented functions. (you can find from lines [2522-2555](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L2522-L2555))
 
-    i)  There we have in total 12 `drawGausFit` functions which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for different regions in the various E(true) bins. `drawGausFit` function is defined in lines [166-388](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L167-L388) and these 1D fitted distributions for various E(true) bins will be saved in projections_$*$.root file. Final summary plot will be saved in resp_reso_$*$.root file.
+    i)  There we have in total 12 `drawGausFit` functions which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for different regions in the various E(true) bins. `drawGausFit` function is defined in lines [166-388](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L167-L388) and these 1D fitted distributions for various E(true) bins will be saved in projections_*asterisks*.root file. Final summary plot will be saved in resp_reso_*asterisks*.root file.
     
     ii) There are 14 calibration coefficients plots for H barrel, H endcap, EH barrel & EH endcap in lines [2578-2601](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L2578-L2601).
     
@@ -27,13 +27,13 @@ Response as a function of E(true) are categorised into three regions: barrel ($\
 For example :
 
 If you want to look into the calibration coefficients for H barrel then you need to :
-1. mention the _region_. (char$*$ _region_ = (char$*$)"barrel")
+1. mention the _region_. (char*asterisks* _region_ = (char*asterisks*)"barrel")
 2. uncomment the H barrel calibration coefficients functions only.
 Note: comment out all the other plots.    
 3. Now, a run and complile the code
 
 If you want to look into the final corrected response wrt true energy for H barrel hadrons then you need to :
-1. mention the _region_ . (char$*$ _region_ = (char$*$)"barrel")
+1. mention the _region_ . (char*asterisks* _region_ = (char*asterisks*)"barrel")
 2. uncomment the drawGausFit(corrEtaBarrelHcal,responseCor,resolutionCor) function.
 Note: comment out all the other plots.
 3. Now, run and complile the code.
@@ -46,7 +46,7 @@ These response plots as function of $\eta$ covers full eta coverage for both EH 
 
 2. Then search "summary" in the same code and you will get list of commented functions. (you can find from lines [2562-2568](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L2562-L2568))
     
-    i)  There are 6 `drawEtaDependence` functions which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for EH and H hadrons in the eta fine bin spectrum. These 1D fitted distributions for various E(true) bins will be saved in projectionseta_$*$.root file and final summary plot will be saved in resp_reso_$*$_wrtEta.root file,
+    i)  There are 6 `drawEtaDependence` functions which are used to fit 1D raw, energy corrected and eta corrected energy response distributions for EH and H hadrons in the eta fine bin spectrum. These 1D fitted distributions for various E(true) bins will be saved in projectionseta_*asterisks*.root file and final summary plot will be saved in resp_reso_*asterisks*_wrtEta.root file,
 
     ii) You need to uncomment the required lines to get the corresponding plot depending on the correction.
 
@@ -58,7 +58,7 @@ These response plots as function of $\eta$ covers full eta coverage for both EH 
 
 For example :
 If you want to look into the final corrected response wrt eta for H hadrons then you need to :
-1. mention the _region_ . (char$*$ _region_ = (char$*$)"Full")
+1. mention the _region_ . (char*asterisks* _region_ = (char*asterisks*)"Full")
 2. uncomment the drawEtaDependence(corrEtaDependenceH, responseEtaEtaH) function.
 Note: comment out all the other plots.
 3. Now, run and complile the code.
