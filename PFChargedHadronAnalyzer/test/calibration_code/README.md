@@ -1,9 +1,11 @@
-# For PFcalibration use PFCalibration/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc 
+# Instructions to run and compile Main_calib.cc
+
+This code is required to dervive calibrations for PF charged hadrons. It is also used to get summary response and resolution plots.
 Note: Please run code in ROOT version > 6.xx
 
-You need to add the input root file path in line 958 of Main_calib.cc.
+You need to add the input root file path in line [995](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L995) of Main_calib.cc.
 
-Here are the following instructions :
+## To get summary response and resolution plots as a function of E(true)
 
 1. You need to select only one _region_ from the lines at 39-42 in the Main_calib.cc code.
 
