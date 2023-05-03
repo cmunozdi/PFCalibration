@@ -6,8 +6,9 @@ Note: Please run code in ROOT version > 6.xx
 You need to add the input root file path in line [995](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L995) of Main_calib.cc.
 
 ## To get summary response and resolution plots as a function of E(true)
+Response and resolution as a function of E(true) are divided into three regions: barrel ($\eta<1.55$), endcap within tracker ($1.55<\eta<2.5$) and endcap outside tracker ($2.5<\eta<2.75$)for each EH and H hadrons.
 
-1. You need to select only one _region_ from the lines at 39-42 in the Main_calib.cc code.
+1. You need to select only one _region_ from the lines [38-40](https://github.com/bkansal/PFCalibration/blob/Run3with_126XGT/PFChargedHadronAnalyzer/test/calibration_code/Main_calib.cc#L38-L41) in the Main_calib.cc code.
 
 2. Then search "summary" in the code you will get list of commented functions. (you can find from lines 2301-2376)
 
