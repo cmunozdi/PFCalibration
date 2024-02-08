@@ -26,7 +26,7 @@
 
 using namespace std;
 //Color fitting functions
-int colorFittingFunc = 3;
+int colorFittingFunc = 2;
 
 double sigC_ = 5.;
 // unsigned sampleRangeHigh = 200;
@@ -1597,31 +1597,31 @@ bool Calibration::fitAsToFunction(TF1 *functionA)
 }
 bool Calibration::fitAsToFunction()
 {
-   graphA_->Fit(functionA_->GetName(), "Q", "", 2., ETrueMax_);
+   graphA_->Fit(functionA_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 
 bool Calibration::fitBsToFunction(TF1 *functionB)
 {
    functionB_ = functionB;
-   graphB_->Fit(functionB_->GetName(), "Q", "SAME", 2., ETrueMax_);
+   graphB_->Fit(functionB_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 bool Calibration::fitBsToFunction()
 {
-   graphB_->Fit(functionB_->GetName(), "Q", "SAME", 2., ETrueMax_);
+   graphB_->Fit(functionB_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 bool Calibration::fitCsToFunction(TF1 *functionC)
 {
    functionC_ = functionC;
-   graphC_->Fit(functionC_->GetName(), "Q", "", 2., ETrueMax_);
+   graphC_->Fit(functionC_->GetName(), "Q", "", 1., ETrueMax_);
 
    return true;
 }
 bool Calibration::fitCsToFunction()
 {
-   graphC_->Fit(functionC_->GetName(), "Q", "", 2., ETrueMax_);
+   graphC_->Fit(functionC_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 
