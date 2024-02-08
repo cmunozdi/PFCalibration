@@ -310,7 +310,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
   if ( isSimu ) { 
     nEv[0]++;//  cout<<" True part size "<<(*trueParticles).size()<<"    "
 // 		  <<(*trueParticles)[0].pdgCode()<<"   "<<(*trueParticles)[1].pdgCode()<<endl;
-    if ( (*trueParticles).size() != 1 ) return;
+    if ( (*trueParticles).size() != 1 ) return; //cmunozdi commented this to use the NTuplizer for Double Pion
     nEv[1]++;
     
     
@@ -321,6 +321,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       const reco::PFCandidate& pfc = *ci;
       //if ( pfc.particleId() == 5 )
 	pfcsID.push_back( pfc.particleId() );
+  
       // std::cout << "Id = " << pfc.particleId() << std::endl;
       if ( pfc.particleId() < 4 ) { 
 	isCharged = true;
@@ -341,7 +342,11 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       reco::PFTrajectoryPoint::LayerType ecalEntrance = reco::PFTrajectoryPoint::ECALEntrance;
       const reco::PFTrajectoryPoint& tpatecal = ((*trueParticles)[0]).extrapolatedPoint( ecalEntrance );
       eta_ = tpatecal.positionREP().Eta();
-      if ( fabs(eta_) < 1E-10 ) return; 
+      if ( fabs(eta_) < 1E-10 ){ 
+        //cout << "abs(eta)<1E-10\t\t" << fabs(eta_) << endl << endl;
+        //cout << "ETA ES CERO PRACTICAMENTE" << endl << endl;
+        return;
+      } 
       phi_ = tpatecal.positionREP().Phi();
       // h_phi->Fill(phi_);    //qwerty Feb_14 2018
       // h_phi_1->Fill(phi_);    //qwerty Feb_15 2018
@@ -372,7 +377,11 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 	double deta = eta_ - pfc.eta();
 	double dphi = dPhi(phi_, pfc.phi() );
 	double dR = std::sqrt(deta*deta+dphi*dphi);
+  
+  //cout << "dR=" << dR << endl << endl;
 	if ( dR < 1.2 ) {
+    
+    //cout << "Ha entrado en dR<1.2" << endl << endl;
 	  dr_.push_back(dR);   //spandey Apr_27 dR
 	  pfcID_.push_back(pfc.particleId());   //spandey Apr_27 dR
 	  Eecal_.push_back(pfc.rawEcalEnergy());  //spandey Apr_27 dR
@@ -387,7 +396,10 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 	//     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
 	// }
 	if ( pfc.particleId() == 4 && dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
-	if ( pfc.particleId() == 5 && dR < 0.4 ) hcal_ += pfc.rawHcalEnergy();
+	if ( pfc.particleId() == 5 && dR < 0.4 ){ //Proposed by Kenichi 9/11/23
+    hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
+    ecal_ += pfc.rawEcalEnergy(); // PF Neutral Hadron's Ecal energy (currently seems ignored)
+  } //hcal_ += pfc.rawHcalEnergy();
 	// if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
 	// if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
 
@@ -876,7 +888,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 //       }
 
 
-
+    std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_;
 
     s->Fill();
 

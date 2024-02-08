@@ -8,7 +8,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -58,7 +58,7 @@
 
 
 
-class PFChargedHadronAnalyzer : public edm::EDAnalyzer {
+class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
  public:
 
   typedef reco::PFCandidateCollection::const_iterator CI;
