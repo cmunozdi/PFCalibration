@@ -1426,7 +1426,7 @@ int main()
        barrelAlphaBetaEcalHcal.push_back(new AlphaBeta(bin, bin + hBs*RBE, true));
        barrelAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + hBs*RBE, true));
        endcapAlphaBetaEcalHcal.push_back(new AlphaBeta(bin, bin + hBs*RBE, false));
-       endcapAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + mBs*RBE, false));
+       endcapAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + hBs*RBE, false));
        BinsETrueEta.push_back(bin);
        // barrelAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + hBs, true));
        // endcapAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + hBs, false));
