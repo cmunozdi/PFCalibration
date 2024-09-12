@@ -1,5 +1,7 @@
-#ifndef MAIN_UL_H
-#define MAIN_UL_H
+//#ifndef MAIN_UL_H
+//#define MAIN_UL_H
+#ifndef RecoParticleFlow_PFClusterTools_PFEnergyCalibration_h
+#define RecoParticleFlow_PFClusterTools_PFEnergyCalibration_h
 
 #include <vector>
 #include <TROOT.h>
@@ -23,6 +25,11 @@
 #include <iostream>
 #include <math.h>
 #include <TSystemDirectory.h>
+
+#include <cmath>
+#include <map>
+#include <algorithm>
+#include <numeric>
 
 using namespace std;
 //Color fitting functions
@@ -68,7 +75,6 @@ double aHe = 2.625;
 /////////////SP
 */
 
-
 double lBs = 0.25; //0.25 B //0.5 E
 double mBs=1.; //1 B
 double hBs=5.0; //10 40 B 50 E
@@ -101,8 +107,8 @@ void LoadOldThresholds() {
 
 //spandey
 void LoadNewThresholds() {
-  aEH = 3.8; aE = 3.8; aH = 3.0; //3.5 2.5
-  aEHe = 3.8; aEe = 3.8; aHe = 3.0;
+  aEH = 0; aE = 0; aH = 0; //3.5 2.5
+  aEHe = 0; aEe = 0; aHe = 0;
 }
 
 
@@ -382,16 +388,16 @@ ABC::ABC(double binLowEdge, double binHighEdge,
    if(isBarrel_)
    {
       etaMinFit_ = 0.0;
-      etaMaxFit_ = 1.6;//1.0
+      etaMaxFit_ = 1.6;//1.0 //@cmunozdi changed from 1.5 to 1.6 (03/09/2024)
       etaMinEtaFit_ = 0.0;
-      etaMaxEtaFit_ = 1.6;//1.3
+      etaMaxEtaFit_ = 1.6;//1.3 //@cmunozdi changed from 1.5 to 1.6 (03/09/2024)
    }
    else
    {
-      etaMinFit_ = 1.6;
-      etaMaxFit_ = 2.2; //FIXME 2.2
-      etaMinEtaFit_ = 1.6;
-      etaMaxEtaFit_ = 2.8; //FIXME 2.8
+      etaMinFit_ = 1.6; //@cmunozdi changed from 1.5 to 1.6 (03/09/2024)
+      etaMaxFit_ = 2.2; //FIXME 2.2 //@cmunozdi changed from 3.0 to 2.2 (03/09/2024)
+      etaMinEtaFit_ = 1.6; //@cmunozdi changed from 1.5 to 1.6 (03/09/2024)
+      etaMaxEtaFit_ = 2.8; //FIXME 2.8 //@cmunozi changed from 3.0 to 2.8 (03/09/2024)
    }
    
    a_ = 0;
@@ -1585,7 +1591,6 @@ double Calibration::getCalibratedEnergyWithGamma(double ETrue, double ecalEnergy
 }
 
 
-
 void Calibration::setETrueMax(double ETrueMax){ETrueMax_ = ETrueMax;}
 
 
@@ -1597,31 +1602,31 @@ bool Calibration::fitAsToFunction(TF1 *functionA)
 }
 bool Calibration::fitAsToFunction()
 {
-   graphA_->Fit(functionA_->GetName(), "Q", "", 1., ETrueMax_);
+   graphA_->Fit(functionA_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 
 bool Calibration::fitBsToFunction(TF1 *functionB)
 {
    functionB_ = functionB;
-   graphB_->Fit(functionB_->GetName(), "Q", "", 1., ETrueMax_);
+   graphB_->Fit(functionB_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 bool Calibration::fitBsToFunction()
 {
-   graphB_->Fit(functionB_->GetName(), "Q", "", 1., ETrueMax_);
+   graphB_->Fit(functionB_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 bool Calibration::fitCsToFunction(TF1 *functionC)
 {
    functionC_ = functionC;
-   graphC_->Fit(functionC_->GetName(), "Q", "", 1., ETrueMax_);
+   graphC_->Fit(functionC_->GetName(), "Q", "", 2., ETrueMax_);
 
    return true;
 }
 bool Calibration::fitCsToFunction()
 {
-   graphC_->Fit(functionC_->GetName(), "Q", "", 1., ETrueMax_);
+   graphC_->Fit(functionC_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 
@@ -1689,7 +1694,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
    //   sprintf(fileName,"resp_reso_%s_%s.root",graph,tag);
    TFile* file3=new TFile(fileName,"recreate");
    file3->cd();
-   TH2F* histo = new TH2F("histoCG", "", sampleRangeHigh, 0, sampleRangeHigh, sampleRangeHigh,  -3.0, 3.0); 
+   TH2F* histo = new TH2F("histoCG", "", sampleRangeHigh, 0, sampleRangeHigh, sampleRangeHigh,  -3.0, 6.0); 
 
    canvas->cd();
    canvas->SetLogx();
@@ -2121,6 +2126,11 @@ TH2F * h_response_vs_phi_EndCap_H_negZ = new TH2F("h_response_vs_phi_EndCap_H_ne
 
 TH2F* raw = new TH2F("raw","", 1000, 0, 1000, 150, -1.5, 1.5);
 TH2F* corrEta = new TH2F("corrEta", "", 1000, 0, 1000, 150, -1.5, 1.5);
+TH2F* corrEta_range1 = new TH2F("corrEta_range1", "", 1000, 0, 1000, 150, -1.5, 1.5);
+TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", 1000, 0, 1000, 150, -1.5, 1.5);
+TH2F* corrEta_range3 = new TH2F("corrEta_range3", "", 1000, 0, 1000, 150, -1.5, 1.5);
+TH2F* corrEta_range4 = new TH2F("corrEta_range4", "", 1000, 0, 1000, 150, -1.5, 1.5);
+TH2F* corrEta_range5 = new TH2F("corrEta_range5", "", 1000, 0, 1000, 150, -1.5, 1.5);
 TH2F* corrEtaDependence = new TH2F("ECorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
@@ -2303,6 +2313,129 @@ unsigned int GetETrueBinEta(double etrue) {
   }
   return -1;
 }
+
+/********************************NUEVO BY MIKKO (EnergyCalibration, CMSSW)****************************/
+class PFEnergyCalibration {
+public:
+  PFEnergyCalibration();
+
+  // ecal calibration for photons
+  // double energyEm(const reco::PFCluster& clusterEcal, double ePS1, double ePS2, bool crackCorrection = true) const;
+
+  // struct CalibratedEndcapPFClusterEnergies {
+  //   double clusterEnergy = 0.;
+  //   double ps1Energy = 0.;
+  //   double ps2Energy = 0.;
+  // };
+
+  // CalibratedEndcapPFClusterEnergies calibrateEndcapClusterEnergies(
+  //     reco::PFCluster const& eeCluster,
+  //     std::vector<reco::PFCluster const*> const& psClusterPointers,
+  //     ESChannelStatus const& channelStatus,
+  //     bool applyCrackCorrections) const;
+
+  // ECAL+HCAL (abc) calibration, with E and eta dependent coefficients, for hadrons
+  void energyEmHad(double t, double& e, double& h, double eta, double phi) const;
+
+  // Set the run-dependent calibration functions from the global tag
+  // void setCalibrationFunctions(const PerformancePayloadFromTFormula* thePFCal) { pfCalibrations = thePFCal; }
+
+  // void initAlphaGamma_ESplanes_fromDB(const ESEEIntercalibConstants* esEEInterCalib) {
+  //   esEEInterCalib_ = esEEInterCalib;
+  // }
+
+  friend std::ostream& operator<<(std::ostream& out, const PFEnergyCalibration& calib);
+
+private:
+  // ecal calibration for photons
+  // double energyEm(const reco::PFCluster& clusterEcal,
+  //                 double ePS1,
+  //                 double ePS2,
+  //                 double& ps1,
+  //                 double& ps2,
+  //                 bool crackCorrection = true) const;
+
+  // // Calibration functions from global tag
+  // const PerformancePayloadFromTFormula* pfCalibrations = nullptr;
+  // const ESEEIntercalibConstants* esEEInterCalib_ = nullptr;
+
+  // Barrel calibration (eta 0.00 -> 1.48)
+  std::unique_ptr<TF1> faBarrel;
+  std::unique_ptr<TF1> fbBarrel;
+  std::unique_ptr<TF1> fcBarrel;
+  std::unique_ptr<TF1> faEtaBarrelEH;
+  std::unique_ptr<TF1> fbEtaBarrelEH;
+  std::unique_ptr<TF1> faEtaBarrelH;
+  std::unique_ptr<TF1> fbEtaBarrelH;
+
+  // Endcap calibration (eta 1.48 -> 3.xx)
+  std::unique_ptr<TF1> faEndcap;
+  std::unique_ptr<TF1> fbEndcap;
+  std::unique_ptr<TF1> fcEndcap;
+  std::unique_ptr<TF1> faEtaEndcapEH;
+  std::unique_ptr<TF1> fbEtaEndcapEH;
+  std::unique_ptr<TF1> faEtaEndcapH;
+  std::unique_ptr<TF1> fbEtaEndcapH;
+
+  //added by Bhumika on 2 august 2018
+  std::unique_ptr<TF1> fcEtaBarrelEH;
+  std::unique_ptr<TF1> fcEtaEndcapEH;
+  std::unique_ptr<TF1> fdEtaEndcapEH;
+  std::unique_ptr<TF1> fcEtaBarrelH;
+  std::unique_ptr<TF1> fcEtaEndcapH;
+  std::unique_ptr<TF1> fdEtaEndcapH;
+
+  // double minimum(double a, double b) const;
+  // double dCrackPhi(double phi, double eta) const;
+  // double CorrPhi(double phi, double eta) const;
+  // double CorrEta(double eta) const;
+  // double CorrBarrel(double E, double eta) const;
+  // double Alpha(double eta) const;
+  // double Beta(double E, double eta) const;
+  // double Gamma(double etaEcal) const;
+  // double EcorrBarrel(double E, double eta, double phi, bool crackCorrection = true) const;
+  // double EcorrZoneBeforePS(double E, double eta) const;
+  // double EcorrPS(double eEcal, double ePS1, double ePS2, double etaEcal) const;
+  // double EcorrPS(double eEcal, double ePS1, double ePS2, double etaEcal, double&, double&) const;
+  // double EcorrPS_ePSNil(double eEcal, double eta) const;
+  // double EcorrZoneAfterPS(double E, double eta) const;
+  // double Ecorr(double eEcal, double ePS1, double ePS2, double eta, double phi, bool crackCorrection = true) const;
+  // double Ecorr(double eEcal,
+  //              double ePS1,
+  //              double ePS2,
+  //              double eta,
+  //              double phi,
+  //              double&,
+  //              double&,
+  //              bool crackCorrection = true) const;
+
+  // The calibration functions
+  double aBarrel(double x) const;
+  double bBarrel(double x) const;
+  double cBarrel(double x) const;
+  double aEtaBarrelEH(double x) const;
+  double bEtaBarrelEH(double x) const;
+  double aEtaBarrelH(double x) const;
+  double bEtaBarrelH(double x) const;
+  double aEndcap(double x) const;
+  double bEndcap(double x) const;
+  double cEndcap(double x) const;
+  double aEtaEndcapEH(double x) const;
+  double bEtaEndcapEH(double x) const;
+  double aEtaEndcapH(double x) const;
+  double bEtaEndcapH(double x) const;
+  //added by Bhumika on 3 august 2018
+  double cEtaBarrelEH(double x) const;
+  double cEtaEndcapEH(double x) const;
+  double dEtaEndcapEH(double x) const;
+  double cEtaBarrelH(double x) const;
+  double cEtaEndcapH(double x) const;
+  double dEtaEndcapH(double x) const;
+
+  // Threshold correction (offset)
+  const double threshE = 3.5;
+  const double threshH = 2.5;
+};
 
 ///======================================================
 
