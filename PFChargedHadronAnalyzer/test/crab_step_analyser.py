@@ -2,7 +2,7 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'Offline_NTuples_Winter2024_GT0_0to200_EpsilonPU'
+config.General.requestName = 'Offline_NTuples_Winter2024_GT0_200to500_PostAlignmentChanges'
 config.General.workArea = 'crab_projects'
 
 #optional
@@ -26,8 +26,7 @@ config.JobType.maxMemoryMB = 2000
 config.section_("Data")
 config.Data.allowNonValidInputDataset = True
 #config.Data.inputDataset = '/SinglePionGun_E0p2to200/Run3Winter24Reco-NoPU_133X_mcRun3_2024_realistic_v9-v2/GEN-SIM-RECO'
-#config.Data.inputDataset = '/SinglePionGun_E200to500/Run3Winter24Reco-NoPU_133X_mcRun3_2024_realistic_v9-v2/GEN-SIM-RECO'
-config.Data:inputDataset = '/SinglePionGun_E0p2to200/Run3Winter24Reco-EpsilonPU_133X_mcRun3_2024_realistic_v9-v2/GEN-SIM-RECO'
+config.Data.inputDataset = '/SinglePionGun_E200to500/Run3Winter24Reco-NoPU_133X_mcRun3_2024_realistic_v9-v2/GEN-SIM-RECO'
 #config.Data.primaryDataset = ''
 #config.Data.splitting = 'EventBased'
 # config.Data.userInputFiles = open('/afs/cern.ch/user/b/bkansal/work/PFcalibration_2019/CMSSW_10_6_0_pre2/src/PFCalibration/PFChargedHadronAnalyzer/test/step2_2_200_10million_1060_2018.txt').readlines()
@@ -40,7 +39,7 @@ config.Data.totalUnits = -1
 config.Data.publication = False
 #config.Data.publishDBS = '' default for the moment
 #config.Data.outLFN = '/home/spandey/t3store/PF_PGun'
-config.Data.outLFNDirBase = '/store/user/cmunozdi/OfflineNTuples_2024GT0/'
+config.Data.outLFNDirBase = '/store/user/cmunozdi/OfflineNTuples_2024GT0_PostAlignmentChanges/'
 
 config.section_("Site")
 config.Site.storageSite = 'T3_CH_CERNBOX'
