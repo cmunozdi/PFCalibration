@@ -38,7 +38,7 @@ process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIWinter19PFCalibDR/Single_Pion_gun_E_200to500_13TeV_pythia8/GEN-SIM-RECO/2016ConditionsNoPU_105X_mcRun2_asymptotic_v2-v1/270000/FF853C26-CDC1-4D44-95D9-924C3C3A482F.root'),
 #    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/Run3Summer21DR/Single_Pion_gun_E_200to500_14TeV_pythia8/GEN-SIM-RECO/NoPURAWRECO_120X_mcRun3_2021_realistic_v6-v2/260000/0788ebab-26eb-410e-97b0-868877d34e33.root'),
     #fileNames = cms.untracked.vstring('root://eoscms.cern.ch//eos/cms/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to200/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/40000/9ff74c70-b71d-4310-a365-150e012cd3de.root'),
-    fileNames = cms.untracked.vstring('/store/mc/Run3Winter24Reco/SinglePionGun_E200to500/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/2820000/01a77a1c-a68b-4c90-a6cc-abfa1b3172ba.root'),
+    fileNames = cms.untracked.vstring('/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to10/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/120000/001a991b-221e-4d99-9413-aee8c82611e7.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -158,16 +158,17 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun3_2024_realistic_v9'
 
 process.pfChargedHadronAnalyzer = cms.EDAnalyzer(
     "PFChargedHadronAnalyzer",
+    genParticles = cms.InputTag("genParticles"),
     PFCandidates = cms.InputTag("particleFlow"),
     PFSimParticles = cms.InputTag("particleFlowSimParticle"),
     EcalPFClusters = cms.InputTag("particleFlowClusterECAL"),
     HcalPFClusters = cms.InputTag("particleFlowClusterHCAL"),
-    ptMin = cms.double(1.),                     # Minimum pt                                                                         
-    pMin = cms.double(1.),                      # Minimum p                                                                          
+    ptMin = cms.double(.1),                     # Minimum pt cmunozdi changed this from 1. to 0.1 to include 0p2 to 10 GeV samples                   
+    pMin = cms.double(.1),                      # Minimum p  cmunozdi changed this from 1. to 0.1 to include 0p2 to 10 GeV samples                                                                     
     nPixMin = cms.int32(2),                     # Nb of pixel hits                                                                   
     nHitMin = cms.vint32(14,17,20,17,10),       # Nb of track hits                                                                   
     nEtaMin = cms.vdouble(1.4,1.6,2.0,2.4,2.6), # in these eta ranges                                                                
-    hcalMin = cms.double(0.5),                   # Minimum hcal energy                                                               
+    hcalMin = cms.double(0.),                   # Minimum hcal energy                                                                cmunozdi changed this from 0.5 to 0. to include 0p2 to 10 GeV samples
     ecalMax = cms.double(1E9),                  # Maximum ecal energy                                                                
     verbose = cms.untracked.bool(True),         # not used.                                                                          
     #rootOutputFile = cms.string("PGun__2_200GeV__81X_upgrade2017_realistic_v22.root"),# the root tree                               

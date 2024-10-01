@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <numeric>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -13,6 +14,9 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
@@ -75,10 +79,12 @@ class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
   
 
   /// PFCandidates in which we'll look for pile up particles 
+  edm::InputTag   inputTaggenParticles_;
   edm::InputTag   inputTagPFCandidates_;
   edm::InputTag   inputTagPFSimParticles_;
   
   edm::InputTag   inputTagEcalPFClusters_;
+  edm::EDGetTokenT<reco::GenParticleCollection> tokengenParticles_;
   edm::EDGetTokenT<reco::PFCandidateCollection> tokenPFCandidates_;
   edm::EDGetTokenT<reco::PFSimParticleCollection>   tokenPFSimParticles_;
   edm::EDGetTokenT<reco::PFClusterCollection>   tokenEcalPFClusters_;
@@ -154,8 +160,11 @@ class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
 
   std::vector<float> addDr,addEmE,addHadE,addEta,addPhi;
   std::vector<int> addPdgId;
-  std::vector<float> genDr,genE,genEta,genPhi;
+  std::vector<float> genDr;
+  float genE, genP,genEta,genPhi;
   std::vector<int> genPdgId;
+
+  float trkP, trkEta, trkPhi;
 
   std::vector<float> cluEcalE;
   std::vector<float> cluEcalEta;

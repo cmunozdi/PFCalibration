@@ -29,6 +29,7 @@
 
 #include <TROOT.h>
 #include <TVector3.h>
+#include "DataFormats/Math/interface/deltaR.h"
 
 //#include "PFChargedHadronAnalyzer.h"
 using namespace std;
@@ -40,6 +41,9 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
   nCh = std::vector<unsigned int>(10,static_cast<unsigned int>(0));
   nEv = std::vector<unsigned int>(2,static_cast<unsigned int>(0));
 
+  inputTaggenParticles_ = iConfig.getParameter<InputTag>("genParticles");
+  tokengenParticles_ = consumes<reco::GenParticleCollection>(inputTaggenParticles_);
+  
   inputTagPFCandidates_ 
     = iConfig.getParameter<InputTag>("PFCandidates");
   tokenPFCandidates_ = consumes<reco::PFCandidateCollection>(inputTagPFCandidates_);
@@ -136,9 +140,15 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
 
   // s->Branch("genDr",&genDr );
   // s->Branch("genPdgId",&genPdgId );
-  // s->Branch("genE",&genE );
-  // s->Branch("genEta",&genEta );
-  // s->Branch("genPhi",&genPhi );
+  s->Branch("genE",&genE );
+  s->Branch("genP",&genP );
+  s->Branch("genEta",&genEta );
+  s->Branch("genPhi",&genPhi );
+
+  // //tracker branches
+  s->Branch("trkP",&trkP);
+  s->Branch("trkEta",&trkEta);
+  s->Branch("trkPhi",&trkPhi);
 
   // s->Branch("emHitX",&emHitX );
   // s->Branch("emHitY",&emHitY );
@@ -257,6 +267,10 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
   olumiBlock = (size_t)lumiBlock;
   otime = (size_t)((iEvent.time().value())>>32);
 
+  //get genParticles
+  Handle<GenParticleCollection> genParticles;
+  iEvent.getByToken(tokengenParticles_, genParticles);
+
   
   // get PFCandidates
   Handle<PFCandidateCollection> pfCandidates;
@@ -312,6 +326,11 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 // 		  <<(*trueParticles)[0].pdgCode()<<"   "<<(*trueParticles)[1].pdgCode()<<endl;
     if ( (*trueParticles).size() != 1 ) return; //cmunozdi commented this to use the NTuplizer for Double Pion
     nEv[1]++;
+
+    genE = (*genParticles)[0].p4().E();
+    genP = (*genParticles)[0].p4().P();
+    genEta = (*genParticles)[0].p4().Eta();
+    genPhi = (*genParticles)[0].p4().Phi();
     
     
     // Check if there is a reconstructed track
@@ -325,6 +344,11 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       // std::cout << "Id = " << pfc.particleId() << std::endl;
       if ( pfc.particleId() < 4 ) { 
 	isCharged = true;
+      if(pfc.particleId() == 1){
+        trkP = pfc.trackRef()->p();
+        trkEta = pfc.trackRef()->eta();
+        trkPhi = pfc.trackRef()->phi();
+      }
 	break;
       }
     }
@@ -914,9 +938,9 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
     genDr.clear();
     genPdgId.clear();
-    genE.clear();
-    genEta.clear();
-    genPhi.clear();
+    // genE.clear();
+    // genEta.clear();
+    // genPhi.clear();
   
     emHitF.clear();
     emHitE.clear();
