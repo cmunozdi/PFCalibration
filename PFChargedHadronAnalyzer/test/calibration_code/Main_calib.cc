@@ -1932,7 +1932,7 @@ int main()
    //   chain->Add("./rootfile/PGun_step3_RECO_1264_2_500_withPU.root");
 //   chain->Add("/eos/home-c/cmunozdi/step3_ana/PGun_step3_RECO_1264_2_200_usingGTRun3v2_noPU/SinglePionGun_E0p2to200/crab_PGun_step3_RECO_1264_2_200_usingGTRun3v2_noPU_v4-v2/230522_081801/0000/*.root");
  
-   add_root_files_to_a_chain(chain, "/eos/home-c/cmunozdi/OFFLINE_NTUPLES/OfflineNTuples_2024GT0/");//_proof/");//NewNTuplizerVersion/");
+   add_root_files_to_a_chain(chain, "/eos/home-c/cmunozdi/OFFLINE_NTUPLES/OfflineNTuples_2024GT0");//OfflineNTuples_2023GT4_kenichiNTuplizer");
 
 //chain->Add("/eos/home-c/cmunozdi/step3_ana/*.root");
    sTree = (TTree*)chain;
@@ -2576,65 +2576,65 @@ int main()
      //functionEndcapHcalC->FixParameter(7,-1.01447);
      
 
-      //2024 current parameters
-      functionBarrelEcalHcalB->FixParameter(0, 14.9081);
-      functionBarrelEcalHcalB->FixParameter(1, -92.531);
-      functionBarrelEcalHcalB->FixParameter(2, -586.723);
-      functionBarrelEcalHcalB->FixParameter(3, 0.281367);
-      functionBarrelEcalHcalB->FixParameter(4, 13.0608);
-      functionBarrelEcalHcalB->FixParameter(5, 0.450973);
-      functionBarrelEcalHcalB->FixParameter(6, 0.03687);
-      functionBarrelEcalHcalB->FixParameter(7, -0.583429);
+      //2023 parameters
+     functionBarrelEcalHcalB->FixParameter(0,14.3654);
+     functionBarrelEcalHcalB->FixParameter(1,-522.051);
+     functionBarrelEcalHcalB->FixParameter(2,62.5789);
+     functionBarrelEcalHcalB->FixParameter(3,0.313092);
+     functionBarrelEcalHcalB->FixParameter(4,13.3344);
+     functionBarrelEcalHcalB->FixParameter(5,0.203111);
+     functionBarrelEcalHcalB->FixParameter(6,0.102733);
+     functionBarrelEcalHcalB->FixParameter(7,-0.611068);
 
 
-      functionBarrelEcalHcalC->FixParameter(0, 2.414);
-      functionBarrelEcalHcalC->FixParameter(1, -2.99257);
-      functionBarrelEcalHcalC->FixParameter(2, -3.10022);
-      functionBarrelEcalHcalC->FixParameter(3, 2.4884);
-      functionBarrelEcalHcalC->FixParameter(4, 1.49647);
-      functionBarrelEcalHcalC->FixParameter(5, 0.0591164);
-      functionBarrelEcalHcalC->FixParameter(6, 0.401639);
-      functionBarrelEcalHcalC->FixParameter(7, -0.848485);
+     functionBarrelEcalHcalC->FixParameter(0,2.34455);
+     functionBarrelEcalHcalC->FixParameter(1,-10.7725);
+     functionBarrelEcalHcalC->FixParameter(2,1.55872);
+     functionBarrelEcalHcalC->FixParameter(3,0.974501);
+     functionBarrelEcalHcalC->FixParameter(4,1.4455);
+     functionBarrelEcalHcalC->FixParameter(5,0.0679553);
+     functionBarrelEcalHcalC->FixParameter(6,0.277572);
+     functionBarrelEcalHcalC->FixParameter(7,-0.836124);
 
 
-      functionBarrelHcalC->FixParameter(0, 10.7719);
-      functionBarrelHcalC->FixParameter(1, 6.36096);
-      functionBarrelHcalC->FixParameter(2, -23.8131);
-      functionBarrelHcalC->FixParameter(3, 1.77669);
-      functionBarrelHcalC->FixParameter(4, 12.6614);
-      functionBarrelHcalC->FixParameter(5, 0.722518);
-      functionBarrelHcalC->FixParameter(6, 0.0447024);
-      functionBarrelHcalC->FixParameter(7, -0.636043);
+     functionBarrelHcalC->FixParameter(0,7.55465);
+     functionBarrelHcalC->FixParameter(1,8.53437);
+     functionBarrelHcalC->FixParameter(2,-14.0856);
+     functionBarrelHcalC->FixParameter(3,5.32547);
+     functionBarrelHcalC->FixParameter(4,13.1732);
+     functionBarrelHcalC->FixParameter(5,0.978521);
+     functionBarrelHcalC->FixParameter(6,0.0427651);
+     functionBarrelHcalC->FixParameter(7,-0.582561);
 
 
-      functionEndcapEcalHcalB->FixParameter(0, 37.7103);
-      functionEndcapEcalHcalB->FixParameter(1, -318.409);
-      functionEndcapEcalHcalB->FixParameter(2, -1095.14);
-      functionEndcapEcalHcalB->FixParameter(3, 0.298041);
-      functionEndcapEcalHcalB->FixParameter(4, 23.6435);
-      functionEndcapEcalHcalB->FixParameter(5, 0.326262);
-      functionEndcapEcalHcalB->FixParameter(6, -0.0049515);
-      functionEndcapEcalHcalB->FixParameter(7, -0.631655);
+       functionEndcapEcalHcalB->FixParameter(0,19.4940);
+       functionEndcapEcalHcalB->FixParameter(1,-276.99);
+       functionEndcapEcalHcalB->FixParameter(2,-538.549);
+       functionEndcapEcalHcalB->FixParameter(3,0.296178);
+       functionEndcapEcalHcalB->FixParameter(4,7.15250);
+       functionEndcapEcalHcalB->FixParameter(5,0.114480);
+       functionEndcapEcalHcalB->FixParameter(6,-0.00592512);
+       functionEndcapEcalHcalB->FixParameter(7,-0.763133);
 
 
-      functionEndcapEcalHcalC->FixParameter(0, -2.24814);
-      functionEndcapEcalHcalC->FixParameter(1, 3.15142);
-      functionEndcapEcalHcalC->FixParameter(2, 3.76944);
-      functionEndcapEcalHcalC->FixParameter(3, 1.06815);
-      functionEndcapEcalHcalC->FixParameter(4, 0.0726289);
-      functionEndcapEcalHcalC->FixParameter(5, 24.8456);
-      functionEndcapEcalHcalC->FixParameter(6, -0.609985);
-      functionEndcapEcalHcalC->FixParameter(7, 0.0968119);
+       functionEndcapEcalHcalC->FixParameter(0,-2.25169);
+       functionEndcapEcalHcalC->FixParameter(1,3.15393);
+       functionEndcapEcalHcalC->FixParameter(2,2.2564);
+       functionEndcapEcalHcalC->FixParameter(3,0.970055);
+       functionEndcapEcalHcalC->FixParameter(4,0.0561773);
+       functionEndcapEcalHcalC->FixParameter(5,21.5052);
+       functionEndcapEcalHcalC->FixParameter(6,-0.845143);
+       functionEndcapEcalHcalC->FixParameter(7,0.0898543);
 
 
-      functionEndcapHcalC->FixParameter(0, 1.63161);
-      functionEndcapHcalC->FixParameter(1, 6.36717);
-      functionEndcapHcalC->FixParameter(2, -33.0955);
-      functionEndcapHcalC->FixParameter(3, 0.501949);
-      functionEndcapHcalC->FixParameter(4, 0.856495);
-      functionEndcapHcalC->FixParameter(5, 0.0255776);
-      functionEndcapHcalC->FixParameter(6, 0.0809049);
-      functionEndcapHcalC->FixParameter(7, -1.41804);
+     functionEndcapHcalC->FixParameter(0,1.60863);
+     functionEndcapHcalC->FixParameter(1,2.56704);
+     functionEndcapHcalC->FixParameter(2,-15.2573);
+     functionEndcapHcalC->FixParameter(3,0.772001);
+     functionEndcapHcalC->FixParameter(4,0.802565);
+     functionEndcapHcalC->FixParameter(5,0.0215722);
+     functionEndcapHcalC->FixParameter(6,0.116599);
+     functionEndcapHcalC->FixParameter(7,-1.48251);
 
 
         
@@ -3347,86 +3347,53 @@ int main()
     //    functionEndcapBetaHcal->SetParameter(3,0.0155008);
     //    functionEndcapBetaHcal->SetParameter(4,-1.41743);
 
-    //2024 current parameters
+    //2023 parameters
 
-    functionBarrelAlphaEcalHcal->FixParameter(0, -0.0337473);
-    functionBarrelAlphaEcalHcal->FixParameter(1, 40.0744);
-    functionBarrelAlphaEcalHcal->FixParameter(2, -1.07833);
-    functionBarrelAlphaEcalHcal->FixParameter(3, 1.7682e-05);
-    functionBarrelAlphaEcalHcal->FixParameter(4, 39.9921);
-    functionBarrelAlphaEcalHcal->FixParameter(5, 1.81186e-05);
-    functionBarrelAlphaEcalHcal->FixParameter(6, -2.83026);
-    functionBarrelAlphaEcalHcal->FixParameter(7, -2.82365);
+     functionBarrelAlphaEcalHcal->FixParameter(0,-0.0153451);
+     functionBarrelAlphaEcalHcal->FixParameter(1,-0.0582379);
+     functionBarrelAlphaEcalHcal->FixParameter(2,34.1286);
+     functionBarrelAlphaEcalHcal->FixParameter(3,0.148752);
 
 
-    functionBarrelBetaEcalHcal->FixParameter(0, 0.114298);
-    functionBarrelBetaEcalHcal->FixParameter(1, 0.260535);
-    functionBarrelBetaEcalHcal->FixParameter(2, -0.76894);
-    functionBarrelBetaEcalHcal->FixParameter(3, 0.690161);
-    functionBarrelBetaEcalHcal->FixParameter(4, 0.454889);
-    functionBarrelBetaEcalHcal->FixParameter(5, 0.149286);
-    functionBarrelBetaEcalHcal->FixParameter(6, -19.212);
-    functionBarrelBetaEcalHcal->FixParameter(7, -0.44035);
+     functionBarrelBetaEcalHcal->FixParameter(0,-0.327691);
+     functionBarrelBetaEcalHcal->FixParameter(1,0.470381);
+     functionBarrelBetaEcalHcal->FixParameter(2,35.5676);
+     functionBarrelBetaEcalHcal->FixParameter(3,0.184173);
+     functionBarrelBetaEcalHcal->FixParameter(4,-0.278133);
+     functionBarrelBetaEcalHcal->FixParameter(5,0.678245);
 
 
-    functionBarrelAlphaHcal->FixParameter(0, -5.8631);
-    functionBarrelAlphaHcal->FixParameter(1, 42.9711);
-    functionBarrelAlphaHcal->FixParameter(2, 0.647296);
-    functionBarrelAlphaHcal->FixParameter(3, 0.380114);
-    functionBarrelAlphaHcal->FixParameter(4, 37.1128);
-    functionBarrelAlphaHcal->FixParameter(5, 0.300629);
-    functionBarrelAlphaHcal->FixParameter(6, -1.22073);
-    functionBarrelAlphaHcal->FixParameter(7, -1.26553);
+     functionBarrelAlphaHcal->FixParameter(0,0.000004304);
+     functionBarrelAlphaHcal->FixParameter(1,-1.23718e-05);
 
 
-    functionBarrelBetaHcal->FixParameter(0, -26.3294);
-    functionBarrelBetaHcal->FixParameter(1, 26.5531);
-    functionBarrelBetaHcal->FixParameter(2, 19.5048);
-    functionBarrelBetaHcal->FixParameter(3, 1.6943);
-    functionBarrelBetaHcal->FixParameter(4, 0.116759);
-    functionBarrelBetaHcal->FixParameter(5, 0.0158723);
-    functionBarrelBetaHcal->FixParameter(6, -0.435307);
-    functionBarrelBetaHcal->FixParameter(7, -0.7014);
+   functionBarrelBetaHcal->FixParameter(0,-0.000114709);
+   functionBarrelBetaHcal->FixParameter(1,0.0001779134);
+   functionBarrelBetaHcal->FixParameter(2,21.9054);
 
 
-    functionEndcapAlphaEcalHcal->FixParameter(0, -74.1841);
-    functionEndcapAlphaEcalHcal->FixParameter(1, 165.064);
-    functionEndcapAlphaEcalHcal->FixParameter(2, -35.0902);
-    functionEndcapAlphaEcalHcal->FixParameter(3, 42.2696);
-    functionEndcapAlphaEcalHcal->FixParameter(4, 86.8144);
-    functionEndcapAlphaEcalHcal->FixParameter(5, 2.28983);
-    functionEndcapAlphaEcalHcal->FixParameter(6, 0.00469653);
-    functionEndcapAlphaEcalHcal->FixParameter(7, -0.523986);
+   functionEndcapAlphaEcalHcal->FixParameter(0,0);
+   functionEndcapAlphaEcalHcal->FixParameter(1,0);
 
 
-    functionEndcapBetaEcalHcal->FixParameter(0, -244.815);
-    functionEndcapBetaEcalHcal->FixParameter(1, 244.887);
-    functionEndcapBetaEcalHcal->FixParameter(2, 13.679);
-    functionEndcapBetaEcalHcal->FixParameter(3, 13.778);
-    functionEndcapBetaEcalHcal->FixParameter(4, 0.143508);
-    functionEndcapBetaEcalHcal->FixParameter(5, 0.00139485);
-    functionEndcapBetaEcalHcal->FixParameter(6, -0.573462);
-    functionEndcapBetaEcalHcal->FixParameter(7, -1.62602);
+   functionEndcapBetaEcalHcal->FixParameter(0,-0.233182);
+   functionEndcapBetaEcalHcal->FixParameter(1,0.170723);
+   functionEndcapBetaEcalHcal->FixParameter(2,997.592);
+   functionEndcapBetaEcalHcal->FixParameter(3,0.00882785);
+   functionEndcapBetaEcalHcal->FixParameter(4,-0.913707);
+   functionEndcapBetaEcalHcal->FixParameter(5,1.78399);
 
 
-    functionEndcapAlphaHcal->FixParameter(0, -21.2045);
-    functionEndcapAlphaHcal->FixParameter(1, 1.61199);
-    functionEndcapAlphaHcal->FixParameter(2, -0.924482);
-    functionEndcapAlphaHcal->FixParameter(3, -0.356028);
-    functionEndcapAlphaHcal->FixParameter(4, -18.8272);
-    functionEndcapAlphaHcal->FixParameter(5, 0.957782);
-    functionEndcapAlphaHcal->FixParameter(6, -0.144766);
-    functionEndcapAlphaHcal->FixParameter(7, -0.318);
+    functionEndcapAlphaHcal->FixParameter(0,0);
+    functionEndcapAlphaHcal->FixParameter(1,0);
+    functionEndcapAlphaHcal->FixParameter(2,0);
+    functionEndcapAlphaHcal->FixParameter(3,2.22078);
+    functionEndcapAlphaHcal->FixParameter(4,0.522372);
 
 
-    functionEndcapBetaHcal->FixParameter(0, 0.00907483);
-    functionEndcapBetaHcal->FixParameter(1, 62.9639);
-    functionEndcapBetaHcal->FixParameter(2, -12.057);
-    functionEndcapBetaHcal->FixParameter(3, 0.0878058);
-    functionEndcapBetaHcal->FixParameter(4, 62.8559);
-    functionEndcapBetaHcal->FixParameter(5, 0.0854849);
-    functionEndcapBetaHcal->FixParameter(6, -0.678145);
-    functionEndcapBetaHcal->FixParameter(7, -0.675762);
+    functionEndcapBetaHcal->FixParameter(0,-0.0524166);
+    functionEndcapBetaHcal->FixParameter(1,-0.223219);
+    functionEndcapBetaHcal->FixParameter(2,1.35631);
 
     
    }
