@@ -39,7 +39,7 @@ bool useP_reco=false;//Instead of using etrue, the calibration code uses p_reco.
 bool drawRespPlots = false;
 int hadrons_eta_symbol = 0;//This int variable is 0 when we take all the eta values (positives and negatives); +1 when we only take hadrons with positive eta; -1 when we only take hadrons with negatives eta.
 bool PFEnergyCalibrationFunction=false; //This bool variable is true for using PFEnergyCalibration function from CMSSW and flase for using the default PFHC calibration function getCalibratedEnergy
-bool WriteNTupleFile = true;
+bool WriteNTupleFile = false;
 //char* _region_ = (char*)"EC_outside_tracker";
 //char* _region_ = (char*)"EC_within_tracker";
 //char* _region_ = (char*)"barrel";
@@ -1577,6 +1577,10 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
        tree->GetEntry(entry);
        
        // if(ecal_<0.4) continue; //FIXME MM
+       if(true_ > sampleRangeHigh) {
+          cout << "true_ = " << true_ << " is greater than sampleRangeHigh = " << sampleRangeHigh << endl;
+          continue;
+        }
        if (fabs(eta_) < 2.4 && p_ == 0) continue;
        if((hadrons_eta_symbol==+1)&&(eta_<0)) continue;
        else if((hadrons_eta_symbol==-1)&&(eta_>0)) continue;
@@ -1932,7 +1936,7 @@ int main()
    //   chain->Add("./rootfile/PGun_step3_RECO_1264_2_500_withPU.root");
 //   chain->Add("/eos/home-c/cmunozdi/step3_ana/PGun_step3_RECO_1264_2_200_usingGTRun3v2_noPU/SinglePionGun_E0p2to200/crab_PGun_step3_RECO_1264_2_200_usingGTRun3v2_noPU_v4-v2/230522_081801/0000/*.root");
  
-   add_root_files_to_a_chain(chain, "/eos/home-c/cmunozdi/OFFLINE_NTUPLES/OfflineNTuples_2024GT0/");//_proof/");//NewNTuplizerVersion/");
+   add_root_files_to_a_chain(chain, "/eos/home-c/cmunozdi/OFFLINE_NTUPLES/OfflineNTuples_2024GT0_merged");//_merged/");//_proof/");//NewNTuplizerVersion/");2024_Merged/2024_Merged/
 
 //chain->Add("/eos/home-c/cmunozdi/step3_ana/*.root");
    sTree = (TTree*)chain;
@@ -2003,7 +2007,7 @@ int main()
    }
    
    
-   for(double bin = 100.0; bin < 1000.0 ; bin = bin + hBs) //10
+   for(double bin = 100.0; bin < sampleRangeHigh ; bin = bin + hBs) //10
    {
      barrelABCEcalHcal.push_back(new ABC(bin, bin + hBs, true));
      barrelABCEcal.push_back(new ABC(bin, bin + hBs, true));
@@ -2059,7 +2063,7 @@ int main()
      //   endcapAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + mBs, false));
      }
    
-   for(double bin = 100.0; bin < 1000.0 ; bin = bin + hBs*RBE)
+   for(double bin = 100.0; bin < sampleRangeHigh ; bin = bin + hBs*RBE)
      {
        barrelAlphaBetaEcalHcal.push_back(new AlphaBeta(bin, bin + hBs*RBE, true));
        barrelAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + hBs*RBE, true));

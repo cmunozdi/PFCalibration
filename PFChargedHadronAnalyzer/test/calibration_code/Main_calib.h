@@ -37,7 +37,7 @@ int colorFittingFunc = 2;
 
 double sigC_ = 5.;
 // unsigned sampleRangeHigh = 200;
-unsigned sampleRangeHigh = 500;
+unsigned sampleRangeHigh = 5000;
 
 
 //threshold
