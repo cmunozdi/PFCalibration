@@ -166,11 +166,11 @@ void InitBarrelAlpha() {
   // faBarrel->SetParameter(8,0.0568171);
 
   // Barrel (fit made with |eta| < 1.2)
-    faBarrel = new TF1("faBarrel","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,1000.);
-    fbBarrel = new TF1("fbBarrel","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,1000.);
-    fcBarrel = new TF1("fcBarrel","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,1000.);
-    faEtaBarrel = new TF1("faEtaBarrel","[0]+[1]*exp(-x/[2])",1.,1000.);
-    fbEtaBarrel = new TF1("fbEtaBarrel","[0]+[1]*exp(-x/[2])+[3]*[3]*exp(-x*x/([4]*[4]))",1.,1000.);
+    faBarrel = new TF1("faBarrel","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,sampleRangeHigh);
+    fbBarrel = new TF1("fbBarrel","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,sampleRangeHigh);
+    fcBarrel = new TF1("fcBarrel","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,sampleRangeHigh);
+    faEtaBarrel = new TF1("faEtaBarrel","[0]+[1]*exp(-x/[2])",1.,sampleRangeHigh);
+    fbEtaBarrel = new TF1("fbEtaBarrel","[0]+[1]*exp(-x/[2])+[3]*[3]*exp(-x*x/([4]*[4]))",1.,sampleRangeHigh);
     faBarrel->SetParameter(0,1.15665);
     fbBarrel->SetParameter(0,0.994603);
     fcBarrel->SetParameter(0,0.956544);
@@ -253,11 +253,11 @@ void InitBarrelAlpha() {
  //  fbBarrel52x->SetParameter(5,9.98657);
  //  fcBarrel52x->SetParameter(5,387.311);
  
- faBarrel52x = new TF1("faBarrel52x","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,1000.);
-  fbBarrel52x = new TF1("fbBarrel52x","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,1000.);
-  fcBarrel52x = new TF1("fcBarrel52x","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,1000.);
-  faEtaBarrel52x = new TF1("faEtaBarrel52x","[0]+[1]*exp(-x/[2])",1.,1000.);
-  fbEtaBarrel52x = new TF1("fbEtaBarrel52x","[0]+[1]*exp(-x/[2])",1.,1000.);
+ faBarrel52x = new TF1("faBarrel52x","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,sampleRangeHigh);
+  fbBarrel52x = new TF1("fbBarrel52x","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,sampleRangeHigh);
+  fcBarrel52x = new TF1("fcBarrel52x","[0]+([1]+[2]/sqrt(x))*exp(-x/[3])-[4]*exp(-x*x/[5])",1.,sampleRangeHigh);
+  faEtaBarrel52x = new TF1("faEtaBarrel52x","[0]+[1]*exp(-x/[2])",1.,sampleRangeHigh);
+  fbEtaBarrel52x = new TF1("fbEtaBarrel52x","[0]+[1]*exp(-x/[2])",1.,sampleRangeHigh);
   faBarrel52x->SetParameter(0,1.36776);
   fbBarrel52x->SetParameter(0,1.00174);
   fcBarrel52x->SetParameter(0,0.958822);
@@ -1360,7 +1360,7 @@ class Calibration
 
 Calibration::Calibration()
 {
-   ETrueMax_ = 1000;
+   ETrueMax_ = sampleRangeHigh;
    isBarrel_ = true;
 }
 Calibration::Calibration(double ETrueMax, bool isBarrel) 
@@ -1694,7 +1694,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
    //   sprintf(fileName,"resp_reso_%s_%s.root",graph,tag);
    TFile* file3=new TFile(fileName,"recreate");
    file3->cd();
-   TH2F* histo = new TH2F("histoCG", "", sampleRangeHigh, 0, sampleRangeHigh, sampleRangeHigh,  -3.0, 6.0); 
+   TH2F* histo = new TH2F("histoCG", "", sampleRangeHigh, 0, sampleRangeHigh, 500,  -3.0, 6.0); 
 
    canvas->cd();
    canvas->SetLogx();
@@ -2124,13 +2124,13 @@ TH2F * h_response_vs_phi_EndCap_H_posZ = new TH2F("h_response_vs_phi_EndCap_H_po
 TH2F * h_response_vs_phi_EndCap_H_negZ = new TH2F("h_response_vs_phi_EndCap_H_negZ", "H hadrons Response vs #phi for -z in EndCap", 70, -3.5, 3.5, 30, -1.5, 1.5); //shubham
 
 
-TH2F* raw = new TH2F("raw","", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEta = new TH2F("corrEta", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEta_range1 = new TH2F("corrEta_range1", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEta_range3 = new TH2F("corrEta_range3", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEta_range4 = new TH2F("corrEta_range4", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEta_range5 = new TH2F("corrEta_range5", "", 1000, 0, 1000, 150, -1.5, 1.5);
+TH2F* raw = new TH2F("raw","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEta = new TH2F("corrEta", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEta_range1 = new TH2F("corrEta_range1", "", 500, 0, 500, 150, -1.5, 1.5);
+TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", 500, 0, 500, 150, -1.5, 1.5);
+TH2F* corrEta_range3 = new TH2F("corrEta_range3", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEta_range4 = new TH2F("corrEta_range4", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEta_range5 = new TH2F("corrEta_range5", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEtaDependence = new TH2F("ECorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
@@ -2150,75 +2150,75 @@ TH2F* EtaCorrEtaDependenceH = new TH2F("EtaCorrEtaDependenceH","Response vs. Eta
 TH2F* EtaCorrEtaDependenceH_Alpha = new TH2F("EtaCorrEtaDependenceH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 TH2F* EtaCorrEtaDependenceH_Beta = new TH2F("EtaCorrEtaDependenceH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 
-TH2F* rawBarrel = new TH2F("rawBarrel","", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrBarrel = new TH2F("ECorrBarrel", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEtaBarrel = new TH2F("EtaCorrBarrel", "", 1000, 0, 1000, 150, -1.5, 
+TH2F* rawBarrel = new TH2F("rawBarrel","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrBarrel = new TH2F("ECorrBarrel", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEtaBarrel = new TH2F("EtaCorrBarrel", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 
                                1.5);
-TH2F* rawBarrelEcalHcal = new TH2F("rawBarrelEH","", 1000, 0, 1000, 150, 
+TH2F* rawBarrelEcalHcal = new TH2F("rawBarrelEH","", sampleRangeHigh, 0, sampleRangeHigh, 150, 
                                    -1.5, 1.5);
-TH2F* corrBarrelEcalHcal = new TH2F("ECorrBarrelEH", "", 1000, 0, 1000, 
+TH2F* corrBarrelEcalHcal = new TH2F("ECorrBarrelEH", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
                                     
-TH2F* corrBarrelEcalHcal_ErawEcal = new TH2F("ECorrBarrelEH_ErawEcal", "", 1000, 0, 1000, 
+TH2F* corrBarrelEcalHcal_ErawEcal = new TH2F("ECorrBarrelEH_ErawEcal", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 15);
                                     
-TH2F* corrBarrelEcalHcal_ErawHcal = new TH2F("ECorrBarrelEH_ErawHcal", "", 1000, 0, 1000, 
+TH2F* corrBarrelEcalHcal_ErawHcal = new TH2F("ECorrBarrelEH_ErawHcal", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
                                     
-TH2F* corrBarrelEcalHcal_ErawEcalHcal = new TH2F("ECorrBarrelEH_ErawEcalHcal", "", 1000, 0, 1000, 
+TH2F* corrBarrelEcalHcal_ErawEcalHcal = new TH2F("ECorrBarrelEH_ErawEcalHcal", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
 
-TH2F* corrEtaBarrelEcalHcal = new TH2F("EtaCorrBarrelEH", "", 1000, 0, 
-                                       1000, 150, -1.5, 1.5);
-TH2F* corrEtaBarrelEcalHcal_Alpha = new TH2F("EtaCorrBarrelEH_Alpha", "", 1000, 0, 
-                                       1000, 150, -1.5, 1.5);
-TH2F* corrEtaBarrelEcalHcal_Beta = new TH2F("EtaCorrBarrelEH_Beta", "", 1000, 0, 
-                                       1000, 150, -1.5, 1.5);
-TH2F* rawBarrelHcal = new TH2F("rawBarrelH","", 1000, 0, 1000, 150, -1.5, 1.5 );
+TH2F* corrEtaBarrelEcalHcal = new TH2F("EtaCorrBarrelEH", "", sampleRangeHigh, 0, 
+                                       sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEtaBarrelEcalHcal_Alpha = new TH2F("EtaCorrBarrelEH_Alpha", "", sampleRangeHigh, 0, 
+                                       sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEtaBarrelEcalHcal_Beta = new TH2F("EtaCorrBarrelEH_Beta", "", sampleRangeHigh, 0, 
+                                       sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* rawBarrelHcal = new TH2F("rawBarrelH","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5 );
 			       //1000, 0.0, 5.0);
-TH2F* corrBarrelHcal = new TH2F("ECorrBarrelH", "", 1000, 0, 1000, 150, -1.5,
+TH2F* corrBarrelHcal = new TH2F("ECorrBarrelH", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5,
                                 1.5);
-TH2F* corrBarrelHcal_ErawHcal = new TH2F("ECorrBarrelH_ErawHcal", "", 1000, 0, 1000, 150, -1.5,
+TH2F* corrBarrelHcal_ErawHcal = new TH2F("ECorrBarrelH_ErawHcal", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5,
                                 1.5);
-TH2F* corrEtaBarrelHcal = new TH2F("EtaCorrBarrelH", "", 1000, 0, 1000, 150,
+TH2F* corrEtaBarrelHcal = new TH2F("EtaCorrBarrelH", "", sampleRangeHigh, 0, sampleRangeHigh, 150,
                                    -1.5, 1.5);
-TH2F* corrEtaBarrelHcal_Alpha = new TH2F("EtaCorrBarrelH_Alpha", "", 1000, 0, 1000, 150,
+TH2F* corrEtaBarrelHcal_Alpha = new TH2F("EtaCorrBarrelH_Alpha", "", sampleRangeHigh, 0, sampleRangeHigh, 150,
                                    -1.5, 1.5);
-TH2F* corrEtaBarrelHcal_Beta = new TH2F("EtaCorrBarrelH_Beta", "", 1000, 0, 1000, 150,
+TH2F* corrEtaBarrelHcal_Beta = new TH2F("EtaCorrBarrelH_Beta", "", sampleRangeHigh, 0, sampleRangeHigh, 150,
                                    -1.5, 1.5);
 
-TH2F* rawEndcap = new TH2F("rawEndcap","", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEndcap = new TH2F("ECorrEndcap", "", 1000, 0, 1000, 150, -1.5, 1.5);
-TH2F* corrEtaEndcap = new TH2F("EtaCorrEndcap", "", 1000, 0, 1000, 150, -1.5, 
+TH2F* rawEndcap = new TH2F("rawEndcap","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEndcap = new TH2F("ECorrEndcap", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEtaEndcap = new TH2F("EtaCorrEndcap", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 
                                1.5);
 //TH2F* rawEndcapEcalHcal = new TH2F("rawEndcapEcalHcal","", 1000, 0, 1000, 150, -1.5, 1.5);
 //TH2F* rawEndcapEcalHcal = new TH2F("rawEndcapEcalHcal","", 1000, 0, 1000, 500, -1.5, 10.0);
-TH2F* rawEndcapEcalHcal = new TH2F("rawEndcapEH","", 1000, 0, 1000, 575, -1.5, 10.0);
+TH2F* rawEndcapEcalHcal = new TH2F("rawEndcapEH","", sampleRangeHigh, 0, sampleRangeHigh, 575, -1.5, 10.0);
 
-TH2F* corrEndcapEcalHcal = new TH2F("ECorrEndcapEH", "", 1000, 0, 1000, 
+TH2F* corrEndcapEcalHcal = new TH2F("ECorrEndcapEH", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
-TH2F* corrEndcapEcalHcal_ErawEcal = new TH2F("ECorrEndcapEH_ErawEcal", "", 1000, 0, 1000, 
+TH2F* corrEndcapEcalHcal_ErawEcal = new TH2F("ECorrEndcapEH_ErawEcal", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
-TH2F* corrEndcapEcalHcal_ErawHcal = new TH2F("ECorrEndcapEH_ErawHcal", "", 1000, 0, 1000, 
+TH2F* corrEndcapEcalHcal_ErawHcal = new TH2F("ECorrEndcapEH_ErawHcal", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
-TH2F* corrEndcapEcalHcal_ErawEcalHcal = new TH2F("ECorrEndcapEH_ErawEcalHcal", "", 1000, 0, 1000, 
+TH2F* corrEndcapEcalHcal_ErawEcalHcal = new TH2F("ECorrEndcapEH_ErawEcalHcal", "", sampleRangeHigh, 0, sampleRangeHigh, 
                                     150, -1.5, 1.5);
 // TH2F* corrEtaEndcapEcalHcal = new TH2F("corrEtaEndcapEcalHcal", "", 1000, 0, 
 //                                        1000, 150, -1.5, 1.5);
 //TH2F* corrEtaEndcapEcalHcal = new TH2F("corrEtaEndcapEcalHcal", "", 1000, 0, 1000, 500, -1.5, 10.0);
-TH2F* corrEtaEndcapEcalHcal = new TH2F("EtaCorrEndcapEH", "", 1000, 0, 1000, 575, -1.5, 10.0);
-TH2F* corrEtaEndcapEcalHcal_Alpha = new TH2F("EtaCorrEndcapEH_Alpha", "", 1000, 0, 1000, 575, -1.5, 10.0);
-TH2F* corrEtaEndcapEcalHcal_Beta = new TH2F("EtaCorrEndcapEH_Beta", "", 1000, 0, 1000, 575, -1.5, 10.0);
+TH2F* corrEtaEndcapEcalHcal = new TH2F("EtaCorrEndcapEH", "", sampleRangeHigh, 0, sampleRangeHigh, 575, -1.5, 10.0);
+TH2F* corrEtaEndcapEcalHcal_Alpha = new TH2F("EtaCorrEndcapEH_Alpha", "", sampleRangeHigh, 0, sampleRangeHigh, 575, -1.5, 10.0);
+TH2F* corrEtaEndcapEcalHcal_Beta = new TH2F("EtaCorrEndcapEH_Beta", "", sampleRangeHigh, 0, sampleRangeHigh, 575, -1.5, 10.0);
 
-TH2F* rawEndcapHcal = new TH2F("rawEndcapH","", 1000, 0, 1000, 150, -1.5, 
+TH2F* rawEndcapHcal = new TH2F("rawEndcapH","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 
                                1.5);
-TH2F* corrEndcapHcal = new TH2F("ECorrEndcapH", "", 1000, 0, 1000, 150, -1.5,
+TH2F* corrEndcapHcal = new TH2F("ECorrEndcapH", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5,
                                 1.5);
-TH2F* corrEndcapHcal_ErawHcal = new TH2F("ECorrEndcapH_ErawHcal", "", 1000, 0, 1000, 150, -1.5,
+TH2F* corrEndcapHcal_ErawHcal = new TH2F("ECorrEndcapH_ErawHcal", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5,
                                 1.5);
-TH2F* corrEtaEndcapHcal = new TH2F("EtaCorrEndcapH", "", 1000, 0, 1000, 150,-1.5, 1.5);
-TH2F* corrEtaEndcapHcal_Alpha = new TH2F("EtaCorrEndcapH_Alpha", "", 1000, 0, 1000, 150,-1.5, 1.5);
-TH2F* corrEtaEndcapHcal_Beta = new TH2F("EtaCorrEndcapH_Beta", "", 1000, 0, 1000, 150,-1.5, 1.5);
+TH2F* corrEtaEndcapHcal = new TH2F("EtaCorrEndcapH", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
+TH2F* corrEtaEndcapHcal_Alpha = new TH2F("EtaCorrEndcapH_Alpha", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
+TH2F* corrEtaEndcapHcal_Beta = new TH2F("EtaCorrEndcapH_Beta", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
 
 TH2F * rawEtaDependence = new TH2F("rawEtaDependence","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
 
