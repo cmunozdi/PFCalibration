@@ -469,7 +469,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
-    if ( (pfc.particleId() != 1) || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
+    if ( (pfc.particleId() != 1))// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
     nCh[1]++;
 
     // Charged hadron minimum pt (the track pt, to an excellent approximation)
