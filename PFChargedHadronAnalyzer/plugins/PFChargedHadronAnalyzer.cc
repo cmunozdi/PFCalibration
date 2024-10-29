@@ -327,6 +327,31 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     if ( (*trueParticles).size() != 1 ) return; //cmunozdi commented this to use the NTuplizer for Double Pion
     nEv[1]++;
 
+    // genE = 0.;
+    // genP = 0.;
+    // genEta = 0.;
+    // genPhi = 0.;
+
+    // trkP = 0.;
+    // trkEta = 0.;
+    // trkPhi = 0.;
+
+    // eta_=0.;
+    // phi_=0.;
+    // true_=0.;
+    // p_=0.;
+    // ecal_=0.;
+    // hcal_=0.;
+    // Ccorrecal_=0.;
+    // Ccorrhcal_=0.;
+    // dr_.clear();
+    // Eecal_.clear();
+    // Ehcal_.clear();
+    // pfcID_.clear();
+    // correcal_.clear();
+    // corrhcal_.clear();
+
+
     genE = (*genParticles)[0].p4().E();
     genP = (*genParticles)[0].p4().P();
     genEta = (*genParticles)[0].p4().Eta();
@@ -428,10 +453,11 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 	// if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
 
       }
-            
+           
+    }
+     
       s->Fill();
       return;
-    }
     
 
 
@@ -469,7 +495,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
-    if ( (pfc.particleId() != 1))// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
+    if ( (pfc.particleId() != 1)) continue;// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
     nCh[1]++;
 
     // Charged hadron minimum pt (the track pt, to an excellent approximation)
