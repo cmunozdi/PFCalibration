@@ -2017,6 +2017,16 @@ vector<double> ecalEnergies;
 vector<double> hcalEnergies;
 vector<double> etas;
 vector<double> phis;
+vector<double> genE;
+vector<double> genP;
+vector<double> genEta;
+vector<double> genPhi;
+vector<double> trkP;
+vector<double> trkEta;
+vector<double> trkPhi;
+vector<double> momentums;
+vector<double> ho_energies;
+vector<double> charges;
 
 
 vector<ABC*> barrelABCEcalHcal; //Vectors of the ABC objects
@@ -2126,8 +2136,8 @@ TH2F * h_response_vs_phi_EndCap_H_negZ = new TH2F("h_response_vs_phi_EndCap_H_ne
 
 TH2F* raw = new TH2F("raw","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta = new TH2F("corrEta", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
-TH2F* corrEta_range1 = new TH2F("corrEta_range1", "", 500, 0, 500, 150, -1.5, 1.5);
-TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", 500, 0, 500, 150, -1.5, 1.5);
+TH2F* corrEta_range1 = new TH2F("corrEta_range1", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
+TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range3 = new TH2F("corrEta_range3", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range4 = new TH2F("corrEta_range4", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range5 = new TH2F("corrEta_range5", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);

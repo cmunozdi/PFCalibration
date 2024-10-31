@@ -327,29 +327,29 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     if ( (*trueParticles).size() != 1 ) return; //cmunozdi commented this to use the NTuplizer for Double Pion
     nEv[1]++;
 
-    // genE = 0.;
-    // genP = 0.;
-    // genEta = 0.;
-    // genPhi = 0.;
+    genE = 0.;
+    genP = 0.;
+    genEta = 0.;
+    genPhi = 0.;
 
-    // trkP = 0.;
-    // trkEta = 0.;
-    // trkPhi = 0.;
+    trkP = 0.;
+    trkEta = 0.;
+    trkPhi = 0.;
 
-    // eta_=0.;
-    // phi_=0.;
-    // true_=0.;
-    // p_=0.;
-    // ecal_=0.;
-    // hcal_=0.;
-    // Ccorrecal_=0.;
-    // Ccorrhcal_=0.;
-    // dr_.clear();
-    // Eecal_.clear();
-    // Ehcal_.clear();
-    // pfcID_.clear();
-    // correcal_.clear();
-    // corrhcal_.clear();
+    eta_=0.;
+    phi_=0.;
+    true_=0.;
+    p_=0.;
+    ecal_=0.;
+    hcal_=0.;
+    Ccorrecal_=0.;
+    Ccorrhcal_=0.;
+    dr_.clear();
+    Eecal_.clear();
+    Ehcal_.clear();
+    pfcID_.clear();
+    correcal_.clear();
+    corrhcal_.clear();
 
 
     genE = (*genParticles)[0].p4().E();
@@ -454,10 +454,10 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
       }
            
-    }
-     
       s->Fill();
       return;
+    }
+     
     
 
 
