@@ -38,9 +38,9 @@ bool payload=false;
 bool useP_reco=false;//Instead of using etrue, the calibration code uses p_reco.
 bool drawRespPlots = false;
 int hadrons_eta_symbol = 0;//This int variable is 0 when we take all the eta values (positives and negatives); +1 when we only take hadrons with positive eta; -1 when we only take hadrons with negatives eta.
-bool PFEnergyCalibrationFunction=true; //This bool variable is true for using PFEnergyCalibration function from CMSSW and flase for using the default PFHC calibration function getCalibratedEnergy
-bool WriteNTupleFile = true;
-bool Parameters24Above500GeV = true; //This bool variable is true for using the parameters for the calibration function for the energy above 500 GeV and false for using the parameters for the calibration function for the energy below 500 GeV (first one)
+bool PFEnergyCalibrationFunction=false; //This bool variable is true for using PFEnergyCalibration function from CMSSW and flase for using the default PFHC calibration function getCalibratedEnergy
+bool WriteNTupleFile = false;
+bool Parameters24Above500GeV = false; //This bool variable is true for using the parameters for the calibration function for the energy above 500 GeV and false for using the parameters for the calibration function for the energy below 500 GeV (first one)
 //char* _region_ = (char*)"EC_outside_tracker";
 //char* _region_ = (char*)"EC_within_tracker";
 //char* _region_ = (char*)"barrel";
@@ -1984,7 +1984,7 @@ int main()
  
    //add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2024_Merged_3Attempt");//_merged/");//_proof/");//NewNTuplizerVersion/");/2024_Merged/OfflineNTuples_2024GT0_merged
 
-   chain->Add("/eos/home-c/cmunozdi/OFFLINE_NTUPLES/2024_Merged_3Attempt/rawFromNTuplizer/*.root");
+   chain->Add("/eos/home-c/cmunozdi/OFFLINE_NTUPLES/OfflineNTuples_2024GT0_merged/0_500.root");//2024_Merged_3Attempt/rawFromNTuplizer/*.root");
    sTree = (TTree*)chain;
    cout<<"Reading input tree..."<<endl;
    getValuesFromTree(sTree, ETrueEnergies, ecalEnergies, 
