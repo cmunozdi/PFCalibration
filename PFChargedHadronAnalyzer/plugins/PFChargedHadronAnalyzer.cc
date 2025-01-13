@@ -187,6 +187,9 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
    // s->Branch("EcalRecHitsDr",&EcalRecHitsDr);
    // //s->Branch("ESSimHitsDr",&ESSimHitsDr);
    // s->Branch("HcalRecHitsDr",&HcalRecHitsDr);
+
+   //HCAL depth fractions
+   s->Branch("hcalDepthFractions",&hcalDepthFractions_);
    
 
 }
@@ -492,7 +495,10 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     //MM
     //cout<< pfc.particleId()<<"    "<<pfc.pt()<<"    "<<pfc.rawEcalEnergy()<<"   "<<pfc.rawHcalEnergy()<<endl;
 
-
+    for(int i=1; i<=7; i++){
+      float depthFraction = pfc.hcalDepthEnergyFraction(i);
+      hcalDepthFractions_.push_back(depthFraction);
+    }
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
     if ( (pfc.particleId() != 1)) continue;// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)

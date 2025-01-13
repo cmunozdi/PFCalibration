@@ -163,6 +163,7 @@ class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
   std::vector<float> genDr;
   float genE, genP,genEta,genPhi;
   std::vector<int> genPdgId;
+  std::vector<float> hcalDepthFractions_;
 
   float trkP, trkEta, trkPhi;
 

@@ -38,7 +38,9 @@ process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIWinter19PFCalibDR/Single_Pion_gun_E_200to500_13TeV_pythia8/GEN-SIM-RECO/2016ConditionsNoPU_105X_mcRun2_asymptotic_v2-v1/270000/FF853C26-CDC1-4D44-95D9-924C3C3A482F.root'),
 #    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/Run3Summer21DR/Single_Pion_gun_E_200to500_14TeV_pythia8/GEN-SIM-RECO/NoPURAWRECO_120X_mcRun3_2021_realistic_v6-v2/260000/0788ebab-26eb-410e-97b0-868877d34e33.root'),
     #fileNames = cms.untracked.vstring('root://eoscms.cern.ch//eos/cms/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to200/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/40000/9ff74c70-b71d-4310-a365-150e012cd3de.root'),
-    fileNames = cms.untracked.vstring('/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to10/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/120000/001a991b-221e-4d99-9413-aee8c82611e7.root'),
+    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to10/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/120000/001a991b-221e-4d99-9413-aee8c82611e7.root'),
+    fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/01a2a0ee-cad5-4855-a11e-3daf528576d2.root'),
+    #fileNames = cms.untracked.vstring('172289d1-a818-46f9-9300-095fd35ff5c5.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -153,7 +155,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2018_realistic_v10', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '105X_mcRun2_asymptotic_v2', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun3_2024_realistic_v9', '')#'126X_mcRun3_2023_forPU64_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '142X_mcRun3_2025_realistic_v4', '')#'126X_mcRun3_2023_forPU64_v1', '')''133X_mcRun3_2024_realistic_v9
 
 
 process.pfChargedHadronAnalyzer = cms.EDAnalyzer(
