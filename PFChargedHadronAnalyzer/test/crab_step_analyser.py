@@ -3,6 +3,7 @@ config = Configuration()
 
 config.section_("General")
 config.General.requestName = 'Offline_NTuples_2025_0p2to200'
+# config.General.requestName = 'Offline_NTuples_2025_200to500'
 config.General.workArea = 'crab_projects'
 
 #optional
@@ -24,9 +25,9 @@ config.JobType.allowUndistributedCMSSW = True
 config.JobType.maxMemoryMB = 2000
 
 config.section_("Data")
-config.Data.allowNonValidInputDataset = False
+config.Data.allowNonValidInputDataset = True
 config.Data.inputDataset = '/Pi_Par-E-0p2to200_PGun/Run3Winter25Reco-NoPU_142X_mcRun3_2025_realistic_v4-v2/GEN-SIM-RECO'
-# config.Data.inputDataset = '/SinglePionGun_E200to500/Run3Winter24Reco-NoPU_133X_mcRun3_2024_realistic_v9-v2/GEN-SIM-RECO'
+# config.Data.inputDataset = '/Pi_Par-E-200to500_PGun/Run3Winter25Reco-NoPU_142X_mcRun3_2025_realistic_v4-v2/GEN-SIM-RECO'
 
 
 #MIKKO's new request for 0.2 to 10 GeV
@@ -47,6 +48,7 @@ config.Data.publication = False
 #config.Data.publishDBS = '' default for the moment
 #config.Data.outLFN = '/home/spandey/t3store/PF_PGun'
 config.Data.outLFNDirBase = '/store/user/cmunozdi/OFFLINE_NTUPLES/2025_E0p2to200GeV/'
+# config.Data.outLFNDirBase = '/store/user/cmunozdi/OOFLINE_NTUPLES/2025_E200to500GeV/'
 
 config.section_("Site")
 config.Site.storageSite = 'T3_CH_CERNBOX'
