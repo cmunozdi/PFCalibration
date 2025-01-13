@@ -170,9 +170,9 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
 
 
   s->Branch("run",&orun,"orun/l");
-  s->Branch("evt",&oevt,"orun/l");
-  s->Branch("lumiBlock",&olumiBlock,"orun/l");
-  s->Branch("time",&otime,"orun/l");
+  s->Branch("evt",&oevt,"oevt/l");
+  s->Branch("lumiBlock",&olumiBlock,"olumiBlock/l");
+  s->Branch("time",&otime,"otime/l");
 
   //simHits
    // s->Branch("EcalSimHits",&EcalSimHits);
@@ -189,7 +189,7 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
    // s->Branch("HcalRecHitsDr",&HcalRecHitsDr);
 
    //HCAL depth fractions
-   s->Branch("hcalDepthFractions",&hcalDepthFractions_);
+   s->Branch("hcalDepthFractions",&hcalDepthFractions_, "hcalDepthFractions[7]/F");
    
 
 }
@@ -497,7 +497,8 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
     for(int i=1; i<=7; i++){
       float depthFraction = pfc.hcalDepthEnergyFraction(i);
-      hcalDepthFractions_.push_back(depthFraction);
+      //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
+      hcalDepthFractions_[i-1]=depthFraction;
     }
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
