@@ -95,7 +95,9 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
   s->Branch("true",&true_,"true/F");  
   s->Branch("p",&p_,"p/F");  
   s->Branch("ecal",&ecal_,"ecal/F");  
-  s->Branch("hcal",&hcal_,"hcal/F");  
+  s->Branch("hcal",&hcal_,"hcal/F"); 
+  s->Branch("hfem",&hfem_,"hfem/F");
+  s->Branch("hfhad",&hfhad_,"hfhad/F"); 
   s->Branch("ho",&ho_,"ho/F");  
   s->Branch("eta",&eta_,"eta/F");  
   s->Branch("phi",&phi_,"phi/F");
@@ -247,12 +249,9 @@ PFChargedHadronAnalyzer::beginRun(const edm::Run& run,
 				  const edm::EventSetup & es) { }
 
 
-void 
-PFChargedHadronAnalyzer::analyze(const Event& iEvent, 
-				 const EventSetup& iSetup) {
-  
-  LogDebug("PFChargedHadronAnalyzer")<<"START event: "<<iEvent.id().event()
-			 <<" in run "<<iEvent.id().run()<<endl;
+void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSetup)
+{
+  LogDebug("PFChargedHadronAnalyzer")<<"START event: "<<iEvent.id().event()<<" in run "<<iEvent.id().run()<<endl;
   
   /*
    edm::ESHandle<CaloGeometry> pCalo;
@@ -263,6 +262,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
   run  = iEvent.id().run();
   evt  = iEvent.id().event();
+  // if(evt!=78025) return;
   lumiBlock = iEvent.id().luminosityBlock();
   time = iEvent.time();
 
@@ -315,83 +315,79 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
   Ehcal_.clear();  
   pfcID_.clear();
 
-  //bhumika Nov 2018
-  correcal_.clear();
-  corrhcal_.clear();  
-  //
+  genE = 0.;
+  genP = 0.;
+  genEta = 0.;
+  genPhi = 0.;
 
-  if(isMBMC_)
-    isSimu=false;
+  trkP = 0.;
+  trkEta = 0.;
+  trkPhi = 0.;
+
+  eta_=0.;
+  phi_=0.;
+  true_=0.;
+  p_=0.;
+  ecal_=0.;
+  hcal_=0.;
+  fill(hcalDepthFractions_, hcalDepthFractions_+7, 0.);
+  hfem_=0.;
+  hfhad_=0.;
+  Ccorrecal_=0.;
+  Ccorrhcal_=0.;
+  dr_.clear();
+  Eecal_.clear();
+  Ehcal_.clear();
+  pfcID_.clear();
+  correcal_.clear();
+  corrhcal_.clear();
+
+  if(isMBMC_) isSimu=false;
 
   //  cout<<isSimu<<"    "<<isMBMC_<<endl;
 
   if ( isSimu ) { 
     nEv[0]++;//  cout<<" True part size "<<(*trueParticles).size()<<"    "
-// 		  <<(*trueParticles)[0].pdgCode()<<"   "<<(*trueParticles)[1].pdgCode()<<endl;
+    // 		  <<(*trueParticles)[0].pdgCode()<<"   "<<(*trueParticles)[1].pdgCode()<<endl;
     if ( (*trueParticles).size() != 1 ) return; //cmunozdi commented this to use the NTuplizer for Double Pion
     nEv[1]++;
-
-    genE = 0.;
-    genP = 0.;
-    genEta = 0.;
-    genPhi = 0.;
-
-    trkP = 0.;
-    trkEta = 0.;
-    trkPhi = 0.;
-
-    eta_=0.;
-    phi_=0.;
-    true_=0.;
-    p_=0.;
-    ecal_=0.;
-    hcal_=0.;
-    Ccorrecal_=0.;
-    Ccorrhcal_=0.;
-    dr_.clear();
-    Eecal_.clear();
-    Ehcal_.clear();
-    pfcID_.clear();
-    correcal_.clear();
-    corrhcal_.clear();
 
 
     genE = (*genParticles)[0].p4().E();
     genP = (*genParticles)[0].p4().P();
     genEta = (*genParticles)[0].p4().Eta();
     genPhi = (*genParticles)[0].p4().Phi();
-    
 
 
-    
+
+
     // Check if there is a reconstructed track
     bool isCharged = false;
-    for( CI ci  = pfCandidates->begin(); 
-	 ci!=pfCandidates->end(); ++ci)  {
+    for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
       const reco::PFCandidate& pfc = *ci;
-      sumdepth=0;
-      for(int i=1; i<=7; i++){
-        float depthFraction = pfc.hcalDepthEnergyFraction(i);
-        //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
-        hcalDepthFractions_[i-1]=depthFraction;
-        sumdepth+=depthFraction;
-      }
-      cout << "sumdepth=" << sumdepth << endl;
+      // sumdepth=0;
+      // for(int i=1; i<=7; i++){
+      //   float depthFraction = pfc.hcalDepthEnergyFraction(i);
+      //   //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
+      //   hcalDepthFractions_[i-1]=depthFraction;
+      //   sumdepth+=depthFraction;
+      // }
+      // cout << "sumdepth=" << sumdepth << endl;
 
 
 
       //if ( pfc.particleId() == 5 )
-	pfcsID.push_back( pfc.particleId() );
-  
+      pfcsID.push_back( pfc.particleId() );
+
       // std::cout << "Id = " << pfc.particleId() << std::endl;
       if ( pfc.particleId() < 4 ) { 
-	isCharged = true;
-      if(pfc.particleId() == 1){
-        trkP = pfc.trackRef()->p();
-        trkEta = pfc.trackRef()->eta();
-        trkPhi = pfc.trackRef()->phi();
-      }
-	break;
+        isCharged = true;
+        if(pfc.particleId() == 1){ //Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
+          trkP = pfc.trackRef()->p();
+          trkEta = pfc.trackRef()->eta();
+          trkPhi = pfc.trackRef()->phi();
+        }
+        break;
       }
     }
 
@@ -421,72 +417,74 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       // h_phi_4->Fill(phi_);    //qwerty Feb_15 2018
       // h_phi_5->Fill(phi_);    //qwerty Feb_15 2018
       true_ = std::sqrt(tpatecal.momentum().Vect().Mag2());
-      p_ = 0.;
-      charge_=0;
-      ecal_ = 0.;
-      hcal_ = 0.;
-      Ccorrecal_=0.;
-      Ccorrhcal_=0.;
-      dr_.clear();  //spandey Apr_27 dR
-      Eecal_.clear();
-      Ehcal_.clear();  
-      pfcID_.clear();
-      
-      //bhumika Nov 2018
-      correcal_.clear();
-      corrhcal_.clear();  
 
       //cout<<"***********************"<<endl;
-      for( CI ci  = pfCandidates->begin(); 
-	   ci!=pfCandidates->end(); ++ci)  {
-	const reco::PFCandidate& pfc = *ci;
-	double deta = eta_ - pfc.eta();
-	double dphi = dPhi(phi_, pfc.phi() );
-	double dR = std::sqrt(deta*deta+dphi*dphi);
-  
-  //cout << "dR=" << dR << endl << endl;
-	if ( dR < 1.2 ) {
-    
-    //cout << "Ha entrado en dR<1.2" << endl << endl;
-	  dr_.push_back(dR);   //spandey Apr_27 dR
-	  pfcID_.push_back(pfc.particleId());   //spandey Apr_27 dR
-	  Eecal_.push_back(pfc.rawEcalEnergy());  //spandey Apr_27 dR
-	  Ehcal_.push_back(pfc.rawHcalEnergy());  //spandey Apr_27 dR
-	  //bhumika Nov 2018
-	  correcal_.push_back(pfc.ecalEnergy());  
-	  corrhcal_.push_back(pfc.hcalEnergy());  
-	  //
-	}
-	  //cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
-	//   if (pfc.particleId() == 5 && pfc.rawEcalEnergy() != 0)
-	//     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
-	// }
-	if ( pfc.particleId() == 4 && dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
-	if ( pfc.particleId() == 5 && dR < 0.4 ){ //Proposed by Kenichi 9/11/23
-    hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
-    ecal_ += pfc.rawEcalEnergy(); // PF Neutral Hadron's Ecal energy (currently seems ignored)
-  } //hcal_ += pfc.rawHcalEnergy();
-	// if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
-	// if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
+      for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
+        const reco::PFCandidate& pfc = *ci;
+        double deta = eta_ - pfc.eta();
+        double dphi = dPhi(phi_, pfc.phi() );
+        double dR = std::sqrt(deta*deta+dphi*dphi);
 
+        //cout << "dR=" << dR << endl << endl;
+        if ( dR < 1.2 ) {
+
+          //cout << "Ha entrado en dR<1.2" << endl << endl;
+          dr_.push_back(dR);   //spandey Apr_27 dR
+          pfcID_.push_back(pfc.particleId());   //spandey Apr_27 dR
+          Eecal_.push_back(pfc.rawEcalEnergy());  //spandey Apr_27 dR
+          Ehcal_.push_back(pfc.rawHcalEnergy());  //spandey Apr_27 dR
+          //bhumika Nov 2018
+          correcal_.push_back(pfc.ecalEnergy());  
+          corrhcal_.push_back(pfc.hcalEnergy());  
+          //
+        }
+        //cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
+        //   if (pfc.particleId() == 5 && pfc.rawEcalEnergy() != 0)
+        //     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
+        // }
+        if ( pfc.particleId() == 4 && dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
+        if ( pfc.particleId() == 5 && dR < 0.4 ){ //Proposed by Kenichi 9/11/23
+          hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
+          ecal_ += pfc.rawEcalEnergy(); // PF Neutral Hadron's Ecal energy (currently seems ignored)
+          for(int i=1; i<=7; i++){
+            hcalDepthFractions_[i-1] += pfc.hcalDepthEnergyFraction(i)*pfc.rawHcalEnergy();//cmunozdi: sum of the energy fraction in each depth of the HCAL;
+            // cout << "hcalDepthFractions_[" << i-1 << "]=" << pfc.hcalDepthEnergyFraction(i) << " \t hcal_ "<< hcal_<< endl;
+          }
+        } //hcal_ += pfc.rawHcalEnergy();
+        // if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
+        // if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
+        if ( ((pfc.particleId() == 6) || (pfc.particleId() == 7)) && dR < 0.4  ) {
+          hfem_ += pfc.rawEcalEnergy();
+          hfhad_ += pfc.rawHcalEnergy();
+        }
+
+      }//for loop neutral hadrons case
+
+      //Renormalize the energy fractions
+      sumdepth=0;
+      if(hcal_ > 0){
+        for(int i=0; i<7; i++){
+          hcalDepthFractions_[i] = hcalDepthFractions_[i]/hcal_;
+          sumdepth+=hcalDepthFractions_[i];
+        }
+      }else{
+        fill(hcalDepthFractions_, hcalDepthFractions_+7, 0.);
+        // return;
       }
-           
+
+      std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_;
+      std::cout << "\nsumdepth= " << sumdepth << std::endl;
       s->Fill();
       return;
-    }
-     
-    
+    }//not isCharge condition
 
-
-
-  }
+  }//isSimu condition
   
   //cout<<" Track case !!! "<<endl;
 
   // Case of a reconstructed track.
   // Loop on pfCandidates
-  for( CI ci  = pfCandidates->begin(); 
-       ci!=pfCandidates->end(); ++ci)  {
+  for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
 
 
     // The pf candidate
@@ -508,14 +506,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
     //MM
     //cout<< pfc.particleId()<<"    "<<pfc.pt()<<"    "<<pfc.rawEcalEnergy()<<"   "<<pfc.rawHcalEnergy()<<endl;
-    sumdepth=0;
-    for(int i=1; i<=7; i++){
-      float depthFraction = pfc.hcalDepthEnergyFraction(i);
-      //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
-      hcalDepthFractions_[i-1]=depthFraction;
-      sumdepth+=depthFraction;
-    }
-    cout << "sumdepth=" << sumdepth << endl;
+
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
     if ( (pfc.particleId() != 1)) continue;// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
@@ -528,6 +519,14 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     // At least 1 GeV in HCAL
     double ecalRaw = pfc.rawEcalEnergy();
     double hcalRaw = pfc.rawHcalEnergy();
+    sumdepth=0;
+    for(int i=1; i<=7; i++){
+      float depthFraction = pfc.hcalDepthEnergyFraction(i);
+      //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
+      hcalDepthFractions_[i-1]=depthFraction;
+      sumdepth+=depthFraction;
+    }
+    // cout << "sumdepth=" << sumdepth << endl;
     double hoRaw = pfc.rawHoEnergy();
     double ecalcorr = pfc.ecalEnergy();
     double hcalcorr = pfc.hcalEnergy();
@@ -576,25 +575,25 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       //==================================================
 
 
-  
-   
-        
+
+
+
       switch( type ) {
-      case PFBlockElement::TRACK:
-	iTrack = iEle;
-	nTracks++;
-	break;
-      case PFBlockElement::ECAL:
-	iECAL.push_back( iEle );
-	//cout<<"iEle "<<iEle<<endl;
-	nEcal++;
-	break;
-      case PFBlockElement::HCAL:
-	iHCAL.push_back( iEle );
-	nHcal++;
-	break;
-      default:
-	continue;
+        case PFBlockElement::TRACK:
+          iTrack = iEle;
+          nTracks++;
+          break;
+        case PFBlockElement::ECAL:
+          iECAL.push_back( iEle );
+          //cout<<"iEle "<<iEle<<endl;
+          nEcal++;
+          break;
+        case PFBlockElement::HCAL:
+          iHCAL.push_back( iEle );
+          nHcal++;
+          break;
+        default:
+          continue;
       }
 
     }
@@ -606,20 +605,18 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
 
     // Characteristics of the track
-    const reco::PFBlockElementTrack& et =
-      dynamic_cast<const reco::PFBlockElementTrack &>( elements[iTrack] );
-    double p =/*pfc.energy();//*/ et.trackRef()->p();  
-    double pt =/*pfc.pt();//*/ et.trackRef()->pt(); 
-    double eta =/*pfc.eta();//*/ et.trackRef()->eta();
-    double phi =/*pfc.phi();//*/ et.trackRef()->phi();
+    const reco::PFBlockElementTrack& et = dynamic_cast<const reco::PFBlockElementTrack &>( elements[iTrack] );
+    double p =et.trackRef()->p();  
+    double pt =et.trackRef()->pt(); 
+    double eta =et.trackRef()->eta();
+    double phi =et.trackRef()->phi();
     
 
 
     //cout<<nEcal<<"   "<<nHcal<<endl;
     //ECAL element
     for(unsigned int ii=0;ii<nEcal;ii++) {
-      const reco::PFBlockElementCluster& eecal =
-	dynamic_cast<const reco::PFBlockElementCluster &>( elements[ iECAL[ii] ] );
+      const reco::PFBlockElementCluster& eecal = dynamic_cast<const reco::PFBlockElementCluster &>( elements[ iECAL[ii] ] );
       double E_ECAL = eecal.clusterRef()->energy();  
       double eta_ECAL = eecal.clusterRef()->eta();
       double phi_ECAL = eecal.clusterRef()->phi();
@@ -627,7 +624,7 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       cluEcalE.push_back( E_ECAL );
       cluEcalEta.push_back( eta_ECAL );
       cluEcalPhi.push_back( phi_ECAL );
-      
+
       double d = blockRef->dist(iTrack, iECAL[ii], linkData);	
       distEcalTrk.push_back( d );
       //cout<<" ecal loop -> "<<iECAL[ii]<<"  "<<d<<" eta "<<eta_ECAL<<"   "<<phi_ECAL<<" <==>  "<<eta<<"   "<<phi<<endl;
@@ -643,11 +640,11 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       // if(isMBMC_ || isSimu) {
       // 	const std::vector< reco::PFRecHitFraction > erh=eecal.clusterRef()->recHitFractions();
       // 	for(unsigned int ieh=0;ieh<erh.size();ieh++) {
-	  
+
       // 	  emHitF[ii].push_back( erh[ieh].fraction() );
-	  
+
       // 	  emHitE[ii].push_back(  erh[ieh].recHitRef()->energy() );
-	  
+
 
       // 	  // cout<<" rechit "<<ieh<<" =====> "<<erh[ieh].recHitRef()->energy()<<"  "<<
       // 	  //   erh[ieh].fraction()<<" / "<<erh[ieh].recHitRef()->position().Eta()
@@ -656,74 +653,73 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
       // 	  emHitX[ii].push_back( isEB?erh[ieh].recHitRef()->position().eta() :erh[ieh].recHitRef()->position().x() );
       // 	  emHitY[ii].push_back( isEB?erh[ieh].recHitRef()->position().phi() :erh[ieh].recHitRef()->position().y() );
       // 	  emHitZ[ii].push_back( isEB?0:erh[ieh].recHitRef()->position().z() );
-	  
+
       // 	}
       // }
 
     }
     //std::cout<<"HOW ABOUT NOW"<<std::endl;
     //HCAL element
-      for(unsigned int ii=0;ii<nHcal;ii++) {
-	const reco::PFBlockElementCluster& ehcal =
-	  dynamic_cast<const reco::PFBlockElementCluster &>( elements[iHCAL[ii] ] );
-	double E_HCAL = ehcal.clusterRef()->energy();  
-	double eta_HCAL = ehcal.clusterRef()->eta();
-	double phi_HCAL = ehcal.clusterRef()->phi();
+    for(unsigned int ii=0;ii<nHcal;ii++) {
+      const reco::PFBlockElementCluster& ehcal = dynamic_cast<const reco::PFBlockElementCluster &>( elements[iHCAL[ii] ] );
+      double E_HCAL = ehcal.clusterRef()->energy();  
+      double eta_HCAL = ehcal.clusterRef()->eta();
+      double phi_HCAL = ehcal.clusterRef()->phi();
 
-	cluHcalE.push_back( E_HCAL );
-	cluHcalEta.push_back( eta_HCAL );
-	cluHcalPhi.push_back( phi_HCAL );
+      cluHcalE.push_back( E_HCAL );
+      cluHcalEta.push_back( eta_HCAL );
+      cluHcalPhi.push_back( phi_HCAL );
 
-	double d = blockRef->dist(iTrack, iHCAL[ii], linkData);	
-	distHcalTrk.push_back( d );
+      double d = blockRef->dist(iTrack, iHCAL[ii], linkData);	
+      distHcalTrk.push_back( d );
 
 
-	//ECAL-HCAL distance
-	vector<float> tmp;
-	distHcalEcal.push_back(tmp);
-	for(unsigned int ij=0;ij<nEcal;ij++) {
-	  d = blockRef->dist(iECAL[ij], iHCAL[ii], linkData);	
-	  distHcalEcal[ii].push_back( d );
-	}
-	//==================
-	//cout<<" hcal loop -> "<<iHCAL[ii]<<"  "<<d<<" eta "<<eta_HCAL<<"   "<<phi_HCAL<<" <==>  "<<eta<<"   "<<phi<<endl;
-	//	vector<float> tmp;
-	hadHitF.push_back( tmp );
-	hadHitE.push_back( tmp );
-	hadHitX.push_back( tmp );
-	hadHitY.push_back( tmp );
-	hadHitZ.push_back( tmp );
-
-	//  if(isMBMC_ || isSimu) {
-	//   const std::vector< reco::PFRecHitFraction > erh=ehcal.clusterRef()->recHitFractions();
-	//   for(unsigned int ieh=0;ieh<erh.size();ieh++) {
-
-	//     hadHitF[ii].push_back( erh[ieh].fraction() );
-      
-	//     hadHitE[ii].push_back(  erh[ieh].recHitRef()->energy() );
-      
-	//     // cout<<" rechit "<<ieh<<" =====> "<<erh[ieh].recHitRef()->energy()<<"  "<<
-	//     //   erh[ieh].fraction()<<" / "<<erh[ieh].recHitRef()->position().Eta()
-	//     // 	<<"  "<<erh[ieh].recHitRef()->position().Phi()<<endl;
-
-	//     bool isHB= erh[ieh].recHitRef()->layer()==1;
-	//     hadHitX[ii].push_back( isHB?erh[ieh].recHitRef()->position().eta() :erh[ieh].recHitRef()->position().x() );
-	//     hadHitY[ii].push_back( isHB?erh[ieh].recHitRef()->position().phi() :erh[ieh].recHitRef()->position().y() );
-	//     hadHitZ[ii].push_back( isHB?0:erh[ieh].recHitRef()->position().z() );
-	  
-	//   }
-	// }
-
+      //ECAL-HCAL distance
+      vector<float> tmp;
+      distHcalEcal.push_back(tmp);
+      for(unsigned int ij=0;ij<nEcal;ij++) {
+        d = blockRef->dist(iECAL[ij], iHCAL[ii], linkData);	
+        distHcalEcal[ii].push_back( d );
       }
+      //==================
+      //cout<<" hcal loop -> "<<iHCAL[ii]<<"  "<<d<<" eta "<<eta_HCAL<<"   "<<phi_HCAL<<" <==>  "<<eta<<"   "<<phi<<endl;
+      //	vector<float> tmp;
+      hadHitF.push_back( tmp );
+      hadHitE.push_back( tmp );
+      hadHitX.push_back( tmp );
+      hadHitY.push_back( tmp );
+      hadHitZ.push_back( tmp );
+
+      //  if(isMBMC_ || isSimu) {
+      //   const std::vector< reco::PFRecHitFraction > erh=ehcal.clusterRef()->recHitFractions();
+      //   for(unsigned int ieh=0;ieh<erh.size();ieh++) {
+
+      //     hadHitF[ii].push_back( erh[ieh].fraction() );
+
+      //     hadHitE[ii].push_back(  erh[ieh].recHitRef()->energy() );
+
+      //     // cout<<" rechit "<<ieh<<" =====> "<<erh[ieh].recHitRef()->energy()<<"  "<<
+      //     //   erh[ieh].fraction()<<" / "<<erh[ieh].recHitRef()->position().Eta()
+      //     // 	<<"  "<<erh[ieh].recHitRef()->position().Phi()<<endl;
+
+      //     bool isHB= erh[ieh].recHitRef()->layer()==1;
+      //     hadHitX[ii].push_back( isHB?erh[ieh].recHitRef()->position().eta() :erh[ieh].recHitRef()->position().x() );
+      //     hadHitY[ii].push_back( isHB?erh[ieh].recHitRef()->position().phi() :erh[ieh].recHitRef()->position().y() );
+      //     hadHitZ[ii].push_back( isHB?0:erh[ieh].recHitRef()->position().z() );
+
+      //   }
+      // }
+
+    }
 
     
     // A minimum p and pt
-      if ( p < pMin_ || pt < ptMin_ ) continue;
-      nCh[5]++;
+    if ( p < pMin_ || pt < ptMin_ ) continue;
+    nCh[5]++;
     
 
 
-      // h_phi_3->Fill(pfc.phi());   //qwerty Feb_15 2018
+    // h_phi_3->Fill(pfc.phi());   //qwerty Feb_15 2018
 
     // Count the number of valid hits (first three iteration only)
     //unsigned int nHits = et.trackRef()->found();
@@ -742,35 +738,35 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     validTrackerHits = hp.numberOfValidTrackerHits();
 
     switch ( et.trackRef()->algo() ) {
-    case TrackBase::initialStep:
-      tobN += hp.numberOfValidStripTOBHits();
-      tecN += hp.numberOfValidStripTECHits();
-      tibN += hp.numberOfValidStripTIBHits();
-      tidN += hp.numberOfValidStripTIDHits();
-      pxbN += hp.numberOfValidPixelBarrelHits(); 
-      pxdN += hp.numberOfValidPixelEndcapHits(); 
-      //validPix += hp.numberOfValidPixelHits();
-      break;
-    case TrackBase::lowPtQuadStep:
-    case TrackBase::highPtTripletStep:
-    case TrackBase::lowPtTripletStep:
-      // tobN += hp.numberOfValidStripTOBHits();
-      // tecN += hp.numberOfValidStripTECHits();
-      // tibN += hp.numberOfValidStripTIBHits();
-      // tidN += hp.numberOfValidStripTIDHits();
-      // pxbN += hp.numberOfValidPixelBarrelHits(); 
-      // pxdN += hp.numberOfValidPixelEndcapHits(); 
-      // validPix += hp.numberOfValidPixelHits();
-      // break;
-    case TrackBase::detachedQuadStep:
-    case TrackBase::detachedTripletStep:
-    case TrackBase::pixelPairStep:
-    case TrackBase::mixedTripletStep:
-    case TrackBase::pixelLessStep:
-    case TrackBase::tobTecStep:
-    case TrackBase::jetCoreRegionalStep:
-    default:
-      break;
+      case TrackBase::initialStep:
+        tobN += hp.numberOfValidStripTOBHits();
+        tecN += hp.numberOfValidStripTECHits();
+        tibN += hp.numberOfValidStripTIBHits();
+        tidN += hp.numberOfValidStripTIDHits();
+        pxbN += hp.numberOfValidPixelBarrelHits(); 
+        pxdN += hp.numberOfValidPixelEndcapHits(); 
+        //validPix += hp.numberOfValidPixelHits();
+        break;
+      case TrackBase::lowPtQuadStep:
+      case TrackBase::highPtTripletStep:
+      case TrackBase::lowPtTripletStep:
+        // tobN += hp.numberOfValidStripTOBHits();
+        // tecN += hp.numberOfValidStripTECHits();
+        // tibN += hp.numberOfValidStripTIBHits();
+        // tidN += hp.numberOfValidStripTIDHits();
+        // pxbN += hp.numberOfValidPixelBarrelHits(); 
+        // pxdN += hp.numberOfValidPixelEndcapHits(); 
+        // validPix += hp.numberOfValidPixelHits();
+        // break;
+      case TrackBase::detachedQuadStep:
+      case TrackBase::detachedTripletStep:
+      case TrackBase::pixelPairStep:
+      case TrackBase::mixedTripletStep:
+      case TrackBase::pixelLessStep:
+      case TrackBase::tobTecStep:
+      case TrackBase::jetCoreRegionalStep:
+      default:
+        break;
     }
     //int inner = pxbN+pxdN;
     int inner = validPix;
@@ -793,10 +789,10 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
 
     // // Number of pixel hits
-      if ( inner < nPixMin_ ) continue;
-      nCh[6]++;
+    if ( inner < nPixMin_ ) continue;
+    nCh[6]++;
     
-      // h_phi_4->Fill(pfc.phi());   //qwerty Feb_15 2018
+    // h_phi_4->Fill(pfc.phi());   //qwerty Feb_15 2018
 
 
     // Number of tracker hits (eta-dependent cut)
@@ -805,15 +801,14 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     for ( unsigned int ieta=0; ieta<nEtaMin_.size(); ++ieta ) { 
       if ( fabs(eta) < etaMin ) break;
       double etaMax = nEtaMin_[ieta];
-      trackerHitOK = 
-    	fabs(eta)>etaMin && fabs(eta)<etaMax && inner+outer>nHitMin_[ieta]; 
+      trackerHitOK = fabs(eta)>etaMin && fabs(eta)<etaMax && inner+outer>nHitMin_[ieta]; 
       if ( trackerHitOK ) break;
       etaMin = etaMax;
     }
-      if ( !trackerHitOK ) continue;
-      nCh[7]++;
+    if ( !trackerHitOK ) continue;
+    nCh[7]++;
     
-      // h_phi_5->Fill(pfc.phi());   //qwerty Feb_15 2018
+    // h_phi_5->Fill(pfc.phi());   //qwerty Feb_15 2018
 
     // Selects only ECAL MIPs
     if ( ecalRaw > ecalMax_ ) continue;
@@ -1006,8 +1001,9 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     bcEcalEta.clear();
     bcEcalPhi.clear();
     
-    
+    return;
   }
+  s->Fill();
 }
 
 

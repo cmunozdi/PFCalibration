@@ -119,7 +119,7 @@ class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
   TFile *tf1;
   TTree* s;
   
-  float true_,p_,ecal_,hcal_,eta_,phi_,ho_;
+  float true_,p_,ecal_,hcal_,eta_,phi_,ho_, hfem_, hfhad_;
   float etaEcal_,phiEcal_;
   int charge_;
   std::vector<float> dr_,Eecal_,Ehcal_,pfcID_;
