@@ -190,6 +190,7 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
 
    //HCAL depth fractions
    s->Branch("hcalDepthFractions",&hcalDepthFractions_, "hcalDepthFractions[7]/F");
+   s->Branch("sumdepth",&sumdepth,"sumdepth/F");
    
 
 }
@@ -360,12 +361,25 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
     genEta = (*genParticles)[0].p4().Eta();
     genPhi = (*genParticles)[0].p4().Phi();
     
+
+
     
     // Check if there is a reconstructed track
     bool isCharged = false;
     for( CI ci  = pfCandidates->begin(); 
 	 ci!=pfCandidates->end(); ++ci)  {
       const reco::PFCandidate& pfc = *ci;
+      sumdepth=0;
+      for(int i=1; i<=7; i++){
+        float depthFraction = pfc.hcalDepthEnergyFraction(i);
+        //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
+        hcalDepthFractions_[i-1]=depthFraction;
+        sumdepth+=depthFraction;
+      }
+      cout << "sumdepth=" << sumdepth << endl;
+
+
+
       //if ( pfc.particleId() == 5 )
 	pfcsID.push_back( pfc.particleId() );
   
@@ -494,12 +508,14 @@ PFChargedHadronAnalyzer::analyze(const Event& iEvent,
 
     //MM
     //cout<< pfc.particleId()<<"    "<<pfc.pt()<<"    "<<pfc.rawEcalEnergy()<<"   "<<pfc.rawHcalEnergy()<<endl;
-
+    sumdepth=0;
     for(int i=1; i<=7; i++){
       float depthFraction = pfc.hcalDepthEnergyFraction(i);
       //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
       hcalDepthFractions_[i-1]=depthFraction;
+      sumdepth+=depthFraction;
     }
+    cout << "sumdepth=" << sumdepth << endl;
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
     if ( (pfc.particleId() != 1)) continue;// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
