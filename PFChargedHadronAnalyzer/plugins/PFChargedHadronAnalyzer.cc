@@ -260,17 +260,6 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   */
 
 
-  run  = iEvent.id().run();
-  evt  = iEvent.id().event();
-  // if(evt!=78025) return;
-  lumiBlock = iEvent.id().luminosityBlock();
-  time = iEvent.time();
-
-  orun = (size_t)run;
-  oevt = (size_t)evt;
-  olumiBlock = (size_t)lumiBlock;
-  otime = (size_t)((iEvent.time().value())>>32);
-
   //get genParticles
   Handle<GenParticleCollection> genParticles;
   iEvent.getByToken(tokengenParticles_, genParticles);
@@ -307,14 +296,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   ESRecHitsDr.clear();
   HcalRecHitsDr.clear();
 
-  pfcsID.clear();
-
-  charge_=0;
-  dr_.clear();
-  Eecal_.clear();
-  Ehcal_.clear();  
-  pfcID_.clear();
-
+  // Reset all tree variables before we start analysis
   genE = 0.;
   genP = 0.;
   genEta = 0.;
@@ -323,7 +305,8 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   trkP = 0.;
   trkEta = 0.;
   trkPhi = 0.;
-
+  charge_=0;
+    
   eta_=0.;
   phi_=0.;
   true_=0.;
@@ -333,152 +316,170 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   fill(hcalDepthFractions_, hcalDepthFractions_+7, 0.);
   hfem_=0.;
   hfhad_=0.;
+
   Ccorrecal_=0.;
   Ccorrhcal_=0.;
   dr_.clear();
   Eecal_.clear();
-  Ehcal_.clear();
+  Ehcal_.clear();  
   pfcID_.clear();
+  pfcsID.clear();
   correcal_.clear();
-  corrhcal_.clear();
+  corrhcal_.clear(); 
 
   if(isMBMC_) isSimu=false;
 
-  //  cout<<isSimu<<"    "<<isMBMC_<<endl;
+  if ( !isSimu ) {
+    run  = iEvent.id().run();
+    evt  = iEvent.id().event();
+    lumiBlock = iEvent.id().luminosityBlock();
+    time = iEvent.time();
+        
+    orun = (size_t)run;
+    oevt = (size_t)evt;
+    olumiBlock = (size_t)lumiBlock;
+    otime = (size_t)((iEvent.time().value())>>32);
+  } // !isSimu
 
-  if ( isSimu ) { 
-    nEv[0]++;//  cout<<" True part size "<<(*trueParticles).size()<<"    "
+  if ( isSimu ) {
+    nEv[0]++;
+    //  cout<<" True part size "<<(*trueParticles).size()<<"    "
     // 		  <<(*trueParticles)[0].pdgCode()<<"   "<<(*trueParticles)[1].pdgCode()<<endl;
+      
+    // Check that we have only one unique gen particle to avoid ambiguity
+    // Caveat: does this drop events with nuclear interactions?
     if ( (*trueParticles).size() != 1 ) return; //cmunozdi commented this to use the NTuplizer for Double Pion
     nEv[1]++;
 
-
+    // Set the gen particle information
+    // Question: we check trueParticles.size()==1, but then fill genParticles
+    //           are we 100% sure genParticles().size()>=1? What if >1?
+    // Here we'd really want the original pion from PionGun, is gen==true?
     genE = (*genParticles)[0].p4().E();
     genP = (*genParticles)[0].p4().P();
     genEta = (*genParticles)[0].p4().Eta();
     genPhi = (*genParticles)[0].p4().Phi();
+    
+  } // isSimu
+
+
+  // Check if there is a reconstructed track
+  bool isCharged = false;
+  for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
+    const reco::PFCandidate& pfc = *ci;
+    // sumdepth=0;
+    // for(int i=1; i<=7; i++){
+    //   float depthFraction = pfc.hcalDepthEnergyFraction(i);
+    //   //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
+    //   hcalDepthFractions_[i-1]=depthFraction;
+    //   sumdepth+=depthFraction;
+    // }
+    // cout << "sumdepth=" << sumdepth << endl;
 
 
 
+    //if ( pfc.particleId() == 5 )
+    pfcsID.push_back( pfc.particleId() );
 
-    // Check if there is a reconstructed track
-    bool isCharged = false;
+    // std::cout << "Id = " << pfc.particleId() << std::endl;
+    if ( pfc.particleId() < 4 ) { 
+      isCharged = true;
+      if(pfc.particleId() == 1){ //Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
+        trkP = pfc.trackRef()->p();
+        trkEta = pfc.trackRef()->eta();
+        trkPhi = pfc.trackRef()->phi();
+      }
+      break;
+    }
+  }
+
+  //to clean a bit the neutral hadrons
+  //if(pfcsID.size()!=1) return;
+
+  //std::cout << "isCharged ? " << isCharged << std::endl;
+  //cout<<" =============================> "<<ecal_<<"     "<<hcal_<<endl;
+  //SaveSimHit(iEvent, eta_, phi_ );
+  // Case of no reconstructed tracks (and neutral single particles)
+  //isCharged=true;//manual bypass
+  if ( !isCharged ) { // || fabs((*trueParticles)[0].charge()) < 1E-10 ) {
+    //cout<<"=====>"<<(*trueParticles)[0].energy()<<"   "<<(*trueParticles)[0].eta()<<"   "<<(*trueParticles)[0].phi()<<endl;
+    reco::PFTrajectoryPoint::LayerType ecalEntrance = reco::PFTrajectoryPoint::ECALEntrance;
+    const reco::PFTrajectoryPoint& tpatecal = ((*trueParticles)[0]).extrapolatedPoint( ecalEntrance );
+    eta_ = tpatecal.positionREP().Eta();
+    if ( fabs(eta_) < 1E-10 ){ 
+      //cout << "abs(eta)<1E-10\t\t" << fabs(eta_) << endl << endl;
+      //cout << "ETA ES CERO PRACTICAMENTE" << endl << endl;
+      return;
+    } 
+    phi_ = tpatecal.positionREP().Phi();
+    // h_phi->Fill(phi_);    //qwerty Feb_14 2018
+    // h_phi_1->Fill(phi_);    //qwerty Feb_15 2018
+    // h_phi_2->Fill(phi_);    //qwerty Feb_15 2018
+    // h_phi_3->Fill(phi_);    //qwerty Feb_15 2018
+    // h_phi_4->Fill(phi_);    //qwerty Feb_15 2018
+    // h_phi_5->Fill(phi_);    //qwerty Feb_15 2018
+    true_ = std::sqrt(tpatecal.momentum().Vect().Mag2());
+
+    //cout<<"***********************"<<endl;
     for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
       const reco::PFCandidate& pfc = *ci;
-      // sumdepth=0;
-      // for(int i=1; i<=7; i++){
-      //   float depthFraction = pfc.hcalDepthEnergyFraction(i);
-      //   //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
-      //   hcalDepthFractions_[i-1]=depthFraction;
-      //   sumdepth+=depthFraction;
-      // }
-      // cout << "sumdepth=" << sumdepth << endl;
+      double deta = eta_ - pfc.eta();
+      double dphi = dPhi(phi_, pfc.phi() );
+      double dR = std::sqrt(deta*deta+dphi*dphi);
 
+      //cout << "dR=" << dR << endl << endl;
+      if ( dR < 1.2 ) {
 
-
-      //if ( pfc.particleId() == 5 )
-      pfcsID.push_back( pfc.particleId() );
-
-      // std::cout << "Id = " << pfc.particleId() << std::endl;
-      if ( pfc.particleId() < 4 ) { 
-        isCharged = true;
-        if(pfc.particleId() == 1){ //Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
-          trkP = pfc.trackRef()->p();
-          trkEta = pfc.trackRef()->eta();
-          trkPhi = pfc.trackRef()->phi();
-        }
-        break;
+        //cout << "Ha entrado en dR<1.2" << endl << endl;
+        dr_.push_back(dR);   //spandey Apr_27 dR
+        pfcID_.push_back(pfc.particleId());   //spandey Apr_27 dR
+        Eecal_.push_back(pfc.rawEcalEnergy());  //spandey Apr_27 dR
+        Ehcal_.push_back(pfc.rawHcalEnergy());  //spandey Apr_27 dR
+        //bhumika Nov 2018
+        correcal_.push_back(pfc.ecalEnergy());  
+        corrhcal_.push_back(pfc.hcalEnergy());  
+        //
       }
+      //cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
+      //   if (pfc.particleId() == 5 && pfc.rawEcalEnergy() != 0)
+      //     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
+      // }
+      if ( pfc.particleId() == 4 && dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
+      if ( pfc.particleId() == 5 && dR < 0.4 ){ //Proposed by Kenichi 9/11/23
+        hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
+        ecal_ += pfc.rawEcalEnergy(); // PF Neutral Hadron's Ecal energy (currently seems ignored)
+        for(int i=1; i<=7; i++){
+          hcalDepthFractions_[i-1] += pfc.hcalDepthEnergyFraction(i)*pfc.rawHcalEnergy();//cmunozdi: sum of the energy fraction in each depth of the HCAL;
+          // cout << "hcalDepthFractions_[" << i-1 << "]=" << pfc.hcalDepthEnergyFraction(i) << " \t hcal_ "<< hcal_<< endl;
+        }
+      } //hcal_ += pfc.rawHcalEnergy();
+      // if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
+      // if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
+      if ( ((pfc.particleId() == 6) || (pfc.particleId() == 7)) && dR < 0.4  ) {
+        hfem_ += pfc.rawEcalEnergy();
+        hfhad_ += pfc.rawHcalEnergy();
+      }
+
+    }//for loop neutral hadrons case
+
+    //Renormalize the energy fractions
+    sumdepth=0;
+    if(hcal_ > 0){
+      for(int i=0; i<7; i++){
+        hcalDepthFractions_[i] = hcalDepthFractions_[i]/hcal_;
+        sumdepth+=hcalDepthFractions_[i];
+      }
+    }else{
+      fill(hcalDepthFractions_, hcalDepthFractions_+7, 0.);
+      // return;
     }
 
-    //to clean a bit the neutral hadrons
-    //if(pfcsID.size()!=1) return;
+    std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_;
+    std::cout << "\nsumdepth= " << sumdepth << std::endl;
+    s->Fill();
+    return;
+  }//not isCharge condition
 
-    //std::cout << "isCharged ? " << isCharged << std::endl;
-    //cout<<" =============================> "<<ecal_<<"     "<<hcal_<<endl;
-    //SaveSimHit(iEvent, eta_, phi_ );
-    // Case of no reconstructed tracks (and neutral single particles)
-    //isCharged=true;//manual bypass
-    if ( !isCharged ) { // || fabs((*trueParticles)[0].charge()) < 1E-10 ) {
-      //cout<<"=====>"<<(*trueParticles)[0].energy()<<"   "<<(*trueParticles)[0].eta()<<"   "<<(*trueParticles)[0].phi()<<endl;
-      reco::PFTrajectoryPoint::LayerType ecalEntrance = reco::PFTrajectoryPoint::ECALEntrance;
-      const reco::PFTrajectoryPoint& tpatecal = ((*trueParticles)[0]).extrapolatedPoint( ecalEntrance );
-      eta_ = tpatecal.positionREP().Eta();
-      if ( fabs(eta_) < 1E-10 ){ 
-        //cout << "abs(eta)<1E-10\t\t" << fabs(eta_) << endl << endl;
-        //cout << "ETA ES CERO PRACTICAMENTE" << endl << endl;
-        return;
-      } 
-      phi_ = tpatecal.positionREP().Phi();
-      // h_phi->Fill(phi_);    //qwerty Feb_14 2018
-      // h_phi_1->Fill(phi_);    //qwerty Feb_15 2018
-      // h_phi_2->Fill(phi_);    //qwerty Feb_15 2018
-      // h_phi_3->Fill(phi_);    //qwerty Feb_15 2018
-      // h_phi_4->Fill(phi_);    //qwerty Feb_15 2018
-      // h_phi_5->Fill(phi_);    //qwerty Feb_15 2018
-      true_ = std::sqrt(tpatecal.momentum().Vect().Mag2());
-
-      //cout<<"***********************"<<endl;
-      for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
-        const reco::PFCandidate& pfc = *ci;
-        double deta = eta_ - pfc.eta();
-        double dphi = dPhi(phi_, pfc.phi() );
-        double dR = std::sqrt(deta*deta+dphi*dphi);
-
-        //cout << "dR=" << dR << endl << endl;
-        if ( dR < 1.2 ) {
-
-          //cout << "Ha entrado en dR<1.2" << endl << endl;
-          dr_.push_back(dR);   //spandey Apr_27 dR
-          pfcID_.push_back(pfc.particleId());   //spandey Apr_27 dR
-          Eecal_.push_back(pfc.rawEcalEnergy());  //spandey Apr_27 dR
-          Ehcal_.push_back(pfc.rawHcalEnergy());  //spandey Apr_27 dR
-          //bhumika Nov 2018
-          correcal_.push_back(pfc.ecalEnergy());  
-          corrhcal_.push_back(pfc.hcalEnergy());  
-          //
-        }
-        //cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
-        //   if (pfc.particleId() == 5 && pfc.rawEcalEnergy() != 0)
-        //     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
-        // }
-        if ( pfc.particleId() == 4 && dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
-        if ( pfc.particleId() == 5 && dR < 0.4 ){ //Proposed by Kenichi 9/11/23
-          hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
-          ecal_ += pfc.rawEcalEnergy(); // PF Neutral Hadron's Ecal energy (currently seems ignored)
-          for(int i=1; i<=7; i++){
-            hcalDepthFractions_[i-1] += pfc.hcalDepthEnergyFraction(i)*pfc.rawHcalEnergy();//cmunozdi: sum of the energy fraction in each depth of the HCAL;
-            // cout << "hcalDepthFractions_[" << i-1 << "]=" << pfc.hcalDepthEnergyFraction(i) << " \t hcal_ "<< hcal_<< endl;
-          }
-        } //hcal_ += pfc.rawHcalEnergy();
-        // if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
-        // if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
-        if ( ((pfc.particleId() == 6) || (pfc.particleId() == 7)) && dR < 0.4  ) {
-          hfem_ += pfc.rawEcalEnergy();
-          hfhad_ += pfc.rawHcalEnergy();
-        }
-
-      }//for loop neutral hadrons case
-
-      //Renormalize the energy fractions
-      sumdepth=0;
-      if(hcal_ > 0){
-        for(int i=0; i<7; i++){
-          hcalDepthFractions_[i] = hcalDepthFractions_[i]/hcal_;
-          sumdepth+=hcalDepthFractions_[i];
-        }
-      }else{
-        fill(hcalDepthFractions_, hcalDepthFractions_+7, 0.);
-        // return;
-      }
-
-      std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_;
-      std::cout << "\nsumdepth= " << sumdepth << std::endl;
-      s->Fill();
-      return;
-    }//not isCharge condition
-
-  }//isSimu condition
   
   //cout<<" Track case !!! "<<endl;
 
