@@ -1726,6 +1726,12 @@ void Calibration::drawCoeffGraph(string graph, string tag)
        // 	faBarrel->Draw("Lsame+");
        //   	faBarrel52x->Draw("Lsame+");
        // }
+       // Añadir una línea vertical en x = 3.5
+      TLine *line = new TLine(3.5, histo->GetYaxis()->GetXmin(), 3.5, histo->GetYaxis()->GetXmax());
+      line->SetLineColor(kBlue);  // Color rojo
+      line->SetLineStyle(2);     // Línea punteada
+      line->SetLineWidth(2);     // Grosor de la línea
+      line->Draw("same");        // Dibujar en el mismo canvas
 
        //  leg->AddEntry(
      TLegend *leg=new TLegend(0.30,0.25,0.90,0.35);
@@ -1757,6 +1763,11 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       // if(tag=="EH") {
       // 	faBarrel->Draw("Lsame+");
 	//   	faBarrel52x->Draw("Lsame+");
+      TLine *line = new TLine(3.5, histo->GetYaxis()->GetXmin(), 3.5, histo->GetYaxis()->GetXmax());
+      line->SetLineColor(kBlue);  // Color rojo
+      line->SetLineStyle(2);     // Línea punteada
+      line->SetLineWidth(2);     // Grosor de la línea
+      line->Draw("same");        // Dibujar en el mismo canvas
       //}
 
       //  leg->AddEntry(
@@ -1787,6 +1798,11 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphC_->Draw("P");
        graphC_->GetFunction(functionC_->GetName())->SetLineColor(colorFittingFunc);
        graphC_->GetFunction(functionC_->GetName())->Draw("same");
+      TLine *line = new TLine(2.5, histo->GetYaxis()->GetXmin(), 2.5, histo->GetYaxis()->GetXmax());
+      line->SetLineColor(kBlue);  // Color rojo
+      line->SetLineStyle(2);     // Línea punteada
+      line->SetLineWidth(2);     // Grosor de la línea
+      line->Draw("same");        // Dibujar en el mismo canvas
 
      TLegend *leg=new TLegend(0.30,0.25,0.90,0.35);
      //     leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))",""); //for UL 2017/2016 barrel
@@ -2026,7 +2042,10 @@ vector<double> trkEta;
 vector<double> trkPhi;
 vector<double> momentums;
 vector<double> ho_energies;
-vector<double> charges;
+vector<int> charges;
+vector<double> hfem_energies;
+vector<double> hfhad_energies;
+vector<array<float, 7>> hcalDepthFractions_Total;
 
 
 vector<ABC*> barrelABCEcalHcal; //Vectors of the ABC objects
