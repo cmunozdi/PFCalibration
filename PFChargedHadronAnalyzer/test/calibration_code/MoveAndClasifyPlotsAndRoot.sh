@@ -4,10 +4,10 @@
 base_dir="/eos/user/c/cmunozdi/www"
 
 # Elegir entre Etrue o Preco
-subfolder_type="PReco24" # Cambiar a "Preco" si es necesario, o "Etrue"
+subfolder_type="ETrue25" # Cambiar a "Preco" si es necesario, o "Etrue"
 
 # Elegir el nombre de la carpeta local
-local_folder_name="WithNotFreezeParameters_PReco24" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
+local_folder_name="ResponsePlots_ETrue25" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
 
 # Directorios de destino
 raw_dir="${base_dir}/Offline_Response_Plots/${subfolder_type}/Uncorrected"

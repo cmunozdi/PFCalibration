@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'Offline_NTuples_2025_0p2to200'
-# config.General.requestName = 'Offline_NTuples_2025_200to500'
+config.General.requestName = 'Offline_NTuples_2025_0p2to200_v2'
+# config.General.requestName = 'Offline_NTuples_2025_200to500_v2'
 config.General.workArea = 'crab_projects'
 
 #optional
@@ -47,8 +47,8 @@ config.Data.totalUnits = -1
 config.Data.publication = False
 #config.Data.publishDBS = '' default for the moment
 #config.Data.outLFN = '/home/spandey/t3store/PF_PGun'
-config.Data.outLFNDirBase = '/store/user/cmunozdi/OFFLINE_NTUPLES/2025_E0p2to200GeV/'
-# config.Data.outLFNDirBase = '/store/user/cmunozdi/OOFLINE_NTUPLES/2025_E200to500GeV/'
+config.Data.outLFNDirBase = '/store/user/cmunozdi/OFFLINE_NTUPLES/2025/2025_E0p2to200GeV_v2/'
+# config.Data.outLFNDirBase = '/store/user/cmunozdi/OFFLINE_NTUPLES/2025/2025_E200to500GeV_v2/'
 
 config.section_("Site")
 config.Site.storageSite = 'T3_CH_CERNBOX'
