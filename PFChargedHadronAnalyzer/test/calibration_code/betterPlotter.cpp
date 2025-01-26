@@ -41,7 +41,11 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
         mg->Add(graph);
 
         graph->SetMarkerSize(1);
-        graph->SetMarkerStyle(20 + i);
+        if (i % 2 == 0) {
+            graph->SetMarkerStyle(20 + i); // Marcador sólido
+        } else {
+            graph->SetMarkerStyle(24 + i); // Marcador abierto
+        }
         do{
             j+=1;
             if((fileNames.size()==2)&&(j==3)){
@@ -50,6 +54,10 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
             // Asignar color evitando los colores 3, 5 y 7
             graph->SetMarkerColor(j);
             graph->SetLineColor(j);
+            // if(i%2!=0){//Valores de i impares
+            //     graph->SetMarkerColorAlpha(j, 0.5);
+            //     graph->SetLineColorAlpha(j, 0.5);
+            // }
             
             TList* functions = graph->GetListOfFunctions();
             TIter nextFunction(functions);

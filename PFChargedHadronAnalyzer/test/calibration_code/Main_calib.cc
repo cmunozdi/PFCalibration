@@ -27,7 +27,7 @@ using namespace std;
 
 
 bool freezeparameters = false;
-bool usePFHC24 = true;
+bool usePFHC24 = false;
 bool useMean = true;
 bool useMedian = false;
 bool changeRange =false;
@@ -42,7 +42,7 @@ int hadrons_eta_symbol = 0;//This int variable is 0 when we take all the eta val
 bool PFEnergyCalibrationFunction=true; //This bool variable is true for using PFEnergyCalibration function from CMSSW and false for using the default PFHC calibration function getCalibratedEnergy
 bool WriteNTupleFile = false;
 bool Parameters24Above500GeV = false; //This bool variable is true for using the parameters for the calibration function for the energy above 500 GeV and false for using the parameters for the calibration function for the energy below 500 GeV (first one)
-bool useOnlyEHhadrons = true; //This bool variable is true for using only EH hadrons and false for using all the hadrons
+bool useOnlyEHhadrons = false; //This bool variable is true for using only EH hadrons and false for using all the hadrons
 bool useOnlyHhadrons = false; //This bool variable is true for using only H hadrons and false for using all the hadrons
 //char* _region_ = (char*)"EC_outside_tracker";
 //char* _region_ = (char*)"EC_within_tracker";
