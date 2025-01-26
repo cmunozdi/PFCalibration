@@ -107,8 +107,8 @@ void LoadOldThresholds() {
 
 //spandey
 void LoadNewThresholds() {
-  aEH = 0; aE = 0; aH = 0; //3.5 2.5
-  aEHe = 0; aEe = 0; aHe = 0;
+  aEH = 2.5; aE = 2.5; aH = 2.5; //3.5 2.5
+  aEHe = 2.5; aEe = 2.5; aHe = 7.5;
 }
 
 
@@ -1727,7 +1727,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
        //   	faBarrel52x->Draw("Lsame+");
        // }
        // Añadir una línea vertical en x = 3.5
-      TLine *line = new TLine(3.5, histo->GetYaxis()->GetXmin(), 3.5, histo->GetYaxis()->GetXmax());
+      TLine *line = new TLine(aEH, histo->GetYaxis()->GetXmin(), aEH, histo->GetYaxis()->GetXmax());
       line->SetLineColor(kBlue);  // Color rojo
       line->SetLineStyle(2);     // Línea punteada
       line->SetLineWidth(2);     // Grosor de la línea
@@ -1736,11 +1736,11 @@ void Calibration::drawCoeffGraph(string graph, string tag)
        //  leg->AddEntry(
      TLegend *leg=new TLegend(0.30,0.25,0.90,0.35);
      // leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))","");
-     leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))","");//for UL 2016 ec
+   //   leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))","");//for UL 2016 ec
      // leg->AddEntry(histo,"[0]+((([1]+([2]/(x^[5])))*exp(-(x^[4]/[3]))))","");//for UL 2016 barrel 
      leg->SetTextAlign(32);
      leg->SetTextSize(0.04);
-     leg->Draw();
+     //leg->Draw();
      //saveString = "ACoefficient" + tag + ".gif";
      //canvas->SaveAs(saveString.c_str());
      saveString = "ACoefficient" + tag + ".png";
@@ -1763,7 +1763,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       // if(tag=="EH") {
       // 	faBarrel->Draw("Lsame+");
 	//   	faBarrel52x->Draw("Lsame+");
-      TLine *line = new TLine(3.5, histo->GetYaxis()->GetXmin(), 3.5, histo->GetYaxis()->GetXmax());
+      TLine *line = new TLine(aEH, histo->GetYaxis()->GetXmin(), aEH, histo->GetYaxis()->GetXmax());
       line->SetLineColor(kBlue);  // Color rojo
       line->SetLineStyle(2);     // Línea punteada
       line->SetLineWidth(2);     // Grosor de la línea
@@ -1772,11 +1772,11 @@ void Calibration::drawCoeffGraph(string graph, string tag)
 
       //  leg->AddEntry(
      TLegend *leg=new TLegend(0.30,0.25,0.90,0.35);
-     leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))","");//for UL2016 barrel(EH)
+   //   leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))","");//for UL2016 barrel(EH)
      //     leg->AddEntry(histo,"[0]+([4]*(x-[5])*exp(-(x*[7])))+(([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))",""); //for UL2016 endcap(EH)
      leg->SetTextAlign(32);
      leg->SetTextSize(0.04);
-     leg->Draw();
+     //leg->Draw();
      //saveString = "BCoefficient" + tag + ".gif";
     //  canvas->SaveAs(saveString.c_str());
      saveString = "BCoefficient" + tag + ".png";
@@ -1798,7 +1798,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphC_->Draw("P");
        graphC_->GetFunction(functionC_->GetName())->SetLineColor(colorFittingFunc);
        graphC_->GetFunction(functionC_->GetName())->Draw("same");
-      TLine *line = new TLine(2.5, histo->GetYaxis()->GetXmin(), 2.5, histo->GetYaxis()->GetXmax());
+      TLine *line = new TLine(aH, histo->GetYaxis()->GetXmin(), aH, histo->GetYaxis()->GetXmax());
       line->SetLineColor(kBlue);  // Color rojo
       line->SetLineStyle(2);     // Línea punteada
       line->SetLineWidth(2);     // Grosor de la línea
@@ -1806,10 +1806,10 @@ void Calibration::drawCoeffGraph(string graph, string tag)
 
      TLegend *leg=new TLegend(0.30,0.25,0.90,0.35);
      //     leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))",""); //for UL 2017/2016 barrel
-     leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))",""); //for UL 2017/2016 endcap
+   //   leg->AddEntry(histo,"[0]+((([1]+([2]/sqrt(x)))*exp(-(x^[6]/[3])))-([4]*exp(-(x^[7]/[5]))))",""); //for UL 2017/2016 endcap
      leg->SetTextAlign(32);
      leg->SetTextSize(0.04);
-     leg->Draw();
+     //leg->Draw();
       // if(tag=="EH") {
       // 	fbBarrel->Draw("Lsame+");
       // 	//   	fbBarrel52x->Draw("Lsame+");
@@ -1836,7 +1836,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphAlpha_->SetMarkerSize(1);
       graphAlpha_->SetMarkerColor(2);
       graphAlpha_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.4, 0.4);
+      histo->GetYaxis()->SetRangeUser(-0.5, 0.1);
 
       graphAlpha_->Draw("P");
        graphAlpha_->GetFunction(functionAlpha_->GetName())->SetLineColor(colorFittingFunc);
@@ -1848,12 +1848,12 @@ void Calibration::drawCoeffGraph(string graph, string tag)
      //leg->AddEntry(graphAlpha_,"[0]+[1]*x^[3]*exp(-x/[2])",""); //for UL2016 endcap H
      //     leg->AddEntry(graphAlpha_,"[0]+([1]*x^[2]*exp(-x))","");//for 2016 endcap EH 
      //leg->AddEntry(histo,"[0]+[1]*x",""); //for UL 2016/2017 barrel
-     if(tag=="H_endcap") leg->AddEntry(histo,"[0]+[1]*x","");
-     if(tag=="EH_barrel") leg->AddEntry(histo,"[0]+[1]*exp(-x*[3]/[2])","");
-     if(tag=="EH_endcap") leg->AddEntry(histo, "[0]+([1]*x)", "");
-     if(tag=="H_barrel") leg->AddEntry(histo,"[0]+[1]*x","");
+   //   if(tag=="H_endcap") leg->AddEntry(histo,"[0]+[1]*x","");
+   //   if(tag=="EH_barrel") leg->AddEntry(histo,"[0]+[1]*exp(-x*[3]/[2])","");
+   //   if(tag=="EH_endcap") leg->AddEntry(histo, "[0]+([1]*x)", "");
+   //   if(tag=="H_barrel") leg->AddEntry(histo,"[0]+[1]*x","");
      leg->SetTextSize(0.04);
-     leg->Draw();
+     //leg->Draw();
 
       //saveString = "AlphaCoefficient" + tag + ".gif";
       //canvas->SaveAs(saveString.c_str());
@@ -1870,7 +1870,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphBeta_->SetMarkerSize(1);
       graphBeta_->SetMarkerColor(2);
       graphBeta_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.4, 0.4);
+      histo->GetYaxis()->SetRangeUser(-0.2, 0.2);
       
       graphBeta_->Draw("P");
        graphBeta_->GetFunction(functionBeta_->GetName())->SetLineColor(colorFittingFunc);
@@ -1881,12 +1881,12 @@ void Calibration::drawCoeffGraph(string graph, string tag)
      // leg->AddEntry(histo,"[0]+[1]*exp(-x/[2])",""); //for UL2017 endcap/barrel & for UL2016 barrel
      //     leg->AddEntry(histo,"[0]+[1]*x*exp(-x/[2])",""); //for UL 2016 endcap H 
      //     leg->AddEntry(histo,"[0]+[1]*(x^[3])*exp(-x/[2])",""); //for UL 2016 endcap EH
-     if(tag=="EH_endcap") leg->AddEntry(histo,"[0]+((([1]+([2]/(x^[5])))*exp(-(x^[4]/[3]))))","");
-     if(tag=="H_endcap") leg->AddEntry(histo,"[0]+[1]*x*exp(-x/[2])","");
-     if(tag=="EH_barrel") leg->AddEntry(histo,"[0]+((([1]+([2]/(x^[5])))*exp(-(x^[4]/[3]))))","");
-     if(tag=="H_barrel") leg->AddEntry(histo,"[0]+[1]*exp(-x/[2])","");
+   //   if(tag=="EH_endcap") leg->AddEntry(histo,"[0]+((([1]+([2]/(x^[5])))*exp(-(x^[4]/[3]))))","");
+   //   if(tag=="H_endcap") leg->AddEntry(histo,"[0]+[1]*x*exp(-x/[2])","");
+   //   if(tag=="EH_barrel") leg->AddEntry(histo,"[0]+((([1]+([2]/(x^[5])))*exp(-(x^[4]/[3]))))","");
+   //   if(tag=="H_barrel") leg->AddEntry(histo,"[0]+[1]*exp(-x/[2])","");
      leg->SetTextSize(0.04);
-     leg->Draw();
+     //leg->Draw();
      //saveString = "BetaCoefficient" + tag + ".gif";
     // canvas->SaveAs(saveString.c_str());
      saveString = "BetaCoefficient" + tag + ".png";
@@ -2160,24 +2160,41 @@ TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", sampleRangeHigh, 0, sample
 TH2F* corrEta_range3 = new TH2F("corrEta_range3", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range4 = new TH2F("corrEta_range4", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range5 = new TH2F("corrEta_range5", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
-TH2F* corrEtaDependence = new TH2F("ECorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* corrEtaDependenceEH_ErawHcal = new TH2F("ECorrEtaDependenceEH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* corrEtaDependenceEH_ErawEcalHcal = new TH2F("ECorrEtaDependenceEH_ErawEcalHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
+TH2F* corrEtaDependence = new TH2F("ECorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence1 = new TH2F("EtaCorrEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence2 = new TH2F("EtaCorrEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence3 = new TH2F("EtaCorrEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence4 = new TH2F("EtaCorrEtaDependence_20to40_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence5 = new TH2F("EtaCorrEtaDependence_40to60_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence6 = new TH2F("EtaCorrEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence7 = new TH2F("EtaCorrEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence8 = new TH2F("EtaCorrEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence1 = new TH2F("RawEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence2 = new TH2F("RawEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence3 = new TH2F("RawEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence4 = new TH2F("RawEtaDependence_20to40_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence5 = new TH2F("RawEtaDependence_40to60_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence6 = new TH2F("RawEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence7 = new TH2F("RawEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence8 = new TH2F("RawEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+
+TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependenceEH_ErawHcal = new TH2F("ECorrEtaDependenceEH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependenceEH_ErawEcalHcal = new TH2F("ECorrEtaDependenceEH_ErawEcalHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 
 
-TH2F* corrEtaDependenceH = new TH2F("ECorrEtaDependenceH", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* corrEtaDependenceH_ErawHcal = new TH2F("ECorrEtaDependenceH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
+TH2F* corrEtaDependenceH = new TH2F("ECorrEtaDependenceH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependenceH_ErawHcal = new TH2F("ECorrEtaDependenceH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 
 
-TH2F* EtaCorrEtaDependence = new TH2F("EtaCorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* EtaCorrEtaDependenceEH = new TH2F("EtaCorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* EtaCorrEtaDependenceEH_Alpha = new TH2F("EtaCorrEtaDependenceEH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* EtaCorrEtaDependenceEH_Beta = new TH2F("EtaCorrEtaDependenceEH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* EtaCorrEtaDependenceH = new TH2F("EtaCorrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* EtaCorrEtaDependenceH_Alpha = new TH2F("EtaCorrEtaDependenceH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-TH2F* EtaCorrEtaDependenceH_Beta = new TH2F("EtaCorrEtaDependenceH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
+TH2F* EtaCorrEtaDependence = new TH2F("EtaCorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependenceEH = new TH2F("EtaCorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependenceEH_Alpha = new TH2F("EtaCorrEtaDependenceEH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependenceEH_Beta = new TH2F("EtaCorrEtaDependenceEH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependenceH = new TH2F("EtaCorrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependenceH_Alpha = new TH2F("EtaCorrEtaDependenceH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependenceH_Beta = new TH2F("EtaCorrEtaDependenceH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 
 TH2F* rawBarrel = new TH2F("rawBarrel","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrBarrel = new TH2F("ECorrBarrel", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
@@ -2249,15 +2266,15 @@ TH2F* corrEtaEndcapHcal = new TH2F("EtaCorrEndcapH", "", sampleRangeHigh, 0, sam
 TH2F* corrEtaEndcapHcal_Alpha = new TH2F("EtaCorrEndcapH_Alpha", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
 TH2F* corrEtaEndcapHcal_Beta = new TH2F("EtaCorrEndcapH_Beta", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
 
-TH2F * rawEtaDependence = new TH2F("rawEtaDependence","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
+TH2F * rawEtaDependence = new TH2F("rawEtaDependence","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 
 
-TH2F * rawEtaDependenceEH = new TH2F("rawEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-//TH2F * corrEtaDependenceEH = new TH2F("corrEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
+TH2F * rawEtaDependenceEH = new TH2F("rawEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+//TH2F * corrEtaDependenceEH = new TH2F("corrEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F * hcorrEtaDependenceEH = new TH2F("hcorrEtaDependenceEH","Response vs. Eta", 75, 0., 3.0, 150, -1.0,1.0 );
 
-TH2F * rawEtaDependenceH = new TH2F("rawEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
-//TH2F * corrEtaDependenceH = new TH2F("corrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -1.0,1.0 );
+TH2F * rawEtaDependenceH = new TH2F("rawEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+//TH2F * corrEtaDependenceH = new TH2F("corrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F * hcorrEtaDependenceH = new TH2F("hcorrEtaDependenceH","Response vs. Eta", 75, 0., 3.0, 150, -1.0,1.0 );
 
 TH1F * trueTempHisto = new TH1F("trueTempHisto", "true", sampleRangeHigh, 0, sampleRangeHigh);
@@ -2269,19 +2286,19 @@ TProfile2D* corrEtaDependenceProfH=new TProfile2D("H","", 40, 0,100, 75, 0, 3.0)
 TH2F* bcplot= new TH2F("bcplot","bcplot",1000,-1.,1.,1000,-1.,1.);
 
 //Temporary TGraphs to passed drawGausFit
-TGraph response;
+TGraphErrors response;
 TGraph resolution;
-TGraph responseRaw;
+TGraphErrors responseRaw;
 TGraph resolutionRaw;
-TGraph responseCor;
+TGraphErrors responseCor;
 TGraph resolutionCor;
-TGraph responseEta;
+TGraphErrors responseEta;
 TGraph resolutionEta;
-TGraph responseEtaEtaEH;
+TGraphErrors responseEtaEtaEH;
 TGraph responseEtaHCorrEtaEH;
-TGraph responseEtaEtaH;
+TGraphErrors responseEtaEtaH;
 TGraph responseEtaHCorrEtaH;
-TGraph responseEtaEtaEH_and_H;
+TGraphErrors responseEtaEtaEH_and_H;
 
 /// Bin Manager =========================================
 vector<double> BinsETrue;
@@ -2343,7 +2360,7 @@ unsigned int GetETrueBinEta(double etrue) {
   return -1;
 }
 
-/********************************NUEVO BY MIKKO (EnergyCalibration, CMSSW)****************************/
+/********************************NUEVO BY MIKKO (EnergyCalibration, powerLaw 2025)****************************/
 class PFEnergyCalibration {
 public:
   PFEnergyCalibration();
@@ -2373,7 +2390,7 @@ public:
   //   esEEInterCalib_ = esEEInterCalib;
   // }
 
-  friend std::ostream& operator<<(std::ostream& out, const PFEnergyCalibration& calib);
+  // friend std::ostream& operator<<(std::ostream& out, const PFEnergyCalibration& calib);
 
 private:
   // ecal calibration for photons
@@ -2389,30 +2406,30 @@ private:
   // const ESEEIntercalibConstants* esEEInterCalib_ = nullptr;
 
   // Barrel calibration (eta 0.00 -> 1.48)
-  std::unique_ptr<TF1> faBarrel;
-  std::unique_ptr<TF1> fbBarrel;
-  std::unique_ptr<TF1> fcBarrel;
-  std::unique_ptr<TF1> faEtaBarrelEH;
-  std::unique_ptr<TF1> fbEtaBarrelEH;
-  std::unique_ptr<TF1> faEtaBarrelH;
-  std::unique_ptr<TF1> fbEtaBarrelH;
+  // std::unique_ptr<TF1> faBarrel;
+  // std::unique_ptr<TF1> fbBarrel;
+  // std::unique_ptr<TF1> fcBarrel;
+  // std::unique_ptr<TF1> faEtaBarrelEH;
+  // std::unique_ptr<TF1> fbEtaBarrelEH;
+  // std::unique_ptr<TF1> faEtaBarrelH;
+  // std::unique_ptr<TF1> fbEtaBarrelH;
 
-  // Endcap calibration (eta 1.48 -> 3.xx)
-  std::unique_ptr<TF1> faEndcap;
-  std::unique_ptr<TF1> fbEndcap;
-  std::unique_ptr<TF1> fcEndcap;
-  std::unique_ptr<TF1> faEtaEndcapEH;
-  std::unique_ptr<TF1> fbEtaEndcapEH;
-  std::unique_ptr<TF1> faEtaEndcapH;
-  std::unique_ptr<TF1> fbEtaEndcapH;
+  // // Endcap calibration (eta 1.48 -> 3.xx)
+  // std::unique_ptr<TF1> faEndcap;
+  // std::unique_ptr<TF1> fbEndcap;
+  // std::unique_ptr<TF1> fcEndcap;
+  // std::unique_ptr<TF1> faEtaEndcapEH;
+  // std::unique_ptr<TF1> fbEtaEndcapEH;
+  // std::unique_ptr<TF1> faEtaEndcapH;
+  // std::unique_ptr<TF1> fbEtaEndcapH;
 
-  //added by Bhumika on 2 august 2018
-  std::unique_ptr<TF1> fcEtaBarrelEH;
-  std::unique_ptr<TF1> fcEtaEndcapEH;
-  std::unique_ptr<TF1> fdEtaEndcapEH;
-  std::unique_ptr<TF1> fcEtaBarrelH;
-  std::unique_ptr<TF1> fcEtaEndcapH;
-  std::unique_ptr<TF1> fdEtaEndcapH;
+  // //added by Bhumika on 2 august 2018
+  // std::unique_ptr<TF1> fcEtaBarrelEH;
+  // std::unique_ptr<TF1> fcEtaEndcapEH;
+  // std::unique_ptr<TF1> fdEtaEndcapEH;
+  // std::unique_ptr<TF1> fcEtaBarrelH;
+  // std::unique_ptr<TF1> fcEtaEndcapH;
+  // std::unique_ptr<TF1> fdEtaEndcapH;
 
   // double minimum(double a, double b) const;
   // double dCrackPhi(double phi, double eta) const;
@@ -2439,31 +2456,31 @@ private:
   //              bool crackCorrection = true) const;
 
   // The calibration functions
-  double aBarrel(double x) const;
-  double bBarrel(double x) const;
-  double cBarrel(double x) const;
-  double aEtaBarrelEH(double x) const;
-  double bEtaBarrelEH(double x) const;
-  double aEtaBarrelH(double x) const;
-  double bEtaBarrelH(double x) const;
-  double aEndcap(double x) const;
-  double bEndcap(double x) const;
-  double cEndcap(double x) const;
-  double aEtaEndcapEH(double x) const;
-  double bEtaEndcapEH(double x) const;
-  double aEtaEndcapH(double x) const;
-  double bEtaEndcapH(double x) const;
-  //added by Bhumika on 3 august 2018
-  double cEtaBarrelEH(double x) const;
-  double cEtaEndcapEH(double x) const;
-  double dEtaEndcapEH(double x) const;
-  double cEtaBarrelH(double x) const;
-  double cEtaEndcapH(double x) const;
-  double dEtaEndcapH(double x) const;
+  // double aBarrel(double x) const;
+  // double bBarrel(double x) const;
+  // double cBarrel(double x) const;
+  // double aEtaBarrelEH(double x) const;
+  // double bEtaBarrelEH(double x) const;
+  // double aEtaBarrelH(double x) const;
+  // double bEtaBarrelH(double x) const;
+  // double aEndcap(double x) const;
+  // double bEndcap(double x) const;
+  // double cEndcap(double x) const;
+  // double aEtaEndcapEH(double x) const;
+  // double bEtaEndcapEH(double x) const;
+  // double aEtaEndcapH(double x) const;
+  // double bEtaEndcapH(double x) const;
+  // //added by Bhumika on 3 august 2018
+  // double cEtaBarrelEH(double x) const;
+  // double cEtaEndcapEH(double x) const;
+  // double dEtaEndcapEH(double x) const;
+  // double cEtaBarrelH(double x) const;
+  // double cEtaEndcapH(double x) const;
+  // double dEtaEndcapH(double x) const;
 
-  // Threshold correction (offset)
-  const double threshE = 3.5;
-  const double threshH = 2.5;
+  // // Threshold correction (offset)
+  // const double threshE = 3.5;
+  // const double threshH = 2.5;
 };
 
 ///======================================================
