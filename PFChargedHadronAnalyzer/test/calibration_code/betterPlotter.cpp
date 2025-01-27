@@ -41,35 +41,48 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
         mg->Add(graph);
 
         graph->SetMarkerSize(1);
-        if (i % 2 == 0) {
-            graph->SetMarkerStyle(20 + i); // Marcador sólido
-        } else {
-            graph->SetMarkerStyle(24 + i); // Marcador abierto
-        }
-        do{
-            j+=1;
-            if((fileNames.size()==2)&&(j==3)){
-                j+=1;
-            }
-            // Asignar color evitando los colores 3, 5 y 7
-            graph->SetMarkerColor(j);
-            graph->SetLineColor(j);
-            // if(i%2!=0){//Valores de i impares
-            //     graph->SetMarkerColorAlpha(j, 0.5);
-            //     graph->SetLineColorAlpha(j, 0.5);
-            // }
+        // if (i % 2 == 0) {
+        graph->SetMarkerStyle(20 + i); // Marcador sólido
+        // } else {
+        //     graph->SetMarkerStyle(24 + i); // Marcador abierto
+        // }
+        // do{
+        //     j+=1;
+        //     if((fileNames.size()==2)&&(j==3)){
+        //         j+=1;
+        //     }
+        //     // Asignar color evitando los colores 3, 5 y 7
+        //     graph->SetMarkerColor(j);
+        //     graph->SetLineColor(j);
+        //     // if(i%2!=0){//Valores de i impares
+        //     //     graph->SetMarkerColorAlpha(j, 0.5);
+        //     //     graph->SetLineColorAlpha(j, 0.5);
+        //     // }
             
-            TList* functions = graph->GetListOfFunctions();
-            TIter nextFunction(functions);
-            TF1* fitFunction = nullptr;
-            while ((fitFunction = dynamic_cast<TF1*>(nextFunction()))) {
-                if (fitFunction->GetNpar() > 0) {
-                    fitFunction->SetLineColor(j);
-                    break;
-                }
-            }
+        //     TList* functions = graph->GetListOfFunctions();
+        //     TIter nextFunction(functions);
+        //     TF1* fitFunction = nullptr;
+        //     while ((fitFunction = dynamic_cast<TF1*>(nextFunction()))) {
+        //         if (fitFunction->GetNpar() > 0) {
+        //             fitFunction->SetLineColor(j);
+        //             break;
+        //         }
+        //     }
 
-        }while(/*(j==3)||*/(j==5)||(j==7));
+        // }while(/*(j==3)||*/(j==5)||(j==7));
+        if(i==0){
+            graph->SetMarkerColor(kRed);
+            graph->SetLineColor(kRed);
+        }else if(i==1){
+            graph->SetMarkerColor(kRed+2);
+            graph->SetLineColor(kRed+2);
+        }else if(i==2){
+            graph->SetMarkerColor(kCyan);
+            graph->SetLineColor(kCyan);
+        }else if(i==3){
+            graph->SetMarkerColor(kCyan+2);
+            graph->SetLineColor(kCyan+2);
+        }
         
 
         legend->AddEntry(graph, legendNames[i].c_str(), "LP");
