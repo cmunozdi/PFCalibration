@@ -365,16 +365,10 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
   // Check if there is a reconstructed track
   bool isCharged = false;
+  double maxPFC_Pt = -1.;
+  const reco::PFCandidate* bestTrack = nullptr;
   for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
     const reco::PFCandidate& pfc = *ci;
-    // sumdepth=0;
-    // for(int i=1; i<=7; i++){
-    //   float depthFraction = pfc.hcalDepthEnergyFraction(i);
-    //   //cout<<"Depth "<<i<<" = "<<depthFraction<<endl;
-    //   hcalDepthFractions_[i-1]=depthFraction;
-    //   sumdepth+=depthFraction;
-    // }
-    // cout << "sumdepth=" << sumdepth << endl;
 
 
 
@@ -383,13 +377,26 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     // std::cout << "Id = " << pfc.particleId() << std::endl;
     if ( pfc.particleId() < 4 ) { 
-      isCharged = true;
-      if(pfc.particleId() == 1){ //Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
-        trkP = pfc.trackRef()->p();
-        trkEta = pfc.trackRef()->eta();
-        trkPhi = pfc.trackRef()->phi();
+      // isCharged = true;
+      //Check DeltaR between the track and the gen particle
+      double deta = genEta - pfc.eta();
+      double dphi = dPhi(genPhi, pfc.phi());
+      double dR = std::sqrt(deta*deta+dphi*dphi);
+      if(dR<0.4){
+        if(pfc.pt()>maxPFC_Pt){
+          maxPFC_Pt = pfc.pt();
+          bestTrack = &pfc;
+        }
       }
-      break;
+    }
+  }
+  //If there is a charged track, save the track info
+  if(bestTrack){
+    isCharged = true;
+    if(bestTrack->particleId() == 1){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
+      trkP = bestTrack->trackRef()->p();
+      trkEta = bestTrack->trackRef()->eta();
+      trkPhi = bestTrack->trackRef()->phi();
     }
   }
 
@@ -489,7 +496,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
 
     // The pf candidate
-    const reco::PFCandidate& pfc = *ci;
+    const reco::PFCandidate& pfc = *bestTrack;//ci;
     nCh[0]++;
 
 
@@ -599,7 +606,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     }
     //bypass for neutrals
-    if ( nTracks != 1 ) continue;
+    // if ( nTracks != 1 ) continue;
     nCh[4]++;
 
     // h_phi_2->Fill(pfc.phi());   //qwerty Feb_15 2018
