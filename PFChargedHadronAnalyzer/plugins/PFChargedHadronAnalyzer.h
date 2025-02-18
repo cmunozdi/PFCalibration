@@ -120,7 +120,7 @@ class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
   TTree* s;
   
   float true_,p_,ecal_,hcal_,eta_,phi_,ho_, hfem_, hfhad_;
-  float rcEcal_, rcHcal_;
+  float rcHcal_;
   float etaEcal_,phiEcal_;
   int charge_;
   std::vector<float> dr_,Eecal_,Ehcal_,pfcID_;
@@ -159,7 +159,7 @@ class PFChargedHadronAnalyzer : public edm::one::EDAnalyzer<> {
   edm::LuminosityBlockNumber_t lumiBlock;
   edm::Timestamp time;
 
-  std::vector<float> addDr,addEmE,addHadE,addEta,addPhi;
+  std::vector<float> addDr,addEmE,addHadE,addEta,addPhi, rcEcal_;
   std::vector<int> addPdgId;
   std::vector<float> genDr;
   float genE, genP,genEta,genPhi;

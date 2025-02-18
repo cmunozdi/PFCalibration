@@ -122,15 +122,15 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
   // s->Branch("etaAtEcal",&etaEcal_,"eta/F");  
   // s->Branch("phiAtEcal",&phiEcal_,"phi/F");
   
-  // s->Branch("cluEcalE",&cluEcalE);
-  // s->Branch("cluEcalEta",&cluEcalEta);
-  // s->Branch("cluEcalPhi",&cluEcalPhi);
+  s->Branch("cluEcalE",&cluEcalE);
+  s->Branch("cluEcalEta",&cluEcalEta);
+  s->Branch("cluEcalPhi",&cluEcalPhi);
 
   // s->Branch("distEcalTrk",&distEcalTrk);
 
-  // s->Branch("cluHcalE",&cluHcalE);
-  // s->Branch("cluHcalEta",&cluHcalEta);
-  // s->Branch("cluHcalPhi",&cluHcalPhi);
+  s->Branch("cluHcalE",&cluHcalE);
+  s->Branch("cluHcalEta",&cluHcalEta);
+  s->Branch("cluHcalPhi",&cluHcalPhi);
 
   // s->Branch("distHcalTrk",&distHcalTrk);
   // s->Branch("distHcalEcal",&distHcalEcal);
@@ -314,7 +314,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   true_=0.;
   p_=0.;
   ecal_=0.;
-  rcEcal_=0.;
+  // rcEcal_=0.;
   hcal_=0.;
   rcHcal_=0.;
   fill(hcalDepthFractions_, hcalDepthFractions_+7, 0.);
@@ -330,6 +330,13 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   pfcsID.clear();
   correcal_.clear();
   corrhcal_.clear(); 
+  cluEcalE.clear();
+  cluEcalEta.clear();
+  cluEcalPhi.clear();
+  cluHcalE.clear();
+  cluHcalEta.clear();
+  cluHcalPhi.clear();
+  rcEcal_.clear();
 
   if(isMBMC_) isSimu=false;
 
@@ -391,7 +398,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
           double deta = genEta - pfc.eta();
           double dphi = dPhi(genPhi, pfc.phi());
           double dR = std::sqrt(deta*deta+dphi*dphi);
-          if(dR<0.4){
+          if(dR<0.025){
             if(pfc.pt()>maxPFC_Pt){
               maxPFC_Pt = pfc.pt();
               bestTrack = &pfc;
@@ -432,7 +439,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       return;
     } 
     phi_ = tpatecal.positionREP().Phi();
-    phiOpposite_ = phi_ + TMath::Pi();
+    float phiOpposite_ = phi_ + TMath::Pi();
     if(phiOpposite_ > TMath::Pi()) phiOpposite_ -= 2*TMath::Pi();
     if(phiOpposite_ < -TMath::Pi()) phiOpposite_ += 2*TMath::Pi();
     // h_phi->Fill(phi_);    //qwerty Feb_14 2018
@@ -471,7 +478,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       // }
       if ( pfc.particleId() == 4 ){
         if( dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
-        if( dROpposite < 0.2 ) rcEcal_ += pfc.rawEcalEnergy();
+        // if( dROpposite < 0.2 ) rcEcal_ += pfc.rawEcalEnergy();
       }
       if ( pfc.particleId() == 5 ){
         if (dR < 0.4){ //Proposed by Kenichi 9/11/23
@@ -485,7 +492,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
         } //hcal_ += pfc.rawHcalEnergy();
         if( dROpposite < 0.4 ){
           rcHcal_ += pfc.rawHcalEnergy();
-          rcEcal_ += pfc.rawEcalEnergy();
+          // rcEcal_ += pfc.rawEcalEnergy();
         }
       }
       // if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
@@ -650,12 +657,26 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
 
     //cout<<nEcal<<"   "<<nHcal<<endl;
+    rcEcal_.clear();
     //ECAL element
+    // std::cout << "nEcal = " << nEcal << std::endl;
     for(unsigned int ii=0;ii<nEcal;ii++) {
       const reco::PFBlockElementCluster& eecal = dynamic_cast<const reco::PFBlockElementCluster &>( elements[ iECAL[ii] ] );
       double E_ECAL = eecal.clusterRef()->energy();  
       double eta_ECAL = eecal.clusterRef()->eta();
       double phi_ECAL = eecal.clusterRef()->phi();
+      double phi_ECAL_opposite = phi_ECAL + TMath::Pi();
+      if(phi_ECAL_opposite > TMath::Pi()) phi_ECAL_opposite -= 2*TMath::Pi();
+      if(phi_ECAL_opposite < -TMath::Pi()) phi_ECAL_opposite += 2*TMath::Pi();
+      // std::cout << "pfClustersEcal->size() = " << pfClustersEcal->size() << "\t eta_ecal= " << eta_ECAL << "\t phi_ECAL= " << phi_ECAL << std::endl;
+      for(size_t ibc=0; ibc<pfClustersEcal->size(); ++ibc){
+        reco::PFClusterRef bcRef (pfClustersEcal,ibc);
+        if(std::abs(deltaPhi(phi_ECAL_opposite, bcRef->phi()))<0.1/* && (eta_ECAL == bcRef->eta())*/){
+          rcEcal_.push_back( bcRef->energy());
+          // std::cout << "rcEcal_" << ibc << ": "<< /*rcEcal_ << "\t" << */bcRef->eta() << "\t" << bcRef->phi() << std::endl;
+          // return;
+        }
+      }
 
       cluEcalE.push_back( E_ECAL );
       cluEcalEta.push_back( eta_ECAL );
@@ -992,7 +1013,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 //       }
 
 
-    std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_;
+    std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_ << std::endl << std::endl;
 
     s->Fill();
 
