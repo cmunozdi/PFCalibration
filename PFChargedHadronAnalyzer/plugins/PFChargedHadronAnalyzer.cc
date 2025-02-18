@@ -377,17 +377,26 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     // std::cout << "Id = " << pfc.particleId() << std::endl;
     if ( pfc.particleId() < 4 ) { 
-      // isCharged = true;
-      //Check DeltaR between the track and the gen particle
-      double deta = genEta - pfc.eta();
-      double dphi = dPhi(genPhi, pfc.phi());
-      double dR = std::sqrt(deta*deta+dphi*dphi);
-      if(dR<0.4){
-        if(pfc.pt()>maxPFC_Pt){
-          maxPFC_Pt = pfc.pt();
-          bestTrack = &pfc;
+      const reco::TrackRef trackRef = pfc.trackRef();
+      if ( trackRef.isNonnull() ) {
+        double dz = fabs(trackRef->dz(genParticles->at(0).vertex()));
+
+        if(dz<0.2){
+          // isCharged = true;
+          //Check DeltaR between the track and the gen particle
+          double deta = genEta - pfc.eta();
+          double dphi = dPhi(genPhi, pfc.phi());
+          double dR = std::sqrt(deta*deta+dphi*dphi);
+          if(dR<0.4){
+            if(pfc.pt()>maxPFC_Pt){
+              maxPFC_Pt = pfc.pt();
+              bestTrack = &pfc;
+            }
+          }
         }
+        
       }
+      
     }
   }
   //If there is a charged track, save the track info
