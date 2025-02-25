@@ -1,3 +1,5 @@
+//Compilar usando: g++ betterPlotter.cpp -o betterPlotter $(root-config --cflags --libs)
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -31,7 +33,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
     latex->SetNDC();
 
     // Mover la leyenda a la esquina superior derecha
-    TLegend* legend = new TLegend(0.72-0.62, 0.15+0.6, 0.88-0.62, 0.30+0.6); // Ajustada para la esquina superior derecha
+    TLegend* legend = new TLegend(0.67, 0.10, 0.90, 0.30); // Ajustada para la esquina superior izquierda new TLegend(0.72-0.62, 0.20+0.6, 0.83-0.62, 0.30+0.6);
     legend->SetBorderSize(1);
 
     int j = 1;
@@ -46,31 +48,31 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
         // } else {
         //     graph->SetMarkerStyle(24 + i); // Marcador abierto
         // }
-        // do{
-        //     j+=1;
-        //     if((fileNames.size()==2)&&(j==3)){
-        //         j+=1;
-        //     }
-        //     // Asignar color evitando los colores 3, 5 y 7
-        //     graph->SetMarkerColor(j);
-        //     graph->SetLineColor(j);
-        //     // if(i%2!=0){//Valores de i impares
-        //     //     graph->SetMarkerColorAlpha(j, 0.5);
-        //     //     graph->SetLineColorAlpha(j, 0.5);
-        //     // }
+        do{
+            j+=1;
+            if((fileNames.size()==2)&&(j==3)){
+                j+=1;
+            }
+            // Asignar color evitando los colores 3, 5 y 7
+            graph->SetMarkerColor(j);
+            graph->SetLineColor(j);
+            // if(i%2!=0){//Valores de i impares
+            //     graph->SetMarkerColorAlpha(j, 0.5);
+            //     graph->SetLineColorAlpha(j, 0.5);
+            // }
             
-        //     TList* functions = graph->GetListOfFunctions();
-        //     TIter nextFunction(functions);
-        //     TF1* fitFunction = nullptr;
-        //     while ((fitFunction = dynamic_cast<TF1*>(nextFunction()))) {
-        //         if (fitFunction->GetNpar() > 0) {
-        //             fitFunction->SetLineColor(j);
-        //             break;
-        //         }
-        //     }
+            TList* functions = graph->GetListOfFunctions();
+            TIter nextFunction(functions);
+            TF1* fitFunction = nullptr;
+            while ((fitFunction = dynamic_cast<TF1*>(nextFunction()))) {
+                if (fitFunction->GetNpar() > 0) {
+                    fitFunction->SetLineColor(j);
+                    break;
+                }
+            }
 
-        // }while(/*(j==3)||*/(j==5)||(j==7));
-        if(i==0){
+        }while(/*(j==3)||*/(j==5)||(j==7));
+        /*if(i==0){
             graph->SetMarkerColor(kRed);
             graph->SetLineColor(kRed);
         }else if(i==1){
@@ -82,7 +84,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
         }else if(i==3){
             graph->SetMarkerColor(kCyan+2);
             graph->SetLineColor(kCyan+2);
-        }
+        }*/
         
 
         legend->AddEntry(graph, legendNames[i].c_str(), "LP");
@@ -97,7 +99,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
     if (xRangeType == "etadependence") {
         mg->GetXaxis()->SetLimits(0., 3.);
     } else {
-        mg->GetXaxis()->SetLimits(1., 500.);
+        mg->GetXaxis()->SetLimits(1., 5000.);
     }
     
     mg->GetYaxis()->SetRangeUser(yMin, yMax);  // Ajustar el rango Y

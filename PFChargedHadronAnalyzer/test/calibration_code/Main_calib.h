@@ -37,7 +37,7 @@ int colorFittingFunc = 2;
 
 double sigC_ = 5.;
 // unsigned sampleRangeHigh = 200;
-unsigned sampleRangeHigh = 500;
+unsigned sampleRangeHigh = 5000;
 
 
 //threshold
@@ -1836,7 +1836,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphAlpha_->SetMarkerSize(1);
       graphAlpha_->SetMarkerColor(2);
       graphAlpha_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.5, 0.1);
+      histo->GetYaxis()->SetRangeUser(-0.4,0.4);
 
       graphAlpha_->Draw("P");
        graphAlpha_->GetFunction(functionAlpha_->GetName())->SetLineColor(colorFittingFunc);
@@ -1870,7 +1870,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphBeta_->SetMarkerSize(1);
       graphBeta_->SetMarkerColor(2);
       graphBeta_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.2, 0.2);
+      histo->GetYaxis()->SetRangeUser(-0.4, 0.4);
       
       graphBeta_->Draw("P");
        graphBeta_->GetFunction(functionBeta_->GetName())->SetLineColor(colorFittingFunc);
@@ -1903,7 +1903,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphGamma_->SetMarkerSize(1);
       graphGamma_->SetMarkerColor(2);
       graphGamma_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.04, 0.04);
+      // histo->GetYaxis()->SetRangeUser(-0.04, 0.04);
       
       graphGamma_->Draw("P");
       // fbEtaBarrel->Draw("Lsame+");
@@ -2169,6 +2169,9 @@ TH2F* corrEtaDependence5 = new TH2F("EtaCorrEtaDependence_40to60_GeV", "Response
 TH2F* corrEtaDependence6 = new TH2F("EtaCorrEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* corrEtaDependence7 = new TH2F("EtaCorrEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* corrEtaDependence8 = new TH2F("EtaCorrEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence9 = new TH2F("EtaCorrEtaDependence_500to1000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence10 = new TH2F("EtaCorrEtaDependence_1000to2000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence11 = new TH2F("EtaCorrEtaDependence_2000to5000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* rawEtaDependence1 = new TH2F("RawEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* rawEtaDependence2 = new TH2F("RawEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* rawEtaDependence3 = new TH2F("RawEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
@@ -2177,6 +2180,9 @@ TH2F* rawEtaDependence5 = new TH2F("RawEtaDependence_40to60_GeV", "Response vs. 
 TH2F* rawEtaDependence6 = new TH2F("RawEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* rawEtaDependence7 = new TH2F("RawEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* rawEtaDependence8 = new TH2F("RawEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence9 = new TH2F("RawEtaDependence_500to1000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence10 = new TH2F("RawEtaDependence_1000to2000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* rawEtaDependence11 = new TH2F("RawEtaDependence_2000to5000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 
 TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
 TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );

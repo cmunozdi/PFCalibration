@@ -2,8 +2,8 @@
 
 # Directorios base
 DIR_2025="ResponsePlots_ETrue25"
-DIR_2024="ResponsePlots_ETrue24"
-OUT_DIR="Comparisons_EH_hadrons"
+DIR_2024="ResponsePlots_ETrue24_above500"
+OUT_DIR="Comparisons_v2/H_hadrons"
 
 # Crear directorio de salida si no existe
 mkdir -p $OUT_DIR
@@ -33,8 +33,8 @@ find $DIR_2025/plots -type f -name "*.png" | while read -r png_2025; do
     png_name=$(basename "$png_2025")
     rel_path=$(dirname "$png_2025" | sed "s|$DIR_2025/||")
     root_name="resp_${png_name%.png}.root"
-    root_2025="$DIR_2025/rootFiles/EH_hadrons/$root_name"
-    root_2024="$DIR_2024/rootFiles/EH_hadrons/$root_name"
+    root_2025="$DIR_2025/rootFiles/H_hadrons/$root_name"
+    root_2024="$DIR_2024/rootFiles/H_hadrons/$root_name"
 
     # Ignorar "_xlog.png" ya que comparten root file con el sin "_xlog"
     if [[ "$png_name" == *_xlog.png ]]; then
@@ -57,7 +57,7 @@ find $DIR_2025/plots -type f -name "*.png" | while read -r png_2025; do
     fi
 
     # Definir título, ejes y archivo de salida
-    title="EH_${png_name%.png}"
+    title="H_${png_name%.png}"
     xlabel="E_{true} [GeV]"
     ylabel="(E_{cor}-E_{true})/E_{true}"
     if [[ "$mode" == "etadependence" ]]; then

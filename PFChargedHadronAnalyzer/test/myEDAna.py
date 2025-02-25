@@ -39,9 +39,21 @@ process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/Run3Summer21DR/Single_Pion_gun_E_200to500_14TeV_pythia8/GEN-SIM-RECO/NoPURAWRECO_120X_mcRun3_2021_realistic_v6-v2/260000/0788ebab-26eb-410e-97b0-868877d34e33.root'),
     #fileNames = cms.untracked.vstring('root://eoscms.cern.ch//eos/cms/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to200/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/40000/9ff74c70-b71d-4310-a365-150e012cd3de.root'),
     # fileNames = cms.untracked.vstring('/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to10/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/120000/001a991b-221e-4d99-9413-aee8c82611e7.root'),
-    fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/11bfb3ce-596d-4c3d-92f7-a4d265cfb723.root'),
-    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-200to500_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/03228d81-6957-4128-9886-814871d09e0b.root'),
+    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/11bfb3ce-596d-4c3d-92f7-a4d265cfb723.root'),
+    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Digi/Pi_Par-E-0p2to200_PGun/GEN-SIM-RAW/NoPU_142X_mcRun3_2025_realistic_v7-v1/2820000/fff32738-6881-45e4-be0e-041c3bd3f9d9.root'),
+    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v2/110000/035b6915-006a-43c3-8d9b-8c3fbc6635f4.root'),
+    fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/009dafa0-5b96-4962-a2f5-10749a78d59b.root'),
     #fileNames = cms.untracked.vstring('172289d1-a818-46f9-9300-095fd35ff5c5.root'),
+    # fileNames = cms.untracked.vstring("/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/005240ff-6c5a-4f06-8426-7ea63c78a25c.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/00a0fd27-3ba7-4ead-b4b6-f19859a3de40.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/00f4225e-55d1-4f9e-bfba-4a4767151658.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/012d0453-9b9e-41e9-8739-5e0d7d50c970.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/013397f8-9363-4c75-909b-5ae765e51109.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/0181fcec-ef17-4d52-bea2-ecf7a82abd5c.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/01fb2af6-3ba7-4069-b0f9-b399ef14aa94.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/029a6efd-e45f-49e2-8d25-492ad9daf2f9.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/02b15411-706b-4c84-b3a3-54b2ccc5cf35.root",
+    #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/03069a6f-851d-4a98-8ba3-dd3ef302459a.root"),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -156,8 +168,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run1_mc', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2018_realistic_v10', '')
 #process.GlobalTag = GlobalTag(process.GlobalTag, '105X_mcRun2_asymptotic_v2', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '142X_mcRun3_2025_realistic_v4', '')#'126X_mcRun3_2023_forPU64_v1', '')''133X_mcRun3_2024_realistic_v9
-
+process.GlobalTag = GlobalTag(process.GlobalTag, '142X_mcRun3_2025_realistic_v7', '')#'126X_mcRun3_2023_forPU64_v1', '')''133X_mcRun3_2024_realistic_v9
+#142X_mcRun3_2025_realistic_v7
 
 process.pfChargedHadronAnalyzer = cms.EDAnalyzer(
     "PFChargedHadronAnalyzer",
