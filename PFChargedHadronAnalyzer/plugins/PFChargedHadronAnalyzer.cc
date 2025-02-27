@@ -506,6 +506,12 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     rcHcal_ = 0.;
     rcEta_ = 0.;
     rcPhi_ = 0.;
+
+    nearClustEcal_ = 0.;
+    nearClustHcal_ = 0.;
+    nearClustEta_ = 0.;
+    nearClustPhi_ = 0.;
+
     for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
       const reco::PFCandidate& pfc = *ci;
       double deta = eta_ - pfc.eta();
@@ -532,11 +538,18 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       //     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
       // }
       if ( pfc.particleId() == 4 ){
-        if( dR < 0.2 ) ecal_ += pfc.rawEcalEnergy();
-        if( dROpposite < 0.2 ) {
-          rcEcal_ += pfc.rawEcalEnergy();
-          rcEta_ += pfc.eta()*pfc.rawEcalEnergy();
-          rcPhi_ += pfc.phi()*pfc.rawEcalEnergy();
+        if( (dR < 0.2 )){
+          ecal_ += pfc.rawEcalEnergy();
+          if(nearClustEcal_ < pfc.rawEcalEnergy()){
+            nearClustEcal_ = pfc.rawEcalEnergy();
+            nearClustEta_ = pfc.eta();
+            nearClustPhi_ = pfc.phi();
+          }
+        }
+        if( (dROpposite < 0.2) && (rcEcal_ < pfc.rawEcalEnergy()) ) {
+          rcEcal_ = pfc.rawEcalEnergy();
+          rcEta_ += pfc.eta();
+          rcPhi_ += pfc.phi();
         }
       }
       if ( pfc.particleId() == 5 ){
@@ -544,16 +557,23 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
           hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
           ecal_ += pfc.rawEcalEnergy(); // PF Neutral Hadron's Ecal energy (currently seems ignored)
+          if(nearClustEcal_+nearClustHcal_ < pfc.rawEcalEnergy()+pfc.rawHcalEnergy()){
+            nearClustEcal_ = pfc.rawEcalEnergy();
+            nearClustHcal_ = pfc.rawHcalEnergy();
+            nearClustEta_ = pfc.eta();
+            nearClustPhi_ = pfc.phi();
+          }
+
           for(int i=1; i<=7; i++){
             hcalDepthFractions_[i-1] += pfc.hcalDepthEnergyFraction(i)*pfc.rawHcalEnergy();//cmunozdi: sum of the energy fraction in each depth of the HCAL;
             // cout << "hcalDepthFractions_[" << i-1 << "]=" << pfc.hcalDepthEnergyFraction(i) << " \t hcal_ "<< hcal_<< endl;
           }
         } //hcal_ += pfc.rawHcalEnergy();
-        if( dROpposite < 0.2 ){
-          rcHcal_ += pfc.rawHcalEnergy();
-          rcEcal_ += pfc.rawEcalEnergy();
-          rcEta_ += pfc.eta()*(pfc.rawHcalEnergy()+pfc.rawEcalEnergy());
-          rcPhi_ += pfc.phi()*(pfc.rawHcalEnergy()+pfc.rawEcalEnergy());
+        if( (dROpposite < 0.2 ) && (rcHcal_+rcEcal_ < pfc.rawHcalEnergy()+pfc.rawEcalEnergy()) ) {
+          rcHcal_ = pfc.rawHcalEnergy();
+          rcEcal_ = pfc.rawEcalEnergy();
+          rcEta_ = pfc.eta();
+          rcPhi_ = pfc.phi();
         }
       }
       // if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
@@ -565,8 +585,36 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     }//for loop neutral hadrons case
 
-    rcEta_ = rcEta_/(rcEcal_+rcHcal_);
-    rcPhi_ = rcPhi_/(rcEcal_+rcHcal_);
+    
+    nearOppPhiEcal_ = 0.;
+    nearOppPhiHcal_ = 0.;
+    nearOppPhiEta_ = 0.;
+    nearOppPhiPhi_ = 0.;
+
+    phiOpposite_ = nearClustPhi_ + TMath::Pi();
+    if(phiOpposite_ > TMath::Pi()) phiOpposite_ -= 2*TMath::Pi();
+    if(phiOpposite_ < -TMath::Pi()) phiOpposite_ += 2*TMath::Pi();
+    for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
+      double deta = nearClustEta_ - ci->eta();
+      double dphiOpposite = dPhi(phiOpposite_, ci->phi());
+      double dROpposite = std::sqrt(deta*deta+dphiOpposite*dphiOpposite);
+      if ( ci->particleId() == 4 ){
+        if( (dROpposite < 0.2) && (nearOppPhiEcal_ < ci->rawEcalEnergy()) ) {
+          nearOppPhiEcal_ = ci->rawEcalEnergy();
+          nearOppPhiEta_ = ci->eta();
+          nearOppPhiPhi_ = ci->phi();
+        }
+      }
+      if ( ci->particleId() == 5 ){
+        if( (dROpposite < 0.2) && (nearOppPhiHcal_ + nearOppPhiEcal_< ci->rawHcalEnergy()+ci->rawEcalEnergy()) ) {
+          nearOppPhiHcal_ = ci->rawHcalEnergy();
+          nearOppPhiEcal_ = ci->rawEcalEnergy();
+          nearOppPhiEta_ = ci->eta();
+          nearOppPhiPhi_ = ci->phi();
+        }
+      }
+    
+    }
 
     //Renormalize the energy fractions
     sumdepth=0;
@@ -1088,23 +1136,33 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       double dphiNearOpposite = dPhi(phiNearOpposite, ci->phi() );
       double dRNearOpposite = std::sqrt(detanear*detanear+dphiNearOpposite*dphiNearOpposite);
 
-      if(dROpposite<0.2){
-        rcEcal_ += ci->rawEcalEnergy();
-        rcHcal_ += ci->rawHcalEnergy();
-        rcEta_ += ci->eta()*(ci->rawEcalEnergy()+ci->rawHcalEnergy());
-        rcPhi_ += ci->phi()*(ci->rawEcalEnergy()+ci->rawHcalEnergy());
+      if(ci->particleId() == 4){
+        if((dROpposite < 0.2) && (rcEcal_ < ci->rawEcalEnergy())){
+          rcEcal_ = ci->rawEcalEnergy();
+          rcEta_ = ci->eta();
+          rcPhi_ = ci->phi();
+        }
+        if((dRNearOpposite < 0.2) && (nearOppPhiEcal_ < ci->rawEcalEnergy())){
+          nearOppPhiEcal_ = ci->rawEcalEnergy();
+          nearOppPhiEta_ = ci->eta();
+          nearOppPhiPhi_ = ci->phi();
+        }
       }
-      if(dRNearOpposite<0.2){
-        nearOppPhiEcal_ += ci->rawEcalEnergy();
-        nearOppPhiHcal_ += ci->rawHcalEnergy();
-        nearOppPhiEta_ += ci->eta()*(ci->rawEcalEnergy()+ci->rawHcalEnergy());
-        nearOppPhiPhi_ += ci->phi()*(ci->rawEcalEnergy()+ci->rawHcalEnergy());
+      if(ci->particleId() == 5){
+        if((dROpposite < 0.2) && (rcHcal_ + rcEcal_ < ci->rawHcalEnergy() + ci->rawEcalEnergy())){
+          rcHcal_ = ci->rawHcalEnergy();
+          rcEcal_ = ci->rawEcalEnergy();
+          rcEta_ = ci->eta();
+          rcPhi_ = ci->phi();
+        }
+        if((dRNearOpposite < 0.2) && (nearOppPhiHcal_ + nearOppPhiEcal_ < ci->rawHcalEnergy() + ci->rawEcalEnergy())){
+          nearOppPhiHcal_ = ci->rawHcalEnergy();
+          nearOppPhiEcal_ = ci->rawEcalEnergy();
+          nearOppPhiEta_ = ci->eta();
+          nearOppPhiPhi_ = ci->phi();
+        }
       }
     }
-    rcEta_ = rcEta_/(rcEcal_+rcHcal_);
-    rcPhi_ = rcPhi_/(rcEcal_+rcHcal_);
-    nearOppPhiEta_ = nearOppPhiEta_/(nearOppPhiEcal_+nearOppPhiHcal_);
-    nearOppPhiPhi_ = nearOppPhiPhi_/(nearOppPhiEcal_+nearOppPhiHcal_);
 
     s->Fill();
 

@@ -29,25 +29,31 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(40000)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-    #fileNames = cms.untracked.vstring('root://se01.indiacms.res.in//store/user/spandey/step2/PGun_step2_DIGI_1002_2_200_Feb_12/CRAB_UserFiles/crab_PGun_step2_DIGI_1002_2_200_Feb_12/180212_110432/0000/step2_2.root'),
-#    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/RunIIWinter19PFCalibDR/Single_Pion_gun_E_200to500_13TeV_pythia8/GEN-SIM-RECO/2016ConditionsNoPU_105X_mcRun2_asymptotic_v2-v1/270000/FF853C26-CDC1-4D44-95D9-924C3C3A482F.root'),
-#    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch//store/mc/Run3Summer21DR/Single_Pion_gun_E_200to500_14TeV_pythia8/GEN-SIM-RECO/NoPURAWRECO_120X_mcRun3_2021_realistic_v6-v2/260000/0788ebab-26eb-410e-97b0-868877d34e33.root'),
-    #fileNames = cms.untracked.vstring('root://eoscms.cern.ch//eos/cms/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to200/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/40000/9ff74c70-b71d-4310-a365-150e012cd3de.root'),
-    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter24Reco/SinglePionGun_E0p2to10/GEN-SIM-RECO/NoPU_133X_mcRun3_2024_realistic_v9-v2/120000/001a991b-221e-4d99-9413-aee8c82611e7.root'),
-    fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/11bfb3ce-596d-4c3d-92f7-a4d265cfb723.root'),
-    # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-200to500_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/03228d81-6957-4128-9886-814871d09e0b.root'),
-    #fileNames = cms.untracked.vstring('172289d1-a818-46f9-9300-095fd35ff5c5.root'),
+    fileNames = cms.untracked.vstring(
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/009dafa0-5b96-4962-a2f5-10749a78d59b.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/0106d6e9-0254-470c-9856-7d41748ce84b.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/010eb979-3b43-4102-abf9-be0520fa0d74.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/011ddd63-034e-4b27-81dc-d3dd2a0f4d0f.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/017dae16-6d16-4f11-a7cd-829eb212058d.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/01ceedbf-af5d-47dc-870f-431ed6bfee07.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/01e53a92-f7e6-4eae-9d01-c914eeda873a.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/01f13413-ce32-490f-a7d6-35953bad3e07.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/02283631-1d4e-4066-9096-5b86fa57c1fe.root',
+        '/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/02639f75-9f5f-4658-8884-4e20dbe96044.root'
+    ),
     secondaryFileNames = cms.untracked.vstring()
 )
 
 process.options = cms.untracked.PSet(
-
+    # numberOfThreads = cms.untracked.uint32(8),  # Número de hilos
+    # numberOfStreams = cms.untracked.uint32(8)   # Número de streams (debe coincidir o ser menor que los hilos)
 )
+
 
 # Production Info
 # process.configurationMetadata = cms.untracked.PSet(
