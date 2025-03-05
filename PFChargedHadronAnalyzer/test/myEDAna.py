@@ -181,7 +181,7 @@ process.pfChargedHadronAnalyzer = cms.EDAnalyzer(
     ecalMax = cms.double(1E9),                  # Maximum ecal energy                                                                
     verbose = cms.untracked.bool(True),         # not used.                                                                          
     #rootOutputFile = cms.string("PGun__2_200GeV__81X_upgrade2017_realistic_v22.root"),# the root tree                               
-    rootOutputFile = cms.string("step3.root"),# the root tree                                                       
+    rootOutputFile = cms.string("step3_reducedConeSize0p05.root"),# the root tree                                                       
 #    IsMinBias = cms.untracked.bool(False)                                                                                           
 )
 
