@@ -1,4 +1,4 @@
-//Compilar usando: g++ betterPlotter.cpp -o betterPlotter $(root-config --cflags --libs)
+//Compilar usando: g++ betterPlotterTwoPads.cpp -o betterPlotterTwoPads $(root-config --cflags --libs)
 
 #include <iostream>
 #include <vector>
@@ -18,75 +18,53 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
               const std::string& YAxisTitle, const std::vector<std::string>& legendNames,
               const std::string& exitFileName, double yMin, double yMax, const std::string& xRangeType) {
 
-    TMultiGraph* mg = new TMultiGraph();
+    TCanvas* canvas = new TCanvas("canvas", "Plot", 600, 700);
+    canvas->Divide(1, 2, 0.01, 0.01);
 
-    TCanvas* canvas = new TCanvas("canvas", "Plot", 800, 800);
+    TPad* pad1 = (TPad*)canvas->cd(1);
     if (logXAxis) {
-        canvas->SetLogx();
+        pad1->SetLogx();
     }
-    canvas->SetGrid();
+    pad1->SetGrid();
+    pad1->SetPad(0, 0.2, 1, 1);
 
-    TLatex* latex = new TLatex();
-    latex->SetTextFont(42);
-    latex->SetTextSize(0.04);
-    latex->SetTextAlign(12);
-    latex->SetNDC();
 
-    // Mover la leyenda a la esquina superior derecha
-    TLegend* legend = new TLegend(0.72, 0.15+0.65, 0.90, 0.30+0.6); // Ajustada para la esquina inferior derecha
-    //TLegend* legend = new TLegend(0.72-0.62, 0.15+0.6, 0.88-0.62, 0.30+0.6); // Ajustada para la esquina superior izquierda
+
+    TMultiGraph* mg = new TMultiGraph();
+    TLegend* legend = new TLegend(0.67, 0.20 + 0.6, 0.90, 0.30 + 0.6);
     legend->SetBorderSize(1);
 
+    std::vector<TGraph*> graphs;
     int j = 1;
+
     for (size_t i = 0; i < fileNames.size(); ++i) {
         TFile* file = TFile::Open(fileNames[i].c_str());
         TGraph* graph = (TGraph*)file->Get(folderNames[i].c_str());
+        graphs.push_back(graph);
         mg->Add(graph);
 
         graph->SetMarkerSize(1);
-        // if (i % 2 == 0) {
-        graph->SetMarkerStyle(20 + i); // Marcador sólido
-        // } else {
-        //     graph->SetMarkerStyle(24 + i); // Marcador abierto
-        // }
-        do{
-            j+=1;
-            if((fileNames.size()==2)&&(j==3)){
-                j+=1;
-            }
-            // Asignar color evitando los colores 3, 5 y 7
-            graph->SetMarkerColor(j);
-            graph->SetLineColor(j);
-            // if(i%2!=0){//Valores de i impares
-            //     graph->SetMarkerColorAlpha(j, 0.5);
-            //     graph->SetLineColorAlpha(j, 0.5);
-            // }
-            
-            TList* functions = graph->GetListOfFunctions();
-            TIter nextFunction(functions);
-            TF1* fitFunction = nullptr;
-            while ((fitFunction = dynamic_cast<TF1*>(nextFunction()))) {
-                if (fitFunction->GetNpar() > 0) {
-                    fitFunction->SetLineColor(j);
-                    break;
-                }
-            }
+        graph->SetMarkerStyle(20 + i);
 
-        }while(/*(j==3)||*/(j==5)||(j==7));
-        // if(i==0){
-        //     graph->SetMarkerColor(kRed);
-        //     graph->SetLineColor(kRed);
-        // }else if(i==1){
-        //     graph->SetMarkerColor(kRed+2);
-        //     graph->SetLineColor(kRed+2);
-        // }else if(i==2){
-        //     graph->SetMarkerColor(kCyan);
-        //     graph->SetLineColor(kCyan);
-        // }else if(i==3){
-        //     graph->SetMarkerColor(kCyan+2);
-        //     graph->SetLineColor(kCyan+2);
-        // }
-        
+        do {
+            j += 1;
+            if ((fileNames.size() == 2) && (j == 3)) {
+                j += 1;
+            }
+        } while ((j == 5) || (j == 7));
+
+        graph->SetMarkerColorAlpha(j, 1.);
+        graph->SetLineColor(j);
+
+        TList* functions = graph->GetListOfFunctions();
+        TIter nextFunction(functions);
+        TF1* fitFunction = nullptr;
+        while ((fitFunction = dynamic_cast<TF1*>(nextFunction()))) {
+            if (fitFunction->GetNpar() > 0) {
+                fitFunction->SetLineColor(j);
+                break;
+            }
+        }
 
         legend->AddEntry(graph, legendNames[i].c_str(), "LP");
     }
@@ -95,28 +73,64 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
     mg->GetXaxis()->SetTitle(XAxisTitle.c_str());
     mg->GetYaxis()->SetTitle(YAxisTitle.c_str());
     mg->GetYaxis()->SetTitleOffset(1.25);
-    
-    // Establecer límites del eje X basados en el tipo de gráfico
+
     if (xRangeType == "etadependence") {
         mg->GetXaxis()->SetLimits(0., 3.);
     } else {
         mg->GetXaxis()->SetLimits(1., 5000.);
     }
-    
-    mg->GetYaxis()->SetRangeUser(yMin, yMax);  // Ajustar el rango Y
+    mg->GetYaxis()->SetRangeUser(yMin-0.025, yMax);
     mg->Draw("AP");
+    
 
-    latex->DrawLatex(0.05, 0.02, "#bf{CMS} #it{Preliminary}");
     legend->Draw();
 
-    //system("mkdir -p Comparison24vs25");
-    std::string outputPath = /*"Comparison24vs25/" +*/ exitFileName;
-    canvas->SaveAs((outputPath + ".png").c_str());
-    canvas->SaveAs((outputPath + ".pdf").c_str());
+
+    TPad* pad2 = (TPad*)canvas->cd(2);
+    pad2->SetPad(0, 0.0, 1, 0.28);
+    pad2->SetGrid();
+    pad2->SetTopMargin(0);
+    pad2->SetBottomMargin(0.3);
+    if (graphs.size() >= 2) {
+        TGraph* ratioGraph = new TGraph();
+        int nPoints = graphs[0]->GetN();
+        for (int i = 0; i < nPoints; ++i) {
+            double x, y1, y2;
+            graphs[0]->GetPoint(i, x, y1);
+            graphs[1]->GetPoint(i, x, y2);
+            if (y2 != 100000) {
+                ratioGraph->SetPoint(i, x, y1-y2);
+            }
+        }
+        ratioGraph->GetXaxis()->SetRangeUser(0., 3.);
+        ratioGraph->SetMarkerStyle(20);
+        ratioGraph->SetMarkerSize(1);
+        ratioGraph->SetMarkerColor(kBlack);
+        // ratioGraph->SetTitle("");
+        ratioGraph->GetXaxis()->SetTitle("|#eta|");
+        ratioGraph->GetYaxis()->SetTitle("Difference");
+        ratioGraph->GetYaxis()->SetTitleSize(0.1);
+        ratioGraph->GetXaxis()->SetTitleSize(0.1);
+        ratioGraph->GetYaxis()->SetRangeUser(-1.005, 1.005);
+        ratioGraph->GetYaxis()->SetTitleOffset(0.5);
+        ratioGraph->GetXaxis()->SetTitleOffset(0.8);
+        ratioGraph->GetYaxis()->SetLabelSize(0.09);
+        ratioGraph->GetXaxis()->SetLabelSize(0.09);
+        ratioGraph->Draw("AP");
+    }
+    TLatex* latex = new TLatex();
+    latex->SetTextFont(42);
+    latex->SetTextSize(0.1);
+    latex->SetTextAlign(12);
+    latex->SetNDC();
+    latex->DrawLatex(0.05, 0.17, "#bf{CMS} #it{Preliminary}");
+    canvas->SaveAs((exitFileName + ".png").c_str());
+    canvas->SaveAs((exitFileName + ".pdf").c_str());
 
     delete mg;
     delete canvas;
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc < 12 || (argc - 9) % 3 != 0) {

@@ -1,21 +1,23 @@
 #!/bin/bash
 
 # Cambia el directorio base según tu necesidad
-base_dir="/eos/user/c/cmunozdi/www"
+base_dir="/eos/user/c/cmunozdi/www/Offline_Response_Plots/PFHC25"
 
 # Elegir entre Etrue o Preco
-subfolder_type="ETrue25vsETrue24_v2" #"ETrue25vsETrue24" # Cambiar a "Preco" si es necesario, o "Etrue"
+subfolder_type="Winter25v2NoPU_vs_Winter25WithPU" #"ETrue25vsETrue24" # Cambiar a "Preco" si es necesario, o "Etrue"
 
 # Elegir el nombre de la carpeta local
-local_folder_name="ResponsePlots_ETrue25_vs_ETrue24" #"ResponsePlots_ETrue25_vs_ETrue24" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
+local_folder_name="ResponsePlots_ETrue25_withPU" #"ResponsePlots_ETrue25_vs_ETrue24" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
 
 # Directorios de destino
-raw_dir="${base_dir}/Offline_Response_Plots/${subfolder_type}/Uncorrected"
-ecorr_dir="${base_dir}/Offline_Response_Plots/${subfolder_type}/Energy_corrected"
-etacorr_dir="${base_dir}/Offline_Response_Plots/${subfolder_type}/Pseudorapidity_corrected"
-eta_dependence_dir="${base_dir}/Offline_Response_Plots/${subfolder_type}/etaDependence_per_energy_ranges"
+raw_dir="${base_dir}/${subfolder_type}/Uncorrected"
+ecorr_dir="${base_dir}/${subfolder_type}/Energy_corrected"
+etacorr_dir="${base_dir}/${subfolder_type}/Pseudorapidity_corrected"
+eta_dependence_dir="${base_dir}/${subfolder_type}/etaDependence_per_energy_ranges"
 before_corr_dir="${eta_dependence_dir}/Before_correction"
 after_corr_dir="${eta_dependence_dir}/After_correction"
+rootFiles_dir="${base_dir}/${subfolder_type}/rootFiles"
+coefficients_dir="${base_dir}/${subfolder_type}/CalibrationCoefficients"
 
 # Eliminar archivos .png en subcarpetas
 rm -f "$raw_dir"/*.png
@@ -30,6 +32,7 @@ rm -f "$etacorr_dir/H_hadrons"/*.png
 rm -f "$before_corr_dir"/*.png
 rm -f "$after_corr_dir"/*.png
 rm -f "$eta_dependence_dir"/*.png
+rm -f "$coefficients_dir"/*.png
 
 rm -f "$raw_dir"/*.pdf
 rm -f "$ecorr_dir"/*.pdf
@@ -44,6 +47,8 @@ rm -f "$before_corr_dir"/*.pdf
 rm -f "$after_corr_dir"/*.pdf
 rm -f "$eta_dependence_dir"/*.pdf
 
+rm -f "$rootFiles_dir"/*.root
+
 # Crear directorios si no existen
 mkdir -p "$raw_dir"
 mkdir -p "$ecorr_dir"
@@ -57,11 +62,15 @@ mkdir -p "$etacorr_dir/H_hadrons"
 mkdir -p "$eta_dependence_dir"
 mkdir -p "$before_corr_dir"
 mkdir -p "$after_corr_dir"
+# mkdir -p "$rootFiles_dir"
+mkdir -p "$coefficients_dir"
 
 # Mover archivos a los directorios correspondientes
 for file in *.png *.pdf; do
 
-    if [[ $file == *RawEtaDependence_*GeV* ]]; then
+    if [[ $file == *Coefficient* ]]; then
+        mv "$file" "$coefficients_dir/"
+    elif [[ $file == *RawEtaDependence_*GeV* ]]; then
         mv "$file" "$before_corr_dir/"
     elif [[ $file == *EtaCorrEtaDependence_*GeV* ]]; then
         mv "$file" "$after_corr_dir/"
@@ -90,17 +99,23 @@ for file in *.png *.pdf; do
 
 done
 
-# Configurar la carpeta local
-local_folder="./${local_folder_name}/plots"
+# for file in *.root; do
+#     mv "$file" "$rootFiles_dir/"
+# done
 
-# Limpiar y copiar archivos
-mkdir -p "./${local_folder_name}"
-mkdir -p "$local_folder"
-rm -rf "$local_folder"
-cp -r "${base_dir}/Offline_Response_Plots/${subfolder_type}" "$local_folder"
-mkdir -p "${local_folder}/CalibrationCoefficients"
-find . -maxdepth 1 -type f -name "*Coefficient*.png" -exec mv {} "${local_folder}/CalibrationCoefficients" \;
-mkdir -p "./${local_folder_name}/rootFiles"
-find . -maxdepth 1 -type f -name "*.root" -exec mv {} "./${local_folder_name}/rootFiles" \;
+# mv "Offline_Etrue_EcalPlusHcalMinusEtrueDivEtrue_histogram.png" "$base_dir/${subfolder_type}/"
+
+# # Configurar la carpeta local
+# local_folder="./${local_folder_name}/plots"
+
+# # Limpiar y copiar archivos
+# mkdir -p "./${local_folder_name}"
+# mkdir -p "$local_folder"
+# rm -rf "$local_folder"
+# cp -r "${base_dir}/${subfolder_type}" "$local_folder"
+# mkdir -p "${local_folder}/CalibrationCoefficients"
+# find . -maxdepth 1 -type f -name "*Coefficient*.png" -exec mv {} "${local_folder}/CalibrationCoefficients" \;
+# mkdir -p "./${local_folder_name}/rootFiles"
+# find . -maxdepth 1 -type f -name "*.root" -exec mv {} "./${local_folder_name}/rootFiles" \;
 
 echo "Operación completada."

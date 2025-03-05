@@ -37,7 +37,7 @@ int colorFittingFunc = 2;
 
 double sigC_ = 5.;
 // unsigned sampleRangeHigh = 200;
-unsigned sampleRangeHigh = 5000;
+unsigned sampleRangeHigh = 500;
 
 
 //threshold
@@ -2046,6 +2046,7 @@ vector<int> charges;
 vector<double> hfem_energies;
 vector<double> hfhad_energies;
 vector<array<float, 7>> hcalDepthFractions_Total;
+vector<double> dr, Eecal, Ehcal, pfcID;
 
 
 vector<ABC*> barrelABCEcalHcal; //Vectors of the ABC objects

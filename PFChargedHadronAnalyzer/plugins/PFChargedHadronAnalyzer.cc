@@ -329,7 +329,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
   if(isMBMC_) isSimu=false;
 
-  if ( !isSimu ) {
+  //if ( !isSimu ) {
     run  = iEvent.id().run();
     evt  = iEvent.id().event();
     lumiBlock = iEvent.id().luminosityBlock();
@@ -339,7 +339,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     oevt = (size_t)evt;
     olumiBlock = (size_t)lumiBlock;
     otime = (size_t)((iEvent.time().value())>>32);
-  } // !isSimu
+  //} // !isSimu
 
   if ( isSimu ) {
     nEv[0]++;
