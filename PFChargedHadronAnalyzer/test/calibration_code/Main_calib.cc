@@ -26,8 +26,8 @@
 using namespace std;
 
 
-bool freezeparameters = false;
-bool PenaltyFactor = true;
+bool freezeparameters = true;
+bool PenaltyFactor = false;
 bool usePFHC24 = false;
 bool usePFHC25_v1 = false;
 bool usePFHC25_withPU=true;
@@ -40,10 +40,10 @@ bool drawResoFit = false;
 bool saveCanvas = true;
 bool payload=false;
 bool useP_reco=false;//Instead of using etrue, the calibration code uses p_reco.
-bool drawRespPlots = true;
+bool drawRespPlots = false;
 int hadrons_eta_symbol = 0;//This int variable is 0 when we take all the eta values (positives and negatives); +1 when we only take hadrons with positive eta; -1 when we only take hadrons with negatives eta.
 bool PFEnergyCalibrationFunction=false; //This bool variable is true for using PFEnergyCalibration function from CMSSW and false for using the default PFHC calibration function getCalibratedEnergy
-bool WriteNTupleFile = true;
+bool WriteNTupleFile = false;
 bool Parameters24Above500GeV = false; //This bool variable is true for using the parameters for the calibration function for the energy above 500 GeV and false for using the parameters for the calibration function for the energy below 500 GeV (first one)
 bool useOnlyEHhadrons = false; //This bool variable is true for using only EH hadrons and false for using all the hadrons
 bool useOnlyHhadrons = false; //This bool variable is true for using only H hadrons and false for using all the hadrons
@@ -273,7 +273,8 @@ double Calibration::getCalibratedEnergy(double ETrue, double ecalEnergy,
 
 	 }
 	 else {//EH-hadrons + ENDCAP I region
-	   etaPow=0; 
+      //etaPow = 0.8 - 2*(fabs(eta) - 1.5)*(fabs(eta) - 1.5)*(fabs(eta) - 1.5)*(fabs(eta) - 1.5);
+	  etaPow=0; 
      //etaPow = -0.8 + 2.2*(fabs(eta)-1.5)*(fabs(eta)-1.5);//Using 2018 functions of eta AN2022_015
 	   //etaPow = 0.8 - 2*(fabs(eta) - 1.5)*(fabs(eta) - 1.5)*(fabs(eta) - 1.5)*(fabs(eta) - 1.5);  
 	   //	   etaPow = -0.1 + 0.5*(fabs(eta) - 1.5)*(fabs(eta) - 1.5)*(fabs(eta)-1.5);//*(fabs(eta)-1.5);
@@ -509,7 +510,11 @@ void drawGausFit(TH2F* inHisto, TGraphErrors& response, TGraph& resolution)
 	    }
 	    else if (useMean) {
 	      gausMean.push_back(ETrueBin.back()->GetMean());
-	      gausSigma.push_back(ETrueBin.back()->GetRMS()/(1.0 + min(0.0, ETrueBin.back()->GetMean())));
+        double stdDev = ETrueBin.back()->GetStdDev();
+        double nEntries = ETrueBin.back()->GetEntries();
+        double sem = stdDev / std::sqrt(nEntries);
+        gausSigma.push_back(sem);
+	      // gausSigma.push_back(ETrueBin.back()->GetRMS()/(1.0 + min(0.0, ETrueBin.back()->GetMean())));
         // double rms = ETrueBin.back()->GetRMS();
         // double N = ETrueBin.back()->GetEntries();
         // double error_on_mean = (N>0) ? rms / sqrt(N) : 0.0;
@@ -532,8 +537,12 @@ void drawGausFit(TH2F* inHisto, TGraphErrors& response, TGraph& resolution)
 	     ETrueBin.back()->Fit("gaus", "Q", "", -1.0, 1.0);
 
 	     gausMean.push_back(gaus->GetParameter(1));
-	     gausSigma.push_back(gaus->GetParameter(2)/
-				 (1.0 + min(0.0, gaus->GetParameter(1))));
+	    //  gausSigma.push_back(gaus->GetParameter(2)/
+			// 	 (1.0 + min(0.0, gaus->GetParameter(1))));
+      double stdDev = ETrueBin.back()->GetStdDev();
+      double nEntries = ETrueBin.back()->GetEntries();
+      double sem = stdDev / std::sqrt(nEntries);
+      gausSigma.push_back(sem);
          //cout << endl << "PARAMETRO0: " << gaus->GetParameter(0) << "\tPARAMETRO1: " << gaus->GetParameter(1) << "\tPARAMETRO2: " << gaus->GetParameter(2) << "\tPARAMETRO3: " << gaus->GetParameter(3) << "\tPARAMETRO4: " << gaus->GetParameter(4) << endl;
 	   }
 
@@ -859,12 +868,16 @@ for(unsigned bin = 1; bin < (unsigned)inHisto->GetNbinsX(); bin = bin + 1)
          etaAverage.push_back(inHisto->GetXaxis()->GetBinCenter(bin));
          etaRms.push_back(0.1);
 	 
-	 if (useMean) 
+	 if (useMean) {
 	   gausMean.push_back(etaBin.back()->GetMean());
-	 else 
+     double stdDev = etaBin.back()->GetStdDev();
+     double nEntries = etaBin.back()->GetEntries();
+     double sem = stdDev / std::sqrt(nEntries);
+     gausSigma.push_back(sem);
+  }else {
 	   gausMean.push_back( gaus->GetParameter(1) );
-         
-         gausSigma.push_back(etaBin.back()->GetRMS());
+     gausSigma.push_back(etaBin.back()->GetRMS());
+  }
 
 	 if(etaAverage.back()>1.6) {
 	   mR += gausMean.back();
@@ -1120,7 +1133,7 @@ void add_root_files_to_a_chain(TChain *chain, const char *path) {
 				TString filepath = TString::Format("%s/%s", path, filename.Data());
 				chain->Add(filepath);
         // contador++;
-        // if(contador==1) break;
+        // if(contador==5) break;
 			} else if (file->IsDirectory() && TString(filename) != "." && TString(filename) != "..") {
 				TString subpath = TString::Format("%s/%s", path, filename.Data());
 				add_root_files_to_a_chain(chain, subpath);
@@ -1148,6 +1161,8 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
    Float_t         eta_;
    Float_t         phi_;
    Int_t           charge_;
+   Float_t         rcEcal_;
+   Float_t         rcHcal_;
    Float_t         genE_;
    Float_t         genP_;
    Float_t         genEta_;
@@ -1165,6 +1180,8 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
    TBranch        *b_eta;    
    TBranch        *b_phi;
    TBranch        *b_charge;
+   TBranch        *b_rcEcal;
+   TBranch        *b_rcHcal;
    TBranch        *b_genE;
    TBranch        *b_genP;
    TBranch        *b_genEta;
@@ -1208,6 +1225,8 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
    tree->SetBranchStatus("eta", 1);
    tree->SetBranchStatus("phi", 1);
    tree->SetBranchStatus("charge", 1);
+   tree->SetBranchStatus("rcEcal", 1);
+   tree->SetBranchStatus("rcHcal", 1);
    tree->SetBranchStatus("pfcID", 1);
    tree->SetBranchStatus("Eecal", 1);
    tree->SetBranchStatus("Ehcal", 1);
@@ -1234,6 +1253,8 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
    tree->SetBranchAddress("phi", &phi_, &b_phi);
    tree->SetBranchAddress("ho", &ho_, &b_ho);
    tree->SetBranchAddress("charge", &charge_, &b_charge);
+   tree->SetBranchAddress("rcEcal", &rcEcal_, &b_rcEcal);
+   tree->SetBranchAddress("rcHcal", &rcHcal_, &b_rcHcal);
    tree->SetBranchAddress("pfcID", &pfcID_, &b_pfcID);
    tree->SetBranchAddress("Eecal", &E_ecal_, &b_E_ecal);
    tree->SetBranchAddress("Ehcal", &E_hcal_, &b_E_hcal);
@@ -1254,6 +1275,7 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
 	  for(int entry = 0; entry < tree->GetEntries(); entry++) {
        tree->GetEntry(entry);
        if(true_ < 2) continue;
+      //  if(charge_ == 0) continue;
        // if(ecal_<0.4) continue; //FIXME MM
        //if (fabs(eta_) < 2.4 && p_ == 0) continue;
        if((hadrons_eta_symbol==+1)&&(eta_<0)) continue;
@@ -1304,7 +1326,10 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
           Ehcal.push_back(E_hcal_->at(i));
           pfcID.push_back(pfcID_->at(i));
         }
-      
+      if(charge_!=0){
+        rcEcal_=0;
+        rcHcal_=0;
+      }
       double etrue, ecal, hcal, p_reco;
       bool saveData = false;
 
@@ -1318,16 +1343,16 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
             //if((ecal+hcal)/etrue<=2){
               if(useP_reco) ETrueEnergies.push_back(p_reco);
               else ETrueEnergies.push_back(etrue);
-              ecalEnergies.push_back(tmp.at(0));
-	            hcalEnergies.push_back(tmp.at(1));
+              ecalEnergies.push_back(tmp.at(0)-rcEcal_);
+	            hcalEnergies.push_back(tmp.at(1)-rcHcal_);
               saveData = true;
             //}
           }else{
             //if((ecal+hcal)/etrue<=2){
               if(useP_reco) ETrueEnergies.push_back(p_);
               else ETrueEnergies.push_back(true_);
-              ecalEnergies.push_back(ecal_);
-	            hcalEnergies.push_back(hcal_);
+              ecalEnergies.push_back(ecal_-rcEcal_);
+	            hcalEnergies.push_back(hcal_-rcHcal_);
               saveData = true;
             //}
           }
@@ -1339,15 +1364,15 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
             hcal = tmp.at(1);
             //if((ecal+hcal)/etrue<=2){
               ETrueEnergies.push_back(p_);
-              ecalEnergies.push_back(tmp.at(0));
-	            hcalEnergies.push_back(tmp.at(1));
+              ecalEnergies.push_back(tmp.at(0)-rcEcal_);
+	            hcalEnergies.push_back(tmp.at(1)-rcHcal_);
               saveData = true;
             //}
           }else{
             //if((ecal+hcal)/etrue<=2){
               ETrueEnergies.push_back(p_);
-              ecalEnergies.push_back(ecal_);
-	            hcalEnergies.push_back(hcal_);
+              ecalEnergies.push_back(ecal_-rcEcal_);
+	            hcalEnergies.push_back(hcal_-rcHcal_);
               saveData = true;
             //}
           }
@@ -1640,8 +1665,12 @@ int main()
     else{
         if(usePFHC25_v1){
           add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/NoPU_v7/NTuples_v1January25/RawNTuples_v1January25");
+        }else if (usePFHC25_withPU){
+          add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/RawNTuples_withPU");
+
         }else{
-          add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/RawNTuples_withPU");//_merged/");//_proof/");//NewNTuplizerVersion/");/2024_Merged/OfflineNTuples_2024GT0_merged
+          add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/RawNTuples_withPU_randomCone");//_merged/");//_proof/");//NewNTuplizerVersion/");/2024_Merged/OfflineNTuples_2024GT0_merged/afs/cern.ch/user/c/cmunozdi/PFHC_2025/CMSSW_14_2_1/src/PFCalibration/PFChargedHadronAnalyzer/test/ntuples_withPU_rc//eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/NoPU_v7/RawNTuples
+          // chain->Add("../step3.root");///afs/cern.ch/user/c/cmunozdi/PFHC_2025/CMSSW_14_2_1/src/PFCalibration/PFChargedHadronAnalyzer/test/ntuples_withPU_rc/step3_extension2.root");
         }
     }
   //  chain->Add("/eos/home-c/cmunozdi/OFFLINE_NTUPLES/2025/NoPU_v7/SmallSamples/*.root");//2024_Merged_3Attempt/rawFromNTuplizer/*.root");
@@ -2291,14 +2320,14 @@ int main()
               functionBarrelEcalHcalB->FixParameter(9,0.0191488);
               functionBarrelEcalHcalB->FixParameter(10,3.5);
 
-              functionBarrelEcalHcalC->FixParameter(0,1.69939);
-              functionBarrelEcalHcalC->FixParameter(1,-0.275609);
-              functionBarrelEcalHcalC->FixParameter(2,-2.20386);
-              functionBarrelEcalHcalC->FixParameter(3,764.609);
-              functionBarrelEcalHcalC->FixParameter(4,0.721603);
-              functionBarrelEcalHcalC->FixParameter(5,0.00113866);
-              functionBarrelEcalHcalC->FixParameter(6,1.46739);
-              functionBarrelEcalHcalC->FixParameter(7,-1.65241);
+              functionBarrelEcalHcalC->FixParameter(0, 2.414);
+              functionBarrelEcalHcalC->FixParameter(1, -2.99257);
+              functionBarrelEcalHcalC->FixParameter(2, -3.10022);
+              functionBarrelEcalHcalC->FixParameter(3, 2.4884);
+              functionBarrelEcalHcalC->FixParameter(4, 1.49647);
+              functionBarrelEcalHcalC->FixParameter(5, 0.0591164);
+              functionBarrelEcalHcalC->FixParameter(6, 0.401639);
+              functionBarrelEcalHcalC->FixParameter(7, -0.848485);
               functionBarrelEcalHcalC->FixParameter(8,0);
               functionBarrelEcalHcalC->FixParameter(9,-0.00461233);
               functionBarrelEcalHcalC->FixParameter(10,3.5);
@@ -2329,14 +2358,14 @@ int main()
               functionEndcapEcalHcalB->FixParameter(9,-0.00677315);
               functionEndcapEcalHcalB->FixParameter(10,3.5);
 
-              functionEndcapEcalHcalC->FixParameter(0,-2.25279);
-              functionEndcapEcalHcalC->FixParameter(1,3.13719);
-              functionEndcapEcalHcalC->FixParameter(2,2.34765);
-              functionEndcapEcalHcalC->FixParameter(3,0.34092);
-              functionEndcapEcalHcalC->FixParameter(4,-0.000549766);
-              functionEndcapEcalHcalC->FixParameter(5,-1532.22);
-              functionEndcapEcalHcalC->FixParameter(6,-1.24175);
-              functionEndcapEcalHcalC->FixParameter(7,0.140639);
+              functionEndcapEcalHcalC->FixParameter(0, -2.24814);
+              functionEndcapEcalHcalC->FixParameter(1, 3.15142);
+              functionEndcapEcalHcalC->FixParameter(2, 3.76944);
+              functionEndcapEcalHcalC->FixParameter(3, 1.06815);
+              functionEndcapEcalHcalC->FixParameter(4, 0.0726289);
+              functionEndcapEcalHcalC->FixParameter(5, 24.8456);
+              functionEndcapEcalHcalC->FixParameter(6, -0.609985);
+              functionEndcapEcalHcalC->FixParameter(7, 0.0968119);
               functionEndcapEcalHcalC->FixParameter(8,0);
               functionEndcapEcalHcalC->FixParameter(9,0.00136191);
               functionEndcapEcalHcalC->FixParameter(10,3.5);
@@ -2361,7 +2390,7 @@ int main()
       }        
    }
    else {
-      /*Fixing B functions*/
+      // /*Fixing B functions*/
       // functionBarrelEcalHcalC->FixParameter(0, 2.414);
       // functionBarrelEcalHcalC->FixParameter(1, -2.99257);
       // functionBarrelEcalHcalC->FixParameter(2, -3.10022);
@@ -2373,7 +2402,7 @@ int main()
       // functionBarrelEcalHcalC->FixParameter(8, 0.0);
       // functionBarrelEcalHcalC->FixParameter(9, 0.0);
       
-      /*Fixing B functions*/
+      // /*Fixing B functions*/
       // functionEndcapEcalHcalC->FixParameter(0, -2.24814);
       // functionEndcapEcalHcalC->FixParameter(1, 3.15142);
       // functionEndcapEcalHcalC->FixParameter(2, 3.76944);
@@ -2397,15 +2426,18 @@ int main()
       functionEndcapHcalA->FixParameter(0, aHe);
       functionEndcapHcalB->FixParameter(0, 0.0);
       functionEndcapHcalC->SetParameters(-2.33803, 7.48803, -6.43784, 2.83128, -1.9239, 0.044214, 0.176219, -0.521761, 0, 0.0111935, 2.5);
+      
+      if(!PenaltyFactor){
+          functionBarrelEcalHcalB->FixParameter(8,0.);
+          functionBarrelEcalHcalC->FixParameter(8,0.);
+          functionBarrelHcalC->FixParameter(8,0.);
+          functionEndcapEcalHcalB->FixParameter(8,0.);
+          functionEndcapEcalHcalC->FixParameter(8,0.);
+          functionEndcapHcalC->FixParameter(8,0.);
+      }
+   
    }
-   if(!PenaltyFactor){
-      functionBarrelEcalHcalB->FixParameter(8,0.);
-      functionBarrelEcalHcalC->FixParameter(8,0.);
-      functionBarrelHcalC->FixParameter(8,0.);
-      functionEndcapEcalHcalB->FixParameter(8,0.);
-      functionEndcapEcalHcalC->FixParameter(8,0.);
-      functionEndcapHcalC->FixParameter(8,0.);
-   }
+
    
    cout << "LLEGUE AQUI" << endl;
    barrelWithEcalHcalCalib->fitAsToFunction(functionBarrelEcalHcalA);
@@ -3074,7 +3106,7 @@ int main()
     float hcalDepthFractions_[7];
     double correctedEta_org, correctedE_org, ecal_org, hcal_org; 
     
-    TFile *outFileN = new TFile("/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/2025_0p2to500GeV_withCorrections_and_PowerLaw_withPU.root","recreate");//OFFLINE_NTUPLES/2025/NoPU_v7/SmallSamples/
+    TFile *outFileN = new TFile("/eos/user/c/cmunozdi/2025_0p2to500GeV_withCorrections_and_PowerLaw_withPU.root","recreate");//OFFLINE_NTUPLES/2025/NoPU_v7/SmallSamples/
     TTree *Ntree = new TTree("s","NTuple for energy btw 0p2 and 5000 GeV and PFHC energy and Power Law energy (No PU)");
     if (WriteNTupleFile){
 
@@ -3195,6 +3227,7 @@ int main()
           correctedEta = eecalcorr + ehcalcorr;
         }
         //Saving in each etrue bin
+        if(charge==0) continue;
         if(etrue<5){
           corrEtaDependence1->Fill(abseta, (correctedEta - etrue) / etrue);
           rawEtaDependence1->Fill(abseta, (ecal + hcal - etrue) / etrue);

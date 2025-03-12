@@ -29,7 +29,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 # Input source
@@ -42,7 +42,9 @@ process.source = cms.Source("PoolSource",
     # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/NoPU_142X_mcRun3_2025_realistic_v4-v2/2540000/11bfb3ce-596d-4c3d-92f7-a4d265cfb723.root'),
     # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Digi/Pi_Par-E-0p2to200_PGun/GEN-SIM-RAW/NoPU_142X_mcRun3_2025_realistic_v7-v1/2820000/fff32738-6881-45e4-be0e-041c3bd3f9d9.root'),
     # fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v2/110000/035b6915-006a-43c3-8d9b-8c3fbc6635f4.root'),
-    fileNames = cms.untracked.vstring('/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/009dafa0-5b96-4962-a2f5-10749a78d59b.root'),
+    fileNames = cms.untracked.vstring(
+        "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v7-v1/2820000/009dafa0-5b96-4962-a2f5-10749a78d59b.root"
+    ),
     #fileNames = cms.untracked.vstring('172289d1-a818-46f9-9300-095fd35ff5c5.root'),
     # fileNames = cms.untracked.vstring("/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/005240ff-6c5a-4f06-8426-7ea63c78a25c.root",
     #     "/store/mc/Run3Winter25Reco/Pi_Par-E-0p2to200_PGun/GEN-SIM-RECO/142X_mcRun3_2025_realistic_v4-v3/2820000/00a0fd27-3ba7-4ead-b4b6-f19859a3de40.root",
@@ -58,7 +60,8 @@ process.source = cms.Source("PoolSource",
 )
 
 process.options = cms.untracked.PSet(
-
+    # numberOfThreads = cms.untracked.uint32(8),  # Number of threads
+    # numberOfStreams = cms.untracked.uint32(16)   # Number of concurrent event streams
 )
 
 # Production Info

@@ -33,7 +33,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
     latex->SetNDC();
 
     // Mover la leyenda a la esquina superior derecha
-    TLegend* legend = new TLegend(0.72, 0.15+0.65, 0.90, 0.30+0.6); // Ajustada para la esquina inferior derecha
+    TLegend* legend = new TLegend(0.72-0.62, 0.15+0.62, 0.90-0.52, 0.30+0.6); // Ajustada para la esquina inferior derecha
     //TLegend* legend = new TLegend(0.72-0.62, 0.15+0.6, 0.88-0.62, 0.30+0.6); // Ajustada para la esquina superior izquierda
     legend->SetBorderSize(1);
 
@@ -55,7 +55,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
                 j+=1;
             }
             // Asignar color evitando los colores 3, 5 y 7
-            graph->SetMarkerColor(j);
+            graph->SetMarkerColorAlpha(j,.5);
             graph->SetLineColor(j);
             // if(i%2!=0){//Valores de i impares
             //     graph->SetMarkerColorAlpha(j, 0.5);

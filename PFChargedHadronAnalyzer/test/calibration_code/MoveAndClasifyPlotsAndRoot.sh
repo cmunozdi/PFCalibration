@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Cambia el directorio base según tu necesidad
-base_dir="/eos/user/c/cmunozdi/www/Offline_Response_Plots/PFHC25"
+base_dir="/eos/user/c/cmunozdi/www/o fil de Offline_Response_Plots/PFHC25"
 
 # Elegir entre Etrue o Preco
-subfolder_type="Winter25v2NoPU_vs_Winter25WithPU" #"ETrue25vsETrue24" # Cambiar a "Preco" si es necesario, o "Etrue"
+subfolder_type="Winter25_WithPU" #"ETrue25vsETrue24" # Cambiar a "Preco" si es necesario, o "Etrue"
 
 # Elegir el nombre de la carpeta local
 local_folder_name="ResponsePlots_ETrue25_withPU" #"ResponsePlots_ETrue25_vs_ETrue24" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
@@ -20,34 +20,34 @@ rootFiles_dir="${base_dir}/${subfolder_type}/rootFiles"
 coefficients_dir="${base_dir}/${subfolder_type}/CalibrationCoefficients"
 
 # Eliminar archivos .png en subcarpetas
-rm -f "$raw_dir"/*.png
-rm -f "$ecorr_dir"/*.png
-rm -f "$etacorr_dir"/*.png
-rm -f "$raw_dir/EH_hadrons"/*.png
-rm -f "$ecorr_dir/EH_hadrons"/*.png
-rm -f "$etacorr_dir/EH_hadrons"/*.png
-rm -f "$raw_dir/H_hadrons"/*.png
-rm -f "$ecorr_dir/H_hadrons"/*.png
-rm -f "$etacorr_dir/H_hadrons"/*.png
-rm -f "$before_corr_dir"/*.png
-rm -f "$after_corr_dir"/*.png
-rm -f "$eta_dependence_dir"/*.png
-rm -f "$coefficients_dir"/*.png
+# rm -f "$raw_dir"/*.png
+# rm -f "$ecorr_dir"/*.png
+# rm -f "$etacorr_dir"/*.png
+# rm -f "$raw_dir/EH_hadrons"/*.png
+# rm -f "$ecorr_dir/EH_hadrons"/*.png
+# rm -f "$etacorr_dir/EH_hadrons"/*.png
+# rm -f "$raw_dir/H_hadrons"/*.png
+# rm -f "$ecorr_dir/H_hadrons"/*.png
+# rm -f "$etacorr_dir/H_hadrons"/*.png
+# rm -f "$before_corr_dir"/*.png
+# rm -f "$after_corr_dir"/*.png
+# rm -f "$eta_dependence_dir"/*.png
+# rm -f "$coefficients_dir"/*.png
 
-rm -f "$raw_dir"/*.pdf
-rm -f "$ecorr_dir"/*.pdf
-rm -f "$etacorr_dir"/*.pdf
-rm -f "$raw_dir/EH_hadrons"/*.pdf
-rm -f "$ecorr_dir/EH_hadrons"/*.pdf
-rm -f "$etacorr_dir/EH_hadrons"/*.pdf
-rm -f "$raw_dir/H_hadrons"/*.pdf
-rm -f "$ecorr_dir/H_hadrons"/*.pdf
-rm -f "$etacorr_dir/H_hadrons"/*.pdf
-rm -f "$before_corr_dir"/*.pdf
-rm -f "$after_corr_dir"/*.pdf
-rm -f "$eta_dependence_dir"/*.pdf
+# rm -f "$raw_dir"/*.pdf
+# rm -f "$ecorr_dir"/*.pdf
+# rm -f "$etacorr_dir"/*.pdf
+# rm -f "$raw_dir/EH_hadrons"/*.pdf
+# rm -f "$ecorr_dir/EH_hadrons"/*.pdf
+# rm -f "$etacorr_dir/EH_hadrons"/*.pdf
+# rm -f "$raw_dir/H_hadrons"/*.pdf
+# rm -f "$ecorr_dir/H_hadrons"/*.pdf
+# rm -f "$etacorr_dir/H_hadrons"/*.pdf
+# rm -f "$before_corr_dir"/*.pdf
+# rm -f "$after_corr_dir"/*.pdf
+# rm -f "$eta_dependence_dir"/*.pdf
 
-rm -f "$rootFiles_dir"/*.root
+# rm -f "$rootFiles_dir"/*.root
 
 # Crear directorios si no existen
 mkdir -p "$raw_dir"
@@ -99,23 +99,23 @@ for file in *.png *.pdf; do
 
 done
 
-# for file in *.root; do
-#     mv "$file" "$rootFiles_dir/"
-# done
+for file in *.root; do
+    mv "$file" "$rootFiles_dir/"
+done
 
-# mv "Offline_Etrue_EcalPlusHcalMinusEtrueDivEtrue_histogram.png" "$base_dir/${subfolder_type}/"
+mv "Offline_Etrue_EcalPlusHcalMinusEtrueDivEtrue_histogram.png" "$base_dir/${subfolder_type}/"
 
-# # Configurar la carpeta local
-# local_folder="./${local_folder_name}/plots"
+# Configurar la carpeta local
+local_folder="./${local_folder_name}/plots"
 
-# # Limpiar y copiar archivos
-# mkdir -p "./${local_folder_name}"
-# mkdir -p "$local_folder"
-# rm -rf "$local_folder"
-# cp -r "${base_dir}/${subfolder_type}" "$local_folder"
-# mkdir -p "${local_folder}/CalibrationCoefficients"
-# find . -maxdepth 1 -type f -name "*Coefficient*.png" -exec mv {} "${local_folder}/CalibrationCoefficients" \;
-# mkdir -p "./${local_folder_name}/rootFiles"
-# find . -maxdepth 1 -type f -name "*.root" -exec mv {} "./${local_folder_name}/rootFiles" \;
+# Limpiar y copiar archivos
+mkdir -p "./${local_folder_name}"
+mkdir -p "$local_folder"
+rm -rf "$local_folder"
+cp -r "${base_dir}/${subfolder_type}" "$local_folder"
+mkdir -p "${local_folder}/CalibrationCoefficients"
+find . -maxdepth 1 -type f -name "*Coefficient*.png" -exec mv {} "${local_folder}/CalibrationCoefficients" \;
+mkdir -p "./${local_folder_name}/rootFiles"
+find . -maxdepth 1 -type f -name "*.root" -exec mv {} "./${local_folder_name}/rootFiles" \;
 
 echo "Operación completada."
