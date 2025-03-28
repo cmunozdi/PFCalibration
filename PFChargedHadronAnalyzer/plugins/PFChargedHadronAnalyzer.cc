@@ -94,8 +94,8 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
 
   s->Branch("true",&true_,"true/F");  
   s->Branch("p",&p_,"p/F");  
-  s->Branch("ecal",&ecal_,"ecal/F");
-  s->Branch("hcal",&hcal_,"hcal/F"); 
+  s->Branch("ecal",&ecal_,"ecal/F");//ecal energy due to gamma, neutral hadrons and charged hadrons
+  s->Branch("hcal",&hcal_,"hcal/F"); //hcal energy due to hadrons
   s->Branch("hfem",&hfem_,"hfem/F");
   s->Branch("hfhad",&hfhad_,"hfhad/F"); 
   s->Branch("ho",&ho_,"ho/F");  
@@ -121,8 +121,8 @@ PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfi
   
 
   s->Branch("dr",&dr_);  //spandey Apr_27 dR
-  s->Branch("Eecal",&Eecal_);  //spandey Apr_27 dR
-  s->Branch("Ehcal",&Ehcal_);  //spandey Apr_27 dR
+  s->Branch("Eecal",&Eecal_);  //Total energy in a cone in ECAL due to every pfcand, only for non-tracked hadrons (neutral hadrons)
+  s->Branch("Ehcal",&Ehcal_);  //Total energy in a cone in HCAL due to every pfcand, only for non-tracked hadrons (neutral hadrons)
   s->Branch("pfcID",&pfcID_);  //spandey Apr_27 dR
 
   s->Branch("pfcs",&pfcsID);
@@ -372,7 +372,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
   if(isMBMC_) isSimu=false;
 
-  if ( !isSimu ) {
+  // if ( !isSimu ) {
     run  = iEvent.id().run();
     evt  = iEvent.id().event();
     lumiBlock = iEvent.id().luminosityBlock();
@@ -382,7 +382,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     oevt = (size_t)evt;
     olumiBlock = (size_t)lumiBlock;
     otime = (size_t)((iEvent.time().value())>>32);
-  } // !isSimu
+  // } // !isSimu
 
   if ( isSimu ) {
     nEv[0]++;
@@ -449,13 +449,13 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   // const reco::PFCandidate* closestBestTrack = nullptr;
   // maxPFC_Pt = -1.;
   // //If there is a charged track, save the track info
-  // if(bestTrack){
-  //   isCharged = true;
-  //   if(bestTrack->particleId() == 1){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
-  //     trkP = bestTrack->trackRef()->p();
-  //     trkEta = bestTrack->trackRef()->eta();
-  //     trkPhi = bestTrack->trackRef()->phi();
-  //   }
+  if(bestTrack){
+    isCharged = true;
+    if(bestTrack->particleId() == 1){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
+      trkP = bestTrack->trackRef()->p();
+      trkEta = bestTrack->trackRef()->eta();
+      trkPhi = bestTrack->trackRef()->phi();
+    }
   //   //Looking for the nearest/highest energy PFCluster to the one that matched the gen particle
   //   for( CI ci = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
   //     double deta = bestTrack->eta() - ci->eta();
@@ -469,7 +469,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   //   }
 
 
-  // }
+  }
   // if(closestBestTrack){
   //   nearClustEcal_ = closestBestTrack->rawEcalEnergy();
   //   nearClustEta_ = closestBestTrack->eta();
@@ -526,8 +526,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       double dR = std::sqrt(deta*deta+dphi*dphi);
       double dROpposite = std::sqrt(deta*deta+dphiOpposite*dphiOpposite);
 
-      //cout << "dR=" << dR << endl << endl;
-      if ( dR < 1.2 ) {
+      if ( dR < 1.2 ) {//Saving all the energy collected by Ecal and Hcal in a cone of 1.2 around the gen particle, no matter the particleId
 
         //cout << "Ha entrado en dR<1.2" << endl << endl;
         dr_.push_back(dR);   //spandey Apr_27 dR
@@ -539,14 +538,6 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
         corrhcal_.push_back(pfc.hcalEnergy());  
         //
       }
-      // if(dROpposite<0.4){
-      //   rcEcal_ += pfc.rawEcalEnergy();
-      //   rcHcal_ += pfc.rawHcalEnergy();
-      // }
-      //cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
-      //   if (pfc.particleId() == 5 && pfc.rawEcalEnergy() != 0)
-      //     cout<<"pID:" << pfcID_.back() << " ,|eta|:" << fabs(eta_) << " ,dR:" << dr_.back() << " ,Eecal:" << Eecal_.back() << " ,Ehcal:" << Ehcal_.back() <<endl;
-      // }
       if ( pfc.particleId() == 4 ){
         if( (dR < 0.2 )){
           ecal_ += pfc.rawEcalEnergy();
@@ -655,6 +646,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_;
     std::cout << "\nsumdepth= " << sumdepth << std::endl;
+    std::cout << "\nrcEcal= " << rcEcal_ << "\trcHcal= " << rcHcal_ << std::endl;
     s->Fill();
     return;
   }//not isCharge condition
@@ -1127,7 +1119,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 //       }
 
 
-    std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_ << std::endl << std::endl;
+    std::cout << "\ntrueE= " << true_ << "\tp= " << p_ << "\tecal= " << ecal_ << "\thcal= " << hcal_ << "\teta= " << eta_ << "\tphi= " << phi_ << "\tcharge= " << charge_ << "\tpfcID= " << pfc.particleId() << std::endl << std::endl;
 
 
     reco::PFTrajectoryPoint::LayerType ecalEntrance = reco::PFTrajectoryPoint::ECALEntrance;
