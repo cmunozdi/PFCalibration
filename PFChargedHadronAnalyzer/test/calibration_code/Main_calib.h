@@ -37,7 +37,7 @@ int colorFittingFunc = 2;
 
 double sigC_ = 5.;
 // unsigned sampleRangeHigh = 200;
-unsigned sampleRangeHigh = 500;
+unsigned sampleRangeHigh = 5000;
 
 
 //threshold
@@ -82,7 +82,7 @@ double hBs=5.0; //10 40 B 50 E
 double RBE = 4; //rebinning for alpha-beta curves
 
 //Eta factor : ecal*factor + hcal
-double factorB = 1.3;//Optimal //A factor put in by hand to make the eta dependence agree
+double factorB = 1.3;//Optimal //A factor put in by hand to make the eta dependence agree 1.3
 double factorE = 1.3; //better. Should fit for the value later. 
 //double factorE = 1.7; //better. Should fit for the value later.  //shubham
 
@@ -1326,7 +1326,7 @@ class Calibration
 			     double hcalEnergy, int DifferentTerms); 
   //Returns calibrated energy with eta dependence.
   double getCalibratedEnergy(double ETrue, double ecalEnergy, 
-			     double hcalEnergy, double eta, int DifferentTerms);
+			     double hcalEnergy, double eta, int DifferentTerms, bool displayCoeff=false);
   //and with advanced pol dependency
   double getCalibratedEnergyWithGamma(double ETrue, double ecalEnergy, 
 				      double hcalEnergy, double eta);
@@ -1602,31 +1602,31 @@ bool Calibration::fitAsToFunction(TF1 *functionA)
 }
 bool Calibration::fitAsToFunction()
 {
-   graphA_->Fit(functionA_->GetName(), "Q", "", 2., ETrueMax_);
+   graphA_->Fit(functionA_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 
 bool Calibration::fitBsToFunction(TF1 *functionB)
 {
    functionB_ = functionB;
-   graphB_->Fit(functionB_->GetName(), "Q", "", 2., ETrueMax_);
+   graphB_->Fit(functionB_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 bool Calibration::fitBsToFunction()
 {
-   graphB_->Fit(functionB_->GetName(), "Q", "", 2., ETrueMax_);
+   graphB_->Fit(functionB_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 bool Calibration::fitCsToFunction(TF1 *functionC)
 {
    functionC_ = functionC;
-   graphC_->Fit(functionC_->GetName(), "Q", "", 2., ETrueMax_);
+   graphC_->Fit(functionC_->GetName(), "Q", "", 1., ETrueMax_);
 
    return true;
 }
 bool Calibration::fitCsToFunction()
 {
-   graphC_->Fit(functionC_->GetName(), "Q", "", 2., ETrueMax_);
+   graphC_->Fit(functionC_->GetName(), "Q", "", 1., ETrueMax_);
    return true;
 }
 
@@ -1657,24 +1657,24 @@ bool Calibration::setBetasToFunction(TF1 *functionBeta)
 bool Calibration::fitBetasToFunction(TF1 *functionBeta)
 {
    functionBeta_ = functionBeta;
-   graphBeta_->Fit(functionBeta_->GetName(), "Q", "", 2.0, ETrueMax_);
+   graphBeta_->Fit(functionBeta_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 bool Calibration::fitBetasToFunction()
 {
-   graphBeta_->Fit(functionBeta_->GetName(), "Q", "", 2.0, ETrueMax_);
+   graphBeta_->Fit(functionBeta_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 
 bool Calibration::fitGammasToFunction(TF1 *functionGamma)
 {
    functionGamma_ = functionGamma;
-   graphGamma_->Fit(functionGamma_->GetName(), "Q", "", 2.0, ETrueMax_ );
+   graphGamma_->Fit(functionGamma_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 bool Calibration::fitGammasToFunction()
 {
-   graphGamma_->Fit(functionGamma_->GetName(), "Q", "", 2.0, ETrueMax_);
+   graphGamma_->Fit(functionGamma_->GetName(), "Q", "", 2., ETrueMax_);
    return true;
 }
 
@@ -1836,7 +1836,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphAlpha_->SetMarkerSize(1);
       graphAlpha_->SetMarkerColor(2);
       graphAlpha_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.4,0.4);
+      histo->GetYaxis()->SetRangeUser(-1,0.3);
 
       graphAlpha_->Draw("P");
        graphAlpha_->GetFunction(functionAlpha_->GetName())->SetLineColor(colorFittingFunc);
@@ -1870,7 +1870,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphBeta_->SetMarkerSize(1);
       graphBeta_->SetMarkerColor(2);
       graphBeta_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-0.4, 0.4);
+      histo->GetYaxis()->SetRangeUser(-0.5, 0.5);
       
       graphBeta_->Draw("P");
        graphBeta_->GetFunction(functionBeta_->GetName())->SetLineColor(colorFittingFunc);
@@ -2031,6 +2031,8 @@ TTree* sTree;
 vector<double> ETrueEnergies;  //The values that are taken from the root file
 vector<double> ecalEnergies;
 vector<double> hcalEnergies;
+vector<double> rcEcalEnergies;
+vector<double> rcHcalEnergies;
 vector<double> etas;
 vector<double> phis;
 vector<double> genE;
@@ -2046,6 +2048,7 @@ vector<int> charges;
 vector<double> hfem_energies;
 vector<double> hfhad_energies;
 vector<array<float, 7>> hcalDepthFractions_Total;
+vector<array<float, 7>> hcalDepthFractions_Total_rc;
 vector<double> dr, Eecal, Ehcal, pfcID;
 
 
@@ -2161,47 +2164,125 @@ TH2F* corrEta_range2 = new TH2F("corrEta_range2", "", sampleRangeHigh, 0, sample
 TH2F* corrEta_range3 = new TH2F("corrEta_range3", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range4 = new TH2F("corrEta_range4", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrEta_range5 = new TH2F("corrEta_range5", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
-TH2F* corrEtaDependence = new TH2F("ECorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence1 = new TH2F("EtaCorrEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence2 = new TH2F("EtaCorrEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence3 = new TH2F("EtaCorrEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence4 = new TH2F("EtaCorrEtaDependence_20to40_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence5 = new TH2F("EtaCorrEtaDependence_40to60_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence6 = new TH2F("EtaCorrEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence7 = new TH2F("EtaCorrEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence8 = new TH2F("EtaCorrEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence9 = new TH2F("EtaCorrEtaDependence_500to1000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence10 = new TH2F("EtaCorrEtaDependence_1000to2000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependence11 = new TH2F("EtaCorrEtaDependence_2000to5000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence1 = new TH2F("RawEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence2 = new TH2F("RawEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence3 = new TH2F("RawEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence4 = new TH2F("RawEtaDependence_20to40_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence5 = new TH2F("RawEtaDependence_40to60_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence6 = new TH2F("RawEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence7 = new TH2F("RawEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence8 = new TH2F("RawEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence9 = new TH2F("RawEtaDependence_500to1000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence10 = new TH2F("RawEtaDependence_1000to2000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* rawEtaDependence11 = new TH2F("RawEtaDependence_2000to5000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependence = new TH2F("ECorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+//CHANGE THIS FOR corrEtaDependence and rawEtaDependence
+TH2F* corrEtaDependence1 = new TH2F("EtaCorrEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence2 = new TH2F("EtaCorrEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence3 = new TH2F("EtaCorrEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence4 = new TH2F("EtaCorrEtaDependence_20to40_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence5 = new TH2F("EtaCorrEtaDependence_40to60_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence6 = new TH2F("EtaCorrEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence7 = new TH2F("EtaCorrEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence8 = new TH2F("EtaCorrEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence9 = new TH2F("EtaCorrEtaDependence_500to1000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence10 = new TH2F("EtaCorrEtaDependence_1000to2000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependence11 = new TH2F("EtaCorrEtaDependence_2000to5000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence1 = new TH2F("RawEtaDependence_2to5_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence2 = new TH2F("RawEtaDependence_5to10_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence3 = new TH2F("RawEtaDependence_10to20_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence4 = new TH2F("RawEtaDependence_20to40_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence5 = new TH2F("RawEtaDependence_40to60_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence6 = new TH2F("RawEtaDependence_60to100_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence7 = new TH2F("RawEtaDependence_100to200_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence8 = new TH2F("RawEtaDependence_200to500_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence9 = new TH2F("RawEtaDependence_500to1000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence10 = new TH2F("RawEtaDependence_1000to2000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* rawEtaDependence11 = new TH2F("RawEtaDependence_2000to5000_GeV", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence1 = new TH2F("NeutralHadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence2 = new TH2F("NeutralHadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence3 = new TH2F("NeutralHadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence4 = new TH2F("NeutralHadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence5 = new TH2F("NeutralHadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence6 = new TH2F("NeutralHadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence7 = new TH2F("NeutralHadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence8 = new TH2F("NeutralHadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence9 = new TH2F("NeutralHadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence10 = new TH2F("NeutralHadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* neutralHadronsEtaDependence11 = new TH2F("NeutralHadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence1 = new TH2F("ChargedHadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence2 = new TH2F("ChargedHadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence3 = new TH2F("ChargedHadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence4 = new TH2F("ChargedHadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence5 = new TH2F("ChargedHadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence6 = new TH2F("ChargedHadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence7 = new TH2F("ChargedHadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence8 = new TH2F("ChargedHadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence9 = new TH2F("ChargedHadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence10 = new TH2F("ChargedHadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* chargedHadronsEtaDependence11 = new TH2F("ChargedHadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence1 = new TH2F("BothHadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence2 = new TH2F("BothHadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence3 = new TH2F("BothHadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence4 = new TH2F("BothHadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence5 = new TH2F("BothHadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence6 = new TH2F("BothHadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence7 = new TH2F("BothHadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence8 = new TH2F("BothHadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence9 = new TH2F("BothHadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence10 = new TH2F("BothHadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* bothHadronsEtaDependence11 = new TH2F("BothHadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence1 = new TH2F("Raw_EHhadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence2 = new TH2F("Raw_EHhadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence3 = new TH2F("Raw_EHhadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence4 = new TH2F("Raw_EHhadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence5 = new TH2F("Raw_EHhadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence6 = new TH2F("Raw_EHhadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence7 = new TH2F("Raw_EHhadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence8 = new TH2F("Raw_EHhadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence9 = new TH2F("Raw_EHhadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence10 = new TH2F("Raw_EHhadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_EHhadronsEtaDependence11 = new TH2F("Raw_EHhadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence1 = new TH2F("Raw_HhadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence2 = new TH2F("Raw_HhadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence3 = new TH2F("Raw_HhadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence4 = new TH2F("Raw_HhadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence5 = new TH2F("Raw_HhadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence6 = new TH2F("Raw_HhadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence7 = new TH2F("Raw_HhadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence8 = new TH2F("Raw_HhadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence9 = new TH2F("Raw_HhadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence10 = new TH2F("Raw_HhadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Raw_HhadronsEtaDependence11 = new TH2F("Raw_HhadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence1 = new TH2F("Corr_EHhadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence2 = new TH2F("Corr_EHhadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence3 = new TH2F("Corr_EHhadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence4 = new TH2F("Corr_EHhadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence5 = new TH2F("Corr_EHhadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence6 = new TH2F("Corr_EHhadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence7 = new TH2F("Corr_EHhadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence8 = new TH2F("Corr_EHhadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence9 = new TH2F("Corr_EHhadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence10 = new TH2F("Corr_EHhadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_EHhadronsEtaDependence11 = new TH2F("Corr_EHhadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence1 = new TH2F("Corr_HhadronsEtaDependence_2to5_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence2 = new TH2F("Corr_HhadronsEtaDependence_5to10_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence3 = new TH2F("Corr_HhadronsEtaDependence_10to20_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence4 = new TH2F("Corr_HhadronsEtaDependence_20to40_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence5 = new TH2F("Corr_HhadronsEtaDependence_40to60_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence6 = new TH2F("Corr_HhadronsEtaDependence_60to100_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence7 = new TH2F("Corr_HhadronsEtaDependence_100to200_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence8 = new TH2F("Corr_HhadronsEtaDependence_200to500_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence9 = new TH2F("Corr_HhadronsEtaDependence_500to1000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence10 = new TH2F("Corr_HhadronsEtaDependence_1000to2000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* Corr_HhadronsEtaDependence11 = new TH2F("Corr_HhadronsEtaDependence_2000to5000_GeV","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 
-TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependenceEH_ErawHcal = new TH2F("ECorrEtaDependenceEH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependenceEH_ErawEcalHcal = new TH2F("ECorrEtaDependenceEH_ErawEcalHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependenceEH = new TH2F("ECorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependenceEH_ErawEcal = new TH2F("ECorrEtaDependenceEH_ErawEcal","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependenceEH_ErawHcal = new TH2F("ECorrEtaDependenceEH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependenceEH_ErawEcalHcal = new TH2F("ECorrEtaDependenceEH_ErawEcalHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 
 
-TH2F* corrEtaDependenceH = new TH2F("ECorrEtaDependenceH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* corrEtaDependenceH_ErawHcal = new TH2F("ECorrEtaDependenceH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* corrEtaDependenceH = new TH2F("ECorrEtaDependenceH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* corrEtaDependenceH_ErawHcal = new TH2F("ECorrEtaDependenceH_ErawHcal", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 
 
-TH2F* EtaCorrEtaDependence = new TH2F("EtaCorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* EtaCorrEtaDependenceEH = new TH2F("EtaCorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* EtaCorrEtaDependenceEH_Alpha = new TH2F("EtaCorrEtaDependenceEH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* EtaCorrEtaDependenceEH_Beta = new TH2F("EtaCorrEtaDependenceEH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* EtaCorrEtaDependenceH = new TH2F("EtaCorrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* EtaCorrEtaDependenceH_Alpha = new TH2F("EtaCorrEtaDependenceH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F* EtaCorrEtaDependenceH_Beta = new TH2F("EtaCorrEtaDependenceH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F* EtaCorrEtaDependence = new TH2F("EtaCorrEtaDependence", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* EtaCorrEtaDependenceEH = new TH2F("EtaCorrEtaDependenceEH", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* EtaCorrEtaDependenceEH_Alpha = new TH2F("EtaCorrEtaDependenceEH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* EtaCorrEtaDependenceEH_Beta = new TH2F("EtaCorrEtaDependenceEH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* EtaCorrEtaDependenceH = new TH2F("EtaCorrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* EtaCorrEtaDependenceH_Alpha = new TH2F("EtaCorrEtaDependenceH_Alpha", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F* EtaCorrEtaDependenceH_Beta = new TH2F("EtaCorrEtaDependenceH_Beta", "Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 
 TH2F* rawBarrel = new TH2F("rawBarrel","", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
 TH2F* corrBarrel = new TH2F("ECorrBarrel", "", sampleRangeHigh, 0, sampleRangeHigh, 150, -1.5, 1.5);
@@ -2273,16 +2354,16 @@ TH2F* corrEtaEndcapHcal = new TH2F("EtaCorrEndcapH", "", sampleRangeHigh, 0, sam
 TH2F* corrEtaEndcapHcal_Alpha = new TH2F("EtaCorrEndcapH_Alpha", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
 TH2F* corrEtaEndcapHcal_Beta = new TH2F("EtaCorrEndcapH_Beta", "", sampleRangeHigh, 0, sampleRangeHigh, 150,-1.5, 1.5);
 
-TH2F * rawEtaDependence = new TH2F("rawEtaDependence","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F * rawEtaDependence = new TH2F("rawEtaDependence","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 
 
-TH2F * rawEtaDependenceEH = new TH2F("rawEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-//TH2F * corrEtaDependenceEH = new TH2F("corrEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
+TH2F * rawEtaDependenceEH = new TH2F("rawEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+//TH2F * corrEtaDependenceEH = new TH2F("corrEtaDependenceEH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 TH2F * hcorrEtaDependenceEH = new TH2F("hcorrEtaDependenceEH","Response vs. Eta", 75, 0., 3.0, 150, -1.0,1.0 );
 
-TH2F * rawEtaDependenceH = new TH2F("rawEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-//TH2F * corrEtaDependenceH = new TH2F("corrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0,2.0 );
-TH2F * hcorrEtaDependenceH = new TH2F("hcorrEtaDependenceH","Response vs. Eta", 75, 0., 3.0, 150, -1.0,1.0 );
+TH2F * rawEtaDependenceH = new TH2F("rawEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+//TH2F * corrEtaDependenceH = new TH2F("corrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
+TH2F * hcorrEtaDependenceH = new TH2F("hcorrEtaDependenceH","Response vs. Eta", 75, 0.0, 3.0, 150, -2.0, 2.0 );
 
 TH1F * trueTempHisto = new TH1F("trueTempHisto", "true", sampleRangeHigh, 0, sampleRangeHigh);
 TH1F * ecalTempHisto = new TH1F("ecalTempHisto", "ecal", sampleRangeHigh, 0, sampleRangeHigh);

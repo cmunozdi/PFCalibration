@@ -33,8 +33,9 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
     latex->SetNDC();
 
     // Mover la leyenda a la esquina superior derecha
-    TLegend* legend = new TLegend(0.72-0.62, 0.15+0.62, 0.90-0.52, 0.30+0.6); // Ajustada para la esquina inferior derecha
-    //TLegend* legend = new TLegend(0.72-0.62, 0.15+0.6, 0.88-0.62, 0.30+0.6); // Ajustada para la esquina superior izquierda
+    // TLegend* legend = new TLegend(0.72-0.62, 0.9-0.052, 0.90-0.52, 0.30+0.6); // Ajustada para la esquina superior derecha
+    // TLegend* legend = new TLegend(0.72-0.62, 0.15+0.6, 0.88-0.62, 0.30+0.6); // Ajustada para la esquina superior izquierda
+    TLegend* legend = new TLegend(0.72/*-0.62*/, 0.15+0.6, 0.98/*-0.52*/, 0.30+0.6);
     legend->SetBorderSize(1);
 
     int j = 1;
@@ -46,6 +47,10 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
         graph->SetMarkerSize(1);
         // if (i % 2 == 0) {
         graph->SetMarkerStyle(20 + i); // Marcador sólido
+        if(i==4){
+            graph->SetMarkerStyle(29);
+            graph->SetMarkerSize(2);
+        }
         // } else {
         //     graph->SetMarkerStyle(24 + i); // Marcador abierto
         // }
@@ -57,6 +62,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
             // Asignar color evitando los colores 3, 5 y 7
             graph->SetMarkerColorAlpha(j,.5);
             graph->SetLineColor(j);
+            // if(i>0) graph->SetLineWidth(0);
             // if(i%2!=0){//Valores de i impares
             //     graph->SetMarkerColorAlpha(j, 0.5);
             //     graph->SetLineColorAlpha(j, 0.5);
@@ -72,7 +78,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
                 }
             }
 
-        }while(/*(j==3)||*/(j==5)||(j==7));
+        }while(/*(j==3)||*/(j==5));
         // if(i==0){
         //     graph->SetMarkerColor(kRed);
         //     graph->SetLineColor(kRed);
@@ -107,6 +113,7 @@ void plotting(const std::vector<std::string>& fileNames, const std::vector<std::
     mg->Draw("AP");
 
     latex->DrawLatex(0.05, 0.02, "#bf{CMS} #it{Preliminary}");
+    legend->SetTextSize(0.03);  
     legend->Draw();
 
     //system("mkdir -p Comparison24vs25");

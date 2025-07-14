@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Directorios base
-DIR_2025="ResponsePlots_ETrue25_v2_Bfix"
-DIR_2024="ResponsePlots_ETrue25_withPU"
+DIR_2025="../PFHC25noPUv2_Bfix_04_04_2025"
+DIR_2024="../PFHC24noPUv1_ext_04_04_2025"
 # DIR_2023="ResponsePlots_ETrue24"
-# DIR_2022="ResponsePlots_ETrue25"
-OUT_DIR="Comparisons_25NoPU_withPU"
+# DIR_2022="ResponsePlots_ETrue25_noPUv2Bfix"
+# DIR_2021="ResponsePlots_ETrue25_noPUv1"
+OUT_DIR="Comparisons_Final25_vs_Final24"
 
 # Crear directorio de salida si no existe
 mkdir -p $OUT_DIR
@@ -19,18 +20,23 @@ run_better_plotter() {
     local title="$5"
     local xlabel="$6"
     local ylabel="$7"
-    local year1="2025 NoPU"
-    local year2="2025 withPU"
+    local year1="PFHC25noPUv2Bfix"
+    local year2="PFHC24noPUv2"
     local year3="2024"
-    local year4="25 New (B fix)"
+    local year4="NoPU25v2Bfix"
+    local year5="NoPU25v1"
     local output="$8"
     local ylim_min="$9"
     local ylim_max="${10}"
     local mode="${11}"
     local root_2023="${12}"
     local root_2022="${13}"
+    local root_2021="${14}"
 
-    ./betterPlotter "$root_2025" "$folder" "$year1" "$root_2024" "$folder" "$year2" "$xlog" "$title" "$xlabel" "$ylabel" "$OUT_DIR/$output" "$ylim_min" "$ylim_max" "$mode" #"$root_2023" "$folder" "$year3" "$root_2022" "$folder" "$year4" 
+    # echo "./betterPlotter \"$root_2025\" \"$folder\" \"$year1\" \"$root_2024\" \"$folder\" \"$year2\" \"$root_2023\" \"$folder\" \"$year3\" \"$xlog\" \"$title\" \"$xlabel\" \"$ylabel\" \"$OUT_DIR/$output\" \"$ylim_min\" \"$ylim_max\" \"$mode\""
+    ./betterPlotter "$root_2025" "$folder" "$year1" "$root_2024" "$folder" "$year2" "$xlog" "$title" "$xlabel" "$ylabel" "$OUT_DIR/$output" "$ylim_min" "$ylim_max" "$mode"
+    # ./betterPlotter "$root_2025" "$folder" "$year1" "$root_2024" "$folder" "$year2" "$root_2023" "$folder" "$year3" "$xlog" "$title" "$xlabel" "$ylabel" "$OUT_DIR/$output" "$ylim_min" "$ylim_max" "$mode" # "$root_2022" "$folder" "$year4" 
+    #  "$root_2023" "$folder" "$year3" "$root_2022" "$folder" "$year4" "$root_2021" "$folder" "$year5"
 }
 
 # Procesar archivos png de 2025 para generar comparaciones
@@ -43,6 +49,7 @@ find $DIR_2025/plots -type f -name "*.png" | while read -r png_2025; do
     root_2024="$DIR_2024/rootFiles/$root_name"
     # root_2023="$DIR_2023/rootFiles/$root_name"
     # root_2022="$DIR_2022/rootFiles/$root_name"
+    # root_2021="$DIR_2021/rootFiles/$root_name"
 
     # Ignorar "_xlog.png" ya que comparten root file con el sin "_xlog"
     if [[ "$png_name" == *_xlog.png ]]; then
@@ -67,7 +74,13 @@ find $DIR_2025/plots -type f -name "*.png" | while read -r png_2025; do
     # Definir título, ejes y archivo de salida
     title="${png_name%.png}"
     xlabel="E_{true} [GeV]"
-    ylabel="(E_{cor}-E_{true})/E_{true}"
+    if [[ "$title" == *_Eraw* || "$title" == *_Alpha* || "$title" == *_Beta* ]]; then
+        ylabel="(E_{partial corr}-E_{true})/E_{true}"
+    elif [[ "$title" == *raw* || "$title" == *Raw* || "$title" == ChargedHadrons* || "$title" == NeutralHadrons* ]]; then
+        ylabel="(E_{raw}-E_{true})/E_{true}"    
+    else
+        ylabel="(E_{corr}-E_{true})/E_{true}"
+    fi
     if [[ "$mode" == "etadependence" ]]; then
         xlabel="|#eta|"
     fi
@@ -75,8 +88,8 @@ find $DIR_2025/plots -type f -name "*.png" | while read -r png_2025; do
 
     # Ejecutar betterPlotter
     if [[ -f "$root_2025" && -f "$root_2024" ]]; then #&& -f "$root_2023" && -f "$root_2022"
-        run_better_plotter "$root_2025" "$root_2024" "$folder" "$xlog" "$title" "$xlabel" "$ylabel" "$output" "$ylim_min" "$ylim_max" "$mode" #"$root_2023" "$root_2022"
-    else
-        echo "Archivo root faltante para $png_name: $root_2025 o $root_2024 o $root_2023" o "$root_2022"
+        run_better_plotter "$root_2025" "$root_2024" "$folder" "$xlog" "$title" "$xlabel" "$ylabel" "$output" "$ylim_min" "$ylim_max" "$mode" #"$root_2023" "$root_2022" "$root_2021"
+    # else
+        # echo "Archivo root faltante para $png_name: $root_2025 o $root_2024 o $root_2023" o "$root_2022"
     fi
 done
