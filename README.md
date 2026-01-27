@@ -1,10 +1,10 @@
 # PFCalibration  
-For Single Pion sample Generation 2025:
+For Single Pion sample Generation 2026:
 
 (For bash)
 ```
-cmsrel CMSSW_14_2_1
-cd CMSSW_14_2_1/src
+cmsrel CMSSW_15_0_18
+cd CMSSW_15_0_18/src
 cmsenv
 git cms-init
 git cms-addpkg RecoParticleFlow/PFSimProducer
@@ -17,7 +17,14 @@ Now change this line: https://github.com/cms-sw/cmssw/blob/CMSSW_14_2_1/RecoPart
 ```
 and finally
 ```
-git clone -b PFHC25 https://gitlab.cern.ch/cms-pf/reconstruction/pfhccode.git
+git clone -b PFHC26 https://gitlab.cern.ch/cms-pf/reconstruction/pfhccode.git
+```
+or
+```
+git clone -b PFHC26 https://github.com/cmunozdi/PFCalibration.git
+```
+and continue by compiling this
+```
 scram b -j 40
 cd PFCalibration/PFChargedHadronAnalyzer/test/
 cmsenv
