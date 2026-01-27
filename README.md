@@ -17,11 +17,11 @@ Now change this line: https://github.com/cms-sw/cmssw/blob/CMSSW_14_2_1/RecoPart
 ```
 and finally
 ```
-git clone -b PFHC26 https://gitlab.cern.ch/cms-pf/reconstruction/pfhccode.git
+git clone -b PFHC26 git@gitlab.cern.ch:cms-pf/reconstruction/pfhccode.git
 ```
 or
 ```
-git clone -b PFHC26 https://github.com/cmunozdi/PFCalibration.git
+git clone -b PFHC26 git@github.com:cmunozdi/PFCalibration.git
 ```
 and continue by compiling this
 ```
