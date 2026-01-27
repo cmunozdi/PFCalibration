@@ -1,13 +1,16 @@
 #!/bin/bash
 
 # Cambia el directorio base según tu necesidad
-base_dir="/eos/user/c/cmunozdi/www/o fil de Offline_Response_Plots/PFHC25"
+base_dir="/eos/user/c/cmunozdi/www/Offline_Response_Plots"
 
 # Elegir entre Etrue o Preco
-subfolder_type="Winter25_WithPU" #"ETrue25vsETrue24" # Cambiar a "Preco" si es necesario, o "Etrue"
+subfolder_type="PFHC25noPUv2_Bfix_VS_PFHC24noPUv2" #"ETrue25vsETrue24" # Cambiar a "Preco" si es necesario, o "Etrue"
 
 # Elegir el nombre de la carpeta local
-local_folder_name="ResponsePlots_ETrue25_withPU" #"ResponsePlots_ETrue25_vs_ETrue24" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
+local_folder_name="../Comparisons_Final25_vs_Final24" #"ResponsePlots_ETrue25_vs_ETrue24" # Cambiar según tus necesidades: "WithFreezeParameters_Etrue" o "WithFreezeParameters_Preco"
+
+mkdir -p "$local_folder_name"
+mkdir -p "$base_dir/${subfolder_type}"
 
 # Directorios de destino
 raw_dir="${base_dir}/${subfolder_type}/Uncorrected"
@@ -16,6 +19,12 @@ etacorr_dir="${base_dir}/${subfolder_type}/Pseudorapidity_corrected"
 eta_dependence_dir="${base_dir}/${subfolder_type}/etaDependence_per_energy_ranges"
 before_corr_dir="${eta_dependence_dir}/Before_correction"
 after_corr_dir="${eta_dependence_dir}/After_correction"
+before_corr_EH_dir="${before_corr_dir}/EH_hadrons"
+before_corr_H_dir="${before_corr_dir}/H_hadrons"
+before_corr_neutral_dir="${before_corr_dir}/Neutral_hadrons"
+before_corr_charged_dir="${before_corr_dir}/Charged_hadrons"
+after_corr_EH_dir="${after_corr_dir}/EH_hadrons"
+after_corr_H_dir="${after_corr_dir}/H_hadrons"
 rootFiles_dir="${base_dir}/${subfolder_type}/rootFiles"
 coefficients_dir="${base_dir}/${subfolder_type}/CalibrationCoefficients"
 
@@ -62,7 +71,13 @@ mkdir -p "$etacorr_dir/H_hadrons"
 mkdir -p "$eta_dependence_dir"
 mkdir -p "$before_corr_dir"
 mkdir -p "$after_corr_dir"
-# mkdir -p "$rootFiles_dir"
+mkdir -p "$before_corr_EH_dir"
+mkdir -p "$before_corr_H_dir"
+mkdir -p "$before_corr_neutral_dir"
+mkdir -p "$before_corr_charged_dir"
+mkdir -p "$after_corr_EH_dir"
+mkdir -p "$after_corr_H_dir"
+mkdir -p "$rootFiles_dir"
 mkdir -p "$coefficients_dir"
 
 # Mover archivos a los directorios correspondientes
@@ -70,10 +85,24 @@ for file in *.png *.pdf; do
 
     if [[ $file == *Coefficient* ]]; then
         mv "$file" "$coefficients_dir/"
-    elif [[ $file == *RawEtaDependence_*GeV* ]]; then
+    elif [[ $file == *Raw*EtaDependence_*GeV* || $file == *NeutralHadronsEtaDependence*GeV* || $file == *ChargedHadronsEtaDependence*GeV* ]]; then
         mv "$file" "$before_corr_dir/"
-    elif [[ $file == *EtaCorrEtaDependence_*GeV* ]]; then
+        if [[ $file == *_EHhadrons* ]]; then
+            mv "$before_corr_dir/$file" "$before_corr_EH_dir/"
+        elif [[ $file == *_Hhadrons* ]]; then
+            mv "$before_corr_dir/$file" "$before_corr_H_dir/"
+        elif [[ $file == *NeutralHadrons* ]]; then
+            mv "$before_corr_dir/$file" "$before_corr_neutral_dir/"
+        elif [[ $file == *ChargedHadrons* ]]; then
+            mv "$before_corr_dir/$file" "$before_corr_charged_dir/"
+        fi
+    elif [[ $file == *EtaCorrEtaDependence_*GeV* || $file == *Corr*EtaDependence_*GeV* ]]; then
         mv "$file" "$after_corr_dir/"
+        if [[ $file == *_EHhadrons* ]]; then
+            mv "$after_corr_dir/$file" "$after_corr_EH_dir/"
+        elif [[ $file == *_Hhadrons* ]]; then
+            mv "$after_corr_dir/$file" "$after_corr_H_dir/"
+        fi
     elif [[ $file == *rawBarrel* || $file == *rawEndcap* || $file == *rawEtaDependence* ]]; then
         mv "$file" "$raw_dir/"
         if [[ $file == *BarrelEH* || $file == *EndcapEH* || $file == *EtaDependenceEH* ]]; then
