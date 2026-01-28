@@ -36,6 +36,26 @@ using namespace std;
 using namespace edm;
 using namespace reco;
 
+// PFlow particle ID constants
+// Reference: PFCandidate::ParticleType enumeration
+// Mapping: particleId() -> PDG ID(s) -> Description
+//   0: unknown/dummy (X)
+//   1: charged hadron (h) -> pdgId: ±211 (pions)
+//   2: electron (e) -> pdgId: ±11
+//   3: muon (mu) -> pdgId: ±13
+//   4: photon (gamma) -> pdgId: 22
+//   5: neutral hadron (h0) -> pdgId: 130 (K_L)
+//   6: hadronic energy in HF tower (h_HF) -> pdgId: 130
+//   7: electromagnetic energy in HF tower (egamma_HF) -> pdgId: 22
+constexpr int PF_UNKNOWN = 0;
+constexpr int PF_CHARGED_HADRON = 1;  // h
+constexpr int PF_ELECTRON = 2;        // e
+constexpr int PF_MUON = 3;            // mu
+constexpr int PF_PHOTON = 4;          // gamma
+constexpr int PF_NEUTRAL_HADRON = 5;  // h0
+constexpr int PF_HF_EM = 6;           // h_HF (hadronic HF)
+constexpr int PF_HF_HADRON = 7;       // egamma_HF (EM HF)
+
 PFChargedHadronAnalyzer::PFChargedHadronAnalyzer(const edm::ParameterSet& iConfig) {
   
   nCh = std::vector<unsigned int>(10,static_cast<unsigned int>(0));
@@ -419,7 +439,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     pfcsID.push_back( pfc.particleId() );
 
     // std::cout << "Id = " << pfc.particleId() << std::endl;
-    if ( pfc.particleId() < 4 ) { 
+    if ( pfc.particleId() < PF_PHOTON ) { 
       const reco::TrackRef trackRef = pfc.trackRef();
       if ( trackRef.isNonnull() ) {
         double dz = fabs(trackRef->dz(genParticles->at(0).vertex()));
@@ -451,7 +471,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   // //If there is a charged track, save the track info
   if(bestTrack){
     isCharged = true;
-    if(bestTrack->particleId() == 1){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
+    if(bestTrack->particleId() == PF_CHARGED_HADRON){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
       trkP = bestTrack->trackRef()->p();
       trkEta = bestTrack->trackRef()->eta();
       trkPhi = bestTrack->trackRef()->phi();
@@ -538,7 +558,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
         corrhcal_.push_back(pfc.hcalEnergy());  
         //
       }
-      if ( pfc.particleId() == 4 ){
+      if ( pfc.particleId() == PF_PHOTON ){
         if( (dR < 0.2 )){
           ecal_ += pfc.rawEcalEnergy();
           // if(nearClustEcal_ < pfc.rawEcalEnergy()){
@@ -553,7 +573,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
           // rcPhi_ = pfc.phi();
         }
       }
-      if ( pfc.particleId() == 5 ){
+      if ( pfc.particleId() == PF_NEUTRAL_HADRON || pfc.particleId() < PF_PHOTON ) { //Added the charged hadrons to catch any missed energy (specially important when working with noPU samples)
         if (dR < 0.4){ //Proposed by Kenichi 9/11/23
 
           hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
@@ -582,7 +602,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       }
       // if ( pfc.particleId() == 4  ) {  Eecal.push_back(pfc.rawEcalEnergy()); }
       // if ( pfc.particleId() == 5  ) { Ehcal.push_back(pfc.rawHcalEnergy()); }
-      if ( ((pfc.particleId() == 6) || (pfc.particleId() == 7)) && dR < 0.4  ) {
+      if ( ((pfc.particleId() == PF_HF_EM) || (pfc.particleId() == PF_HF_HADRON)) && dR < 0.4  ) {
         hfem_ += pfc.rawEcalEnergy();
         hfhad_ += pfc.rawHcalEnergy();
       }
@@ -672,7 +692,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
-    if ( (pfc.particleId() != 1)) return;// || (pfc.particleId() != 4) || (pfc.particleId() != 5)) continue;//cmunozdi: include photons (pfc id = 4) and neutral hadrons (pfc id = 5)
+    if ( (pfc.particleId() != PF_CHARGED_HADRON)) return;// || (pfc.particleId() != PF_PHOTON) || (pfc.particleId() != PF_NEUTRAL_HADRON)) continue;//cmunozdi: include photons and neutral hadrons
     nCh[1]++;
 
     // Charged hadron minimum pt (the track pt, to an excellent approximation)
@@ -1170,7 +1190,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       //   //   nearOppPhiPhi_ = ci->phi();
       //   // }
       // }
-      if(ci->particleId() == 5){
+      if(ci->particleId() == PF_NEUTRAL_HADRON){
         if((dROpposite < 0.4) /*&& (rcHcal_ + rcEcal_ < ci->rawHcalEnergy() + ci->rawEcalEnergy())*/){
           // rcHcal_ += ci->rawHcalEnergy();
           // rcEcal_ += ci->rawEcalEnergy();
