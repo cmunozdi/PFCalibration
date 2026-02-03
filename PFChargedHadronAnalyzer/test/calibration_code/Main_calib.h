@@ -1694,7 +1694,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
    //   sprintf(fileName,"resp_reso_%s_%s.root",graph,tag);
    TFile* file3=new TFile(fileName,"recreate");
    file3->cd();
-   TH2F* histo = new TH2F("histoCG", "", sampleRangeHigh, 0, sampleRangeHigh, 500,  -3.0, 6.0); 
+   TH2F* histo = new TH2F("histoCG", "", sampleRangeHigh, 0, sampleRangeHigh, 500,  -3.5, 3.0); 
 
    canvas->cd();
    canvas->SetLogx();
@@ -1718,6 +1718,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
        graphB_->SetMarkerStyle(22);
        graphB_->SetMarkerSize(1);
        graphB_->SetFillColor(0);
+       histo->GetYaxis()->SetRangeUser(-3.5,3);
 
        graphB_->Draw("P");
        graphB_->GetFunction(functionB_->GetName())->SetLineColor(colorFittingFunc);
@@ -1836,7 +1837,7 @@ void Calibration::drawCoeffGraph(string graph, string tag)
       graphAlpha_->SetMarkerSize(1);
       graphAlpha_->SetMarkerColor(2);
       graphAlpha_->SetFillColor(0);
-      histo->GetYaxis()->SetRangeUser(-1,0.3);
+      histo->GetYaxis()->SetRangeUser(-0.8,0.3);
 
       graphAlpha_->Draw("P");
        graphAlpha_->GetFunction(functionAlpha_->GetName())->SetLineColor(colorFittingFunc);

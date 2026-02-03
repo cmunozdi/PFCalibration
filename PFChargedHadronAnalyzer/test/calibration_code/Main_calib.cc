@@ -32,8 +32,9 @@ bool noUseRC = true;
 bool usePFHC24_v2 = false; // 2024 long version (with extra samples at 0.2to10GeV and 500to5000GeV)
 bool usePFHC24_v1 = false; // 2024 short version (with samples at 0.2to200GeV and 200to500GeV)
 bool usePFHC25_v1 = false;
-bool usePFHC25_v2 = true;//B-fix
+bool usePFHC25_v2 = false;//B-fix
 bool usePFHC25_withPU=false;
+bool usePFHC26_v1 = true;
 bool useMean = true;
 bool useMedian = false;
 bool changeRange =false;
@@ -43,9 +44,10 @@ bool drawResoFit = false;
 bool saveCanvas = true;
 bool payload=true;
 bool useP_reco=false;//Instead of using etrue, the calibration code uses p_reco.
-bool drawRespPlots = true;
+bool drawRespPlots = false;
+bool drawEtaRespEnergyBinnedPlots = true;
 int hadrons_eta_symbol = 0;//This int variable is 0 when we take all the eta values (positives and negatives); +1 when we only take hadrons with positive eta; -1 when we only take hadrons with negatives eta.
-bool PFEnergyCalibrationFunction=false; //This bool variable is true for using PFEnergyCalibration function from CMSSW and false for using the default PFHC calibration function getCalibratedEnergy
+bool PFEnergyCalibrationFunction=true; //This bool variable is true for using PFEnergyCalibration function from CMSSW and false for using the default PFHC calibration function getCalibratedEnergy
 bool WriteNTupleFile = false;
 bool Parameters24Above500GeV = false; //This bool variable is true for using the parameters for the calibration function for the energy above 500 GeV and false for using the parameters for the calibration function for the energy below 500 GeV (first one)
 bool useOnlyEHhadrons = false; //This bool variable is true for using only EH hadrons and false for using all the hadrons
@@ -88,8 +90,8 @@ PFEnergyCalibration::PFEnergyCalibration() {
 // Eventually something to go into database, but can select suitable one here
 // #include "piongun_Winter25_v3.txt"
 // #include "piongun_Winter24_v9v10.txt"
-#include "piongun_Winter25v2NoPu.txt"
-
+// #include "piongun_Winter25v2NoPu.txt"
+#include "piongun_PFHC26v4.txt"
 void PFEnergyCalibration::energyEmHad(double t, double& e, double& h, double eta, double phi) const {
 
   // Save input energies in const form
@@ -1111,14 +1113,16 @@ vector<float> assignvalues(vector<float> *pfcID_, vector<float> *Ecalenergy_,
       if(pfcID_->at(ii) == 4 && dr->at(ii) < 0.2) {
         e += Ecalenergy_->at(ii);
       }
-      if (pfcID_->at(ii) == 5 && dr->at(ii) < 0.4) {
+      if ((pfcID_->at(ii) == 5 /*|| pfcID_->at(ii) == 1*/) && dr->at(ii) < 0.4) { //charge==0 bug, considering also pfcID == 1 (charged had pfcands raw energies)
         e += Ecalenergy_->at(ii);
         h += Hcalenergy_->at(ii);
       }
+
     }
   }
   energies.push_back(e);
   energies.push_back(h);
+  // cout << "From an event with " << pfcID_->size() << " PFCandidates, found " << count_chrged << " charged hadrons." << endl;
   return energies;
 
 }
@@ -1284,6 +1288,10 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
    double sigmaEcalHcal=1;
    long veto = 0 ;
    //int count = 0;
+   int countNeutralBST=0;
+   int countChargedBST=0;
+   int countNeutralBSF=0;
+   int countChargedBSF=0;
    bool flag[10] = {0,0,0,0,0,0,0,0,0,0};
 	  for(int entry = 0; entry < tree->GetEntries(); entry++) {
        tree->GetEntry(entry);
@@ -1353,7 +1361,8 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
       bool saveData = false;
 
       if(tree->GetBranchStatus("true")){
-          if(pfcID_->size() != 0) {
+          if(pfcID_->size() != 0) { //Not charged (from NTuplizer plugins/PFChargedHadronAnalyzer.cc)
+            countNeutralBST++;
             vector<float> tmp = assignvalues(pfcID_, E_ecal_, E_hcal_, dr_);
             etrue = true_;
             p_reco = p_;
@@ -1368,6 +1377,7 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
               saveData = true;
             //}
           }else{
+            countChargedBST++;
             //if((ecal+hcal)/etrue<=2){
               if(useP_reco) ETrueEnergies.push_back(p_);
               else ETrueEnergies.push_back(true_);
@@ -1379,6 +1389,7 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
           }
       }else{
         if(pfcID_->size() != 0) {
+            countNeutralBSF++;
             vector<float> tmp = assignvalues(pfcID_, E_ecal_, E_hcal_, dr_);
             etrue = true_;
             ecal = tmp.at(0);
@@ -1391,6 +1402,7 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
               saveData = true;
             //}
           }else{
+            countChargedBSF++;
             //if((ecal+hcal)/etrue<=2){
               ETrueEnergies.push_back(p_);
               ecalEnergies.push_back(ecal_-rcEcal_);
@@ -1455,6 +1467,8 @@ void getValuesFromTree(TTree* tree, vector<double>& ETrueEnergies,
 
    cout<<" Entries "<<ecalEnergies.size()<<endl;
    cout<<" Vetoed events "<<veto<<endl;
+   
+  //  cout << "Neutral Branch Status True: " << countNeutralBST << "\tCharged Branch Status True: " << countChargedBST << "\tNeutral Branch Status False: " << countNeutralBSF << "\tCharged Branch Status False: " << countChargedBSF << endl;
    //exit(0);
 
 }
@@ -1698,7 +1712,11 @@ int main()
           // add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/NoPU_v7_rcNTuplizer");
         }else{
           // add_root_files_to_a_chain(chain, "/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/RawNTuples_withPU_randomCone");//_merged/");//_proof/");//NewNTuplizerVersion/");/2024_Merged/OfflineNTuples_2024GT0_merged/afs/cern.ch/user/c/cmunozdi/PFHC_2025/CMSSW_14_2_1/src/PFCalibration/PFChargedHadronAnalyzer/test/ntuples_withPU_rc//eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/NoPU_v7/RawNTuples
-          chain->Add("/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/2025_0p2to500GeV_withCorrections.root");///afs/cern.ch/user/c/cmunozdi/PFHC_2025/CMSSW_14_2_1/src/PFCalibration/PFChargedHadronAnalyzer/test/ntuples_withPU_rc/step3_extension2.root");
+          // chain->Add("/eos/user/c/cmunozdi/OFFLINE_NTUPLES/2025/WithPU_v7/2025_0p2to500GeV_withCorrections.root");///afs/cern.ch/user/c/cmunozdi/PFHC_2025/CMSSW_14_2_1/src/PFCalibration/PFChargedHadronAnalyzer/test/ntuples_withPU_rc/step3_extension2.root");
+          // add_root_files_to_a_chain(chain, "/eos/cms/store/group/phys_pf/cmunozdi/OFFLINE_NTUPLES/2026/NoPU_v1/Prove_RawNTuple_AddingChargedPFCandsToUnchargedHad/subsample");//");smallDataset//RawNTuples
+          // chain->Add("/eos/cms/store/group/phys_pf/cmunozdi/OFFLINE_NTUPLES/2026/NoPU_v1/Prove_RawNTuple_AddingChargedPFCandsToUnchargedHad/*.root");
+          add_root_files_to_a_chain(chain, "/eos/cms/store/group/phys_pf/cmunozdi/OFFLINE_NTUPLES/2026/NoPU_v2/RawNTuples");
+          // chain->Add("/eos/cms/store/group/phys_pf/cmunozdi/OFFLINE_NTUPLES/2026/NoPU_v2/intermediateSample_Nuplizer25noPU/*root");
         }
     }
   //  chain->Add("/eos/home-c/cmunozdi/OFFLINE_NTUPLES/2025/NoPU_v7/SmallSamples/*.root");//2024_Merged_3Attempt/rawFromNTuplizer/*.root");
@@ -1747,7 +1765,7 @@ int main()
    BinsETrue.clear();
    BinsETrueEta.clear();
 
-   for(double bin = 0.0; bin < 10.0; bin = bin + lBs)
+   for(double bin = 0.2; bin < 10.0; bin = bin + lBs)
      {
        barrelABCEcalHcal.push_back(new ABC(bin, bin + lBs, true));
        barrelABCEcal.push_back(new ABC(bin, bin + lBs, true));
@@ -1806,7 +1824,7 @@ int main()
 
 
    
-   for(double bin = 0.0; bin < 10.0; bin = bin + lBs*RBE)
+   for(double bin = 0.2; bin < 10.0; bin = bin + lBs*RBE)
      {
        barrelAlphaBetaEcalHcal.push_back(new AlphaBeta(bin, bin + lBs*RBE, true));
        barrelAlphaBetaHcal.push_back(new AlphaBeta(bin, bin + lBs*RBE, true));
@@ -2478,6 +2496,90 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
               functionEndcapHcalC->FixParameter(8,0);
               functionEndcapHcalC->FixParameter(9,0.0111935);
               functionEndcapHcalC->FixParameter(10,2.5);
+          }else if(usePFHC26_v1){
+              functionBarrelEcalHcalA->FixParameter(0, aEH);
+
+              functionBarrelEcalHcalB->FixParameter(0,7.40005);
+              functionBarrelEcalHcalB->FixParameter(1,28.602);
+              functionBarrelEcalHcalB->FixParameter(2,-176.817);
+              functionBarrelEcalHcalB->FixParameter(3,0.417319);
+              functionBarrelEcalHcalB->FixParameter(4,1.53951);
+              functionBarrelEcalHcalB->FixParameter(5,0.00565535);
+              functionBarrelEcalHcalB->FixParameter(6,0.0682348);
+              functionBarrelEcalHcalB->FixParameter(7,-1.42749);
+              functionBarrelEcalHcalB->FixParameter(8,-5.20805);
+              functionBarrelEcalHcalB->FixParameter(9,0.178202);
+              functionBarrelEcalHcalB->FixParameter(10,3.5);
+
+              
+              functionBarrelEcalHcalC->FixParameter(0,260.101);
+              functionBarrelEcalHcalC->FixParameter(1,565838);
+              functionBarrelEcalHcalC->FixParameter(2,-607615);
+              functionBarrelEcalHcalC->FixParameter(3,2.4427e+307);
+              functionBarrelEcalHcalC->FixParameter(4,259.143);
+              functionBarrelEcalHcalC->FixParameter(5,1.72e+12);
+              functionBarrelEcalHcalC->FixParameter(6,5.06412e+19);
+              functionBarrelEcalHcalC->FixParameter(7,2.14467);
+              functionBarrelEcalHcalC->FixParameter(8,-1.9242);
+              functionBarrelEcalHcalC->FixParameter(9,-0.386838);
+              functionBarrelEcalHcalC->FixParameter(10,3.5);
+
+              functionBarrelHcalC->FixParameter(0,14.0606);
+              functionBarrelHcalC->FixParameter(1,26.8368);
+              functionBarrelHcalC->FixParameter(2,-55.2472);
+              functionBarrelHcalC->FixParameter(3,0.68893);
+              functionBarrelHcalC->FixParameter(4,20.1755);
+              functionBarrelHcalC->FixParameter(5,1.268);
+              functionBarrelHcalC->FixParameter(6,-0.00895323);
+              functionBarrelHcalC->FixParameter(7,-0.461712);
+              functionBarrelHcalC->FixParameter(8,0);
+              functionBarrelHcalC->FixParameter(9,-0.866854);
+              functionBarrelHcalC->FixParameter(10,2.5);
+
+              functionEndcapEcalHcalA->FixParameter(0, aEHe);
+
+              /*Try to improve tail at low E_T*/
+              functionEndcapEcalHcalB->FixParameter(0,31.6524);
+              functionEndcapEcalHcalB->FixParameter(1,-37.3992);
+              functionEndcapEcalHcalB->FixParameter(2,-1255.98);
+              functionEndcapEcalHcalB->FixParameter(3,0.287391);
+              functionEndcapEcalHcalB->FixParameter(4,23.6273);
+              functionEndcapEcalHcalB->FixParameter(5,0.240774);
+              functionEndcapEcalHcalB->FixParameter(6,-0.0681336);
+              functionEndcapEcalHcalB->FixParameter(7,-0.558541);
+              functionEndcapEcalHcalB->FixParameter(8,-0.186274);
+              functionEndcapEcalHcalB->FixParameter(9,-0.00112773);
+              functionEndcapEcalHcalB->FixParameter(10,3.5);
+
+              functionEndcapEcalHcalC->FixParameter(0, -2.24814);
+              functionEndcapEcalHcalC->FixParameter(1, 3.15142);
+              functionEndcapEcalHcalC->FixParameter(2, 3.76944);
+              functionEndcapEcalHcalC->FixParameter(3, 1.06815);
+              functionEndcapEcalHcalC->FixParameter(4, 0.0726289);
+              functionEndcapEcalHcalC->FixParameter(5, 24.8456);
+              functionEndcapEcalHcalC->FixParameter(6, -0.609985);
+              functionEndcapEcalHcalC->FixParameter(7, 0.0968119);
+              functionEndcapEcalHcalC->FixParameter(8,0);
+              functionEndcapEcalHcalC->FixParameter(9,0.00136191);
+              functionEndcapEcalHcalC->FixParameter(10,3.5);
+
+              functionBarrelHcalA->FixParameter(0, aH);
+              functionBarrelHcalB->FixParameter(0, 0.0);
+              functionEndcapHcalA->FixParameter(0, aHe);
+              functionEndcapHcalB->FixParameter(0, 0.0);
+
+              functionEndcapHcalC->FixParameter(0,-1.81593);
+              functionEndcapHcalC->FixParameter(1,6.85804);
+              functionEndcapHcalC->FixParameter(2,-6.82026);
+              functionEndcapHcalC->FixParameter(3,4.26585);
+              functionEndcapHcalC->FixParameter(4,-2.98148);
+              functionEndcapHcalC->FixParameter(5,0.0405707);
+              functionEndcapHcalC->FixParameter(6,0.342915);
+              functionEndcapHcalC->FixParameter(7,-0.622976);
+              functionEndcapHcalC->FixParameter(8,0);
+              functionEndcapHcalC->FixParameter(9,0.0111935);
+              functionEndcapHcalC->FixParameter(10,2.5);
+
           }
       }        
    }
@@ -2506,18 +2608,71 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
       // functionEndcapEcalHcalC->FixParameter(8, 0.0);
       // functionEndcapEcalHcalC->FixParameter(9, 0.0);
 
+      // functionBarrelEcalHcalA->FixParameter(0, aEH);
+      // functionBarrelEcalHcalB->SetParameters(14.0727, 88.2972, -817.703, 0.298722, 14.2666, 0.255018, 0.0270357, -0.781966, 0, 0.0191488, 3.5);
+      // functionBarrelEcalHcalC->SetParameters(2.56174, -0.549811, -6.11692, 2.89818, 1.26181, 0.0654501, 0.0613357, -0.774286, 0, -0.00461233, 3.5);
+      // functionBarrelHcalC->SetParameters(14.0778, 26.8906, -62.6699, 0.691913, 20.1613, 1.04061, -0.0087673, -0.501269, 0, -0.866854, 2.5);
+      // functionEndcapEcalHcalA->FixParameter(0, aEHe);
+      // functionEndcapEcalHcalB->SetParameters(30.863, -65.7147, -3287.94, 0.222156, 22.3641, 0.221705, -0.0657388, -0.531576, 0, -0.00677315, 3.5);
+      // functionEndcapEcalHcalC->SetParameters(-1.2338, 4.31084, 2.67188, 1.11163, 2.06637e-06, -75574.9, -0.0267069, 0.00211068, 0, 0.00136191, 3.5);
+      // functionBarrelHcalA->FixParameter(0, aH);
+      // functionBarrelHcalB->FixParameter(0, 0.0);
+      // functionEndcapHcalA->FixParameter(0, aHe);
+      // functionEndcapHcalB->FixParameter(0, 0.0);
+      // functionEndcapHcalC->SetParameters(-1.81593, 6.85803, -6.82026, 4.26585, -2.98148, 0.0405706, 0.342915, -0.622976, 0, 0.0111935, 2.5);
+
       functionBarrelEcalHcalA->FixParameter(0, aEH);
-      functionBarrelEcalHcalB->SetParameters(6.00066178, -14.48485178,   3.18745133,   2.9182735 , 4.77379253,   0.02417865,   0.63771354,  -1.47065873,0.213991, 0.051676, 3.5);
-      functionBarrelEcalHcalC->SetParameters(-2.203137788685195,2907.1426737355127,3387.7980788170858,0.20983946718298346,2907.383059280487,0.2490912250728103,-0.5784124863010315,-0.6273095620695427,-0.601465, -0.0628752, 3.5);
-      functionBarrelHcalC->SetParameters(-1.4511510901615847,3.0599863067293245,20.13927623619521,0.28398292533812053,0.7014529736790318,0.02862946671210739,-0.42721811590010617,-1.423787583888692,-0.773444, -0.567351, 2.5);
+
+      functionBarrelBetaEcalHcal->SetParameters(
+      -0.26,     // [0] estable
+        0.55,     // [1] estable
+      -0.50,     // [2] estable low-x
+        0.04,     // [3] ↑ leve (exp1 más gradual)
+        0.28,     // [4] estable
+        0.10,     // [5] ↑ moderado (2ª exp suave)
+      -0.40,     // [6] FUERTE CAMBIO: no extremo! (-66 → -0.4)
+      -0.55      // [7] estable
+      );
+
+
+
+      functionBarrelEcalHcalC->SetParameters(2.56174, 0.0, 0.0, 2.89818, 1.26181, 0.0654501, 0.0613354, -0.774286, 0, -0.00461233, 3.5);
+
+      functionBarrelHcalC->SetParameters(
+        14.0606, 26.8368, -55.2472, 0.68893, 20.1755,
+        1.268, -0.00895323, -0.461712, 0,
+        -0.866854, 2.5
+      );
+
       functionEndcapEcalHcalA->FixParameter(0, aEHe);
-      functionEndcapEcalHcalB->SetParameters(7.402921336406181,759.260945107506,-14.593681991851373,0.4489922400909166,765.269147442827,0.46073055802426793,-0.9445919485888375,-0.9248391880037822,-0.472676, -0.0262791, 3.5);
-      functionEndcapEcalHcalC->SetParameters(-0.4803515868861214,66.91783483579212,1.7705290268502827,0.15071928671294943,65.14921947418765,0.1404870192657235,-0.5201196589054726,-0.5306737454479942,0.503966, 0.00394282, 3.5);
+
+      // Try to improve tail at low E_T
+      functionEndcapEcalHcalB->SetParameters(
+        31.6524, -37.3992, -1255.98, 0.287391, 23.6273,
+        0.240774, -0.0681336, -0.558541, -0.186274,
+        -0.00112773, 3.5
+      );
+
+      functionEndcapEcalHcalC->SetParameters(
+        -2.24814, 3.15142, 3.76944, 1.06815, 0.0726289,
+        24.8456, -0.609985, 0.0968119, 0,
+        0.00136191, 3.5
+      );
+
       functionBarrelHcalA->FixParameter(0, aH);
+
       functionBarrelHcalB->FixParameter(0, 0.0);
+
       functionEndcapHcalA->FixParameter(0, aHe);
+
       functionEndcapHcalB->FixParameter(0, 0.0);
-      functionEndcapHcalC->SetParameters(-0.26157031426401145,109.11571113561037,796.9749856640897,0.09098627396430353,106.85914722817823,0.09583931789969959,-0.5086083457737826,-0.6569624063284915,1.65694, -0.0269124, 2.5);
+
+      functionEndcapHcalC->SetParameters(
+        -1.81593, 6.85804, -6.82026, 4.26585, -2.98148,
+        0.0405707, 0.342915, -0.622976, 0,
+        0.0111935, 2.5
+      );
+
 
       
       if(!PenaltyFactor){
@@ -3185,19 +3340,254 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
           functionEndcapBetaHcal->FixParameter(5,0.194395);
           functionEndcapBetaHcal->FixParameter(6,-0.811108);
           functionEndcapBetaHcal->FixParameter(7,-0.81471);
+        }else if(usePFHC26_v1){
+            functionBarrelAlphaEcalHcal->FixParameter(0,0.00459153);
+            functionBarrelAlphaEcalHcal->FixParameter(1,41.4101);
+            functionBarrelAlphaEcalHcal->FixParameter(2,-0.208785);
+            functionBarrelAlphaEcalHcal->FixParameter(3,0.00511777);
+            functionBarrelAlphaEcalHcal->FixParameter(4,41.4355);
+            functionBarrelAlphaEcalHcal->FixParameter(5,0.00525003);
+            functionBarrelAlphaEcalHcal->FixParameter(6,-1.8401);
+            functionBarrelAlphaEcalHcal->FixParameter(7,-1.83148);
+
+            functionBarrelBetaEcalHcal->FixParameter(0,-0.163473);
+            functionBarrelBetaEcalHcal->FixParameter(1,0.618648);
+            functionBarrelBetaEcalHcal->FixParameter(2,-0.784699);
+            functionBarrelBetaEcalHcal->FixParameter(3,0.033817);
+            functionBarrelBetaEcalHcal->FixParameter(4,0.47448);
+            functionBarrelBetaEcalHcal->FixParameter(5,0.23735);
+            functionBarrelBetaEcalHcal->FixParameter(6,-69.0827);
+            functionBarrelBetaEcalHcal->FixParameter(7,-0.430652);
+
+            functionBarrelAlphaHcal->FixParameter(0,-0.524795);
+            functionBarrelAlphaHcal->FixParameter(1,40.2708);
+            functionBarrelAlphaHcal->FixParameter(2,-0.236613);
+            functionBarrelAlphaHcal->FixParameter(3,0.0310657);
+            functionBarrelAlphaHcal->FixParameter(4,39.7898);
+            functionBarrelAlphaHcal->FixParameter(5,0.0294048);
+            functionBarrelAlphaHcal->FixParameter(6,-1.98694);
+            functionBarrelAlphaHcal->FixParameter(7,-2.00412);
+
+            functionBarrelBetaHcal->FixParameter(0,-26.3116);
+            functionBarrelBetaHcal->FixParameter(1,26.3633);
+            functionBarrelBetaHcal->FixParameter(2,15.6867);
+            functionBarrelBetaHcal->FixParameter(3,2.00651);
+            functionBarrelBetaHcal->FixParameter(4,0.013134);
+            functionBarrelBetaHcal->FixParameter(5,4.22512e-18);
+            functionBarrelBetaHcal->FixParameter(6,-0.459166);
+            functionBarrelBetaHcal->FixParameter(7,-5.17465);
+
+                  // functionEndcapAlphaEcalHcal->SetParameters(-72.1177, 311.82, -2.75771, 14.6139, 227.975, 21.1233, -0.0298999, -0.10506);
+            functionEndcapAlphaEcalHcal->FixParameter(0,-74.5982);
+            functionEndcapAlphaEcalHcal->FixParameter(1,164.64);
+            functionEndcapAlphaEcalHcal->FixParameter(2,-2.08148);
+            functionEndcapAlphaEcalHcal->FixParameter(3,36.2163);
+            functionEndcapAlphaEcalHcal->FixParameter(4,87.2231);
+            functionEndcapAlphaEcalHcal->FixParameter(5,26.5112);
+            functionEndcapAlphaEcalHcal->FixParameter(6,-0.0348255);
+            functionEndcapAlphaEcalHcal->FixParameter(7,-0.221957);
+
+                  // Should be same as 2025
+                  // USING NEUTRAL HADRONS ENERGIES AS NEUTRAL + CHARGED PFCANDS
+              // functionEndcapBetaEcalHcal->SetParameters(-241.994, 247.709, 3.75597, 22.8834, 5.72361, 0.15035, -0.814136, -2.22686);
+            //Trying to fix this
+            functionEndcapBetaEcalHcal->FixParameter(0,-241.994);
+            functionEndcapBetaEcalHcal->FixParameter(1,247.709);
+            functionEndcapBetaEcalHcal->FixParameter(2,3.75597);
+            functionEndcapBetaEcalHcal->FixParameter(3,22.8834);
+            functionEndcapBetaEcalHcal->FixParameter(4,5.72361);
+            functionEndcapBetaEcalHcal->FixParameter(5,0.15035);
+            functionEndcapBetaEcalHcal->FixParameter(6,-0.814136);
+            functionEndcapBetaEcalHcal->FixParameter(7,-2.22686);
+            //Trying old fit function
+            // functionEndcapBetaEcalHcal->SetParameters(0.0, 0.25, -15.0, 120.0, 1.6, 1.3);
+
+
+
+            functionEndcapAlphaHcal->FixParameter(0,-23.2804);
+            functionEndcapAlphaHcal->FixParameter(1,2.6938);
+            functionEndcapAlphaHcal->FixParameter(2,-0.857107);
+            functionEndcapAlphaHcal->FixParameter(3,-0.416349);
+            functionEndcapAlphaHcal->FixParameter(4,-15.526);
+            functionEndcapAlphaHcal->FixParameter(5,0.367006);
+            functionEndcapAlphaHcal->FixParameter(6,-0.0582322);
+            functionEndcapAlphaHcal->FixParameter(7,-0.263193);
+
+                  // Should be same as 2025
+                  // USING NEUTRAL HADRONS ENERGIES AS NEUTRAL + CHARGED PFCANDS
+            functionEndcapBetaHcal->FixParameter(0,0.106427);
+            functionEndcapBetaHcal->FixParameter(1,62.8186);
+            functionEndcapBetaHcal->FixParameter(2,1.69978);
+            functionEndcapBetaHcal->FixParameter(3,0.0128515);
+            functionEndcapBetaHcal->FixParameter(4,62.9246);
+            functionEndcapBetaHcal->FixParameter(5,0.0127131);
+            functionEndcapBetaHcal->FixParameter(6,-1.70043);
+            functionEndcapBetaHcal->FixParameter(7,-1.70544);
+
+          // functionBarrelAlphaEcalHcal->FixParameter(0,0.00459153);
+          // functionBarrelAlphaEcalHcal->FixParameter(1,41.4101);
+          // functionBarrelAlphaEcalHcal->FixParameter(2,-0.208785);
+          // functionBarrelAlphaEcalHcal->FixParameter(3,0.00511777);
+          // functionBarrelAlphaEcalHcal->FixParameter(4,41.4355);
+          // functionBarrelAlphaEcalHcal->FixParameter(5,0.00525003);
+          // functionBarrelAlphaEcalHcal->FixParameter(6,-1.8401);
+          // functionBarrelAlphaEcalHcal->FixParameter(7,-1.83148);
+
+          // functionBarrelBetaEcalHcal->FixParameter(0,-0.230141);
+          // functionBarrelBetaEcalHcal->FixParameter(1,0.55198);
+          // functionBarrelBetaEcalHcal->FixParameter(2,-0.6058);
+          // functionBarrelBetaEcalHcal->FixParameter(3,0.033817);
+          // functionBarrelBetaEcalHcal->FixParameter(4,0.284558);
+          // functionBarrelBetaEcalHcal->FixParameter(5,0.0581362);
+          // functionBarrelBetaEcalHcal->FixParameter(6,-68.9373);
+          // functionBarrelBetaEcalHcal->FixParameter(7,-0.739426);
+
+          // /*Should be same as 2025*/
+          // functionBarrelAlphaHcal->FixParameter(0,-0.0228555);
+          // functionBarrelAlphaHcal->FixParameter(1,38.4883);
+          // functionBarrelAlphaHcal->FixParameter(2,-30);
+          // functionBarrelAlphaHcal->FixParameter(3,0.050213);
+          // functionBarrelAlphaHcal->FixParameter(4,38.3574);
+          // functionBarrelAlphaHcal->FixParameter(5,0.0500749);
+          // functionBarrelAlphaHcal->FixParameter(6,-0.749399);
+          // functionBarrelAlphaHcal->FixParameter(7,-0.725583);
+
+
+          // functionBarrelBetaHcal->FixParameter(0,-26.2967);
+          // functionBarrelBetaHcal->FixParameter(1,26.3867);
+          // functionBarrelBetaHcal->FixParameter(2,20.4632);
+          // functionBarrelBetaHcal->FixParameter(3,1.6136);
+          // functionBarrelBetaHcal->FixParameter(4,0.0346884);
+          // functionBarrelBetaHcal->FixParameter(5,1.36174e-05);
+          // functionBarrelBetaHcal->FixParameter(6,-0.447603);
+          // functionBarrelBetaHcal->FixParameter(7,-1.43572);
+
+          // functionEndcapAlphaEcalHcal->FixParameter(0,-74.5982);
+          // functionEndcapAlphaEcalHcal->FixParameter(1,164.64);
+          // functionEndcapAlphaEcalHcal->FixParameter(2,-2.08148);
+          // functionEndcapAlphaEcalHcal->FixParameter(3,36.2163);
+          // functionEndcapAlphaEcalHcal->FixParameter(4,87.2231);
+          // functionEndcapAlphaEcalHcal->FixParameter(5,26.5112);
+          // functionEndcapAlphaEcalHcal->FixParameter(6,-0.0348255);
+          // functionEndcapAlphaEcalHcal->FixParameter(7,-0.221957);
+
+          // /*Should be same as 2025*/
+          // //USING NEUTRAL HADRONS ENERGIES AS NEUTRAL + CHARGED PFCANDS
+          // // functionEndcapBetaEcalHcal->SetParameters(
+          // // -250.0,    // [0] ↓ offset (baja tail)
+          // //   260.0,    // [1] ↑ compensa power
+          // //   5.0,     // [2] ↓ drástico (menos divergencia low-x)
+          // //   30.0,     // [3] ↑ exp1 más rápida (decae tail pronto)
+          // //   5.0,     // [4] ↑ supresión 2ª exp
+          // //   0.15,    // [5] ↑ escala 2ª (decay high antes)
+          // //   -0.7,     // [6] decay suave
+          // //   -2.5      // [7] fuerte high
+          // // );
+          // functionEndcapBetaEcalHcal->FixParameter(0,-251.257);
+          // functionEndcapBetaEcalHcal->FixParameter(1,257.534);
+          // functionEndcapBetaEcalHcal->FixParameter(2,15.3389);
+          // functionEndcapBetaEcalHcal->FixParameter(3,14.3594);
+          // functionEndcapBetaEcalHcal->FixParameter(4,6.25427);
+          // functionEndcapBetaEcalHcal->FixParameter(5,2.53553);
+          // functionEndcapBetaEcalHcal->FixParameter(6,-0.537981);
+          // functionEndcapBetaEcalHcal->FixParameter(7,-378.318);
+
+          // //USGIN NEUTRAL HADRONS ENERGIES AS NEUTRAL PFCANDS
+          // // functionEndcapBetaEcalHcal->FixParameter(0,-248.886);
+          // // functionEndcapBetaEcalHcal->FixParameter(1,252.613);
+          // // functionEndcapBetaEcalHcal->FixParameter(2,4.67897);
+          // // functionEndcapBetaEcalHcal->FixParameter(3,27.7326);
+          // // functionEndcapBetaEcalHcal->FixParameter(4,3.71614);
+          // // functionEndcapBetaEcalHcal->FixParameter(5,0.124304);
+          // // functionEndcapBetaEcalHcal->FixParameter(6,-0.69408);
+          // // functionEndcapBetaEcalHcal->FixParameter(7,-2.45953);
+
+          // functionEndcapAlphaHcal->FixParameter(0,-23.3651);
+          // functionEndcapAlphaHcal->FixParameter(1,2.84006);
+          // functionEndcapAlphaHcal->FixParameter(2,-0.651411);
+          // functionEndcapAlphaHcal->FixParameter(3,-0.436573);
+          // functionEndcapAlphaHcal->FixParameter(4,-9.13241);
+          // functionEndcapAlphaHcal->FixParameter(5,0.204199);
+          // functionEndcapAlphaHcal->FixParameter(6,-0.0265643);
+          // functionEndcapAlphaHcal->FixParameter(7,-0.274679);
+
+          // /*Should be same as 2025*/
+          // //USING NEUTRAL HADRONS ENERGIES AS NEUTRAL + CHARGED PFCANDS
+          // functionEndcapBetaHcal->FixParameter(0,0.129337);
+          // functionEndcapBetaHcal->FixParameter(1,62.8072);
+          // functionEndcapBetaHcal->FixParameter(2,2.19581);
+          // functionEndcapBetaHcal->FixParameter(3,0.00444789);
+          // functionEndcapBetaHcal->FixParameter(4,62.9391);
+          // functionEndcapBetaHcal->FixParameter(5,0.00435674);
+          // functionEndcapBetaHcal->FixParameter(6,-1.33967);
+          // functionEndcapBetaHcal->FixParameter(7,-1.3453);
+          // //USING NEUTRAL HADRONS ENERGIES AS ONLY NEUTRAL PFCANDS
+          // // functionEndcapBetaHcal->FixParameter(0,-0.151919);
+          // // functionEndcapBetaHcal->FixParameter(1,62.9727);
+          // // functionEndcapBetaHcal->FixParameter(2,3.12989);
+          // // functionEndcapBetaHcal->FixParameter(3,0.194795);
+          // // functionEndcapBetaHcal->FixParameter(4,62.8429);
+          // // functionEndcapBetaHcal->FixParameter(5,0.194395);
+          // // functionEndcapBetaHcal->FixParameter(6,-0.811108);
+          // // functionEndcapBetaHcal->FixParameter(7,-0.81471);
         }
       }      
    }
 
    else {
-    functionBarrelAlphaEcalHcal->SetParameters(7.20803327e-02,  3.88513516e+01, -1.97089186e-01,  1.92317354e-05, 3.89148254e+01,  1.97377202e-05, -3.81903468e+00, -3.80976892e+00);
-    functionBarrelBetaEcalHcal->SetParameters(-1.37303146e-01,  5.07467665e-01, -1.43816608e+00,  1.13786188e-27,3.49325605e-01,  3.87184658e-02, -3.18522650e+01, -7.41168461e-01);
-    functionBarrelAlphaHcal->SetParameters(-309.88719218,  478.49418581,    0.91255439,    3.93860731, 168.63174108,    1.26827987,   -1.22288791,   -1.26789833);
-    functionBarrelBetaHcal->SetParameters(-3.75423260e+04,  3.99936899e+04,  2.49930771e+03,  9.81435671e+00,2.45794683e+03,  9.23503212e-01, -3.63415745e-01, -3.29998655e-01);
-    functionEndcapAlphaEcalHcal->SetParameters(-4.73805349e-01,  1.70558532e+00, -2.43497109e+00,  2.94641300e-29,1.22798778e+00,  2.69113481e-01, -4.49744558e+01, -6.04008964e-01);
-    functionEndcapBetaEcalHcal->SetParameters(-1.73913760e+04,  3.67689873e+04,  1.92196620e+04,  1.83917932e+00, 1.93808095e+04,  4.03549296e+00, -5.05027587e-01, -8.80505213e-01);
-    functionEndcapAlphaHcal->SetParameters(-1.35241991e+02,  5.40254415e+00, -2.12630211e-01, -3.08375788e-01,-3.50364751e+00,  7.56113988e-02, -1.46618957e-03, -3.96685721e-01);
-    functionEndcapBetaHcal->SetParameters(6.27590088e-03,  6.97459767e+02,  4.41382044e+02,  4.23349014e-01, 6.98315917e+02,  5.32656095e-01, -5.84971848e-01, -6.37684753e-01);
+        functionBarrelAlphaEcalHcal->SetParameters(
+          0.00459153, 41.4101, -0.208785, 0.00511777,
+          41.4355, 0.00525003, -1.8401, -1.83148
+        );
+
+        functionBarrelBetaEcalHcal->SetParameters(
+          -0.230141, 0.55198, -0.6058, 0.033817,
+          0.284558, 0.0581362, -68.9373, -0.739426
+        );
+
+        // Should be same as 2025
+        functionBarrelAlphaHcal->SetParameters(
+          -0.0228555, 38.4883, -30, 0.050213,
+          38.3574, 0.0500749, -0.749399, -0.725583
+        );
+
+        functionBarrelBetaHcal->SetParameters(
+          -26.2967, 26.3867, 20.4632, 1.6136,
+          0.0346884, 1.36174e-05, -0.447603, -1.43572
+        );
+
+        functionEndcapAlphaEcalHcal->SetParameters(
+          -74.5982, 164.64, -2.08148, 36.2163,
+          87.2231, 26.5112, -0.0348255, -0.221957
+        );
+
+        // Should be same as 2025
+        // USING NEUTRAL HADRONS ENERGIES AS NEUTRAL + CHARGED PFCANDS
+        functionEndcapBetaEcalHcal->SetParameters(
+          -251.257, 257.534, 15.3389, 14.3594,
+          6.25427, 2.53553, -0.537981, -378.318
+        );
+
+        functionEndcapAlphaHcal->SetParameters(
+          -23.3651, 2.84006, -0.651411, -0.436573,
+          -9.13241, 0.204199, -0.0265643, -0.274679
+        );
+
+        // Should be same as 2025
+        // USING NEUTRAL HADRONS ENERGIES AS NEUTRAL + CHARGED PFCANDS
+        functionEndcapBetaHcal->SetParameters(
+          0.129337, 62.8072, 2.19581, 0.00444789,
+          62.9391, 0.00435674, -1.33967, -1.3453
+        );
+
+        // functionBarrelAlphaEcalHcal->SetParameters(-0.0442435, 41.0462, 0.249631, 3.39039e-06, 41.0298, 3.29772e-06, -2.82867, -2.83522);
+        // functionBarrelBetaEcalHcal->SetParameters(-0.230277, 0.551844, -0.596517, 0.033817, 0.284861, 0.0575414, -68.9373, -0.738639);
+        // functionBarrelAlphaHcal->SetParameters(-0.0137777, 1.39716, -9.19957, 0.0670852, 1.10144, 0.0123436, -0.428705, -0.683071);
+        // functionBarrelBetaHcal->SetParameters(-26.3462, 26.4397, 21.8309, 1.53318, 0.237261, 0.00473179, -0.445645, -0.528491);
+        // functionEndcapAlphaEcalHcal->SetParameters(-74.04, 165.211, -50.9361, 43.6627, 86.6656, 1.48086, 0.0189179, -0.548654);
+        // functionEndcapBetaEcalHcal->SetParameters(-244.238, 245.469, 15.5365, 15.2373, 1.11606, 0.0565505, -0.408889, -0.523665);
+        // functionEndcapAlphaHcal->SetParameters(-23.3651, 2.84006, -0.651396, -0.436573, -9.1324, 0.204201, -0.0265643, -0.274679);
+        // functionEndcapBetaHcal->SetParameters(0.220469, 65.1512, -73.6223, 0.018503, 65.1762, 0.0185766, -0.712891, -0.700704);
    }
 
 
@@ -3266,6 +3656,7 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
     
     int contador = -1;
     unsigned N = ETrueEnergies.size();
+    // cout << "N = " << N << endl;
     PFEnergyCalibration* pec = nullptr;  // Inicializar fuera del bucle si es necesario
 
     bool usePFEnergyCalibration = PFEnergyCalibrationFunction;
@@ -3278,9 +3669,12 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
     float hcalDepthFractions_[7], hcalDepthFractions_rc_[7];
     double correctedEta_org, correctedE_org, ecal_org, hcal_org; 
     
-    TFile *outFileN = new TFile("/eos/user/c/cmunozdi/tmp/2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU_bfix.root","recreate");//OFFLINE_NTUPLES/2025/NoPU_v7/SmallSamples/
-    TTree *Ntree = new TTree("s","NTuple for energy btw 0p2 and 5000 GeV and PFHC energy (without PU, 2025v2 B-fix calibration) and Power Law corrections");
+    TFile *outFileN = nullptr;
+    TTree *Ntree = nullptr;
+    
     if (WriteNTupleFile){
+      outFileN = new TFile("/eos/cms/store/group/phys_pf/cmunozdi/OFFLINE_NTUPLES/2026/NoPU_v2/WithPFEC/perETrueBin/2026_500to5000GeV_withCorrections_and_PowerLaw_NoPU_same2025Ntuplizer.root","recreate");
+      Ntree = new TTree("s","2026 NTuple for energy btw 500 and 5000 GeV and PFHC energy (without PU, same 2025 NTuplizer) and Power Law corrections");
 
       Ntree->Branch("true",&etrue_f, "true/F");
       Ntree->Branch("p", &momentum, "p/F");
@@ -3308,14 +3702,23 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
       Ntree->Branch("PFHC_energy",&correctedEta_f, "PFHC_energy/F");
       Ntree->Branch("hcalDepthFractions",&hcalDepthFractions_, "hcalDepthFractions[7]/F");
       // Ntree->Branch("hcalDepthFractions_rc",&hcalDepthFractions_rc_, "hcalDepthFractions_rc[7]/F");
-      Ntree->Branch("PFPL_energy",&correctedE_f, "PFPL_energy/F");
+      Ntree->Branch("PFEC_energy",&correctedE_f, "PFEC_energy/F");
       // Ntree->Branch("PFHC_closure",&PFHCclosure);
       // Ntree->Branch("PFEC_closure",&PFECclosure);
     }
     cout << "\t\t rawEnergy \t\t rawEMinusRC \t\t ecal \t\t hcal \t\t rcecal \t\t rchcal \t\t charge \t\t etrue \t\t eta" << endl;
     int ehcounter=0, hcounter=0;
     for (unsigned entry = 0; entry < N; ++entry) {
+        // continue;
         contador++;
+        
+        // Safety check
+        if (entry >= etas.size() || entry >= ETrueEnergies.size() || entry >= ecalEnergies.size()) {
+          std::cerr << "ERROR: entry=" << entry << " exceeds array sizes. etas.size()=" << etas.size() 
+                    << " ETrueEnergies.size()=" << ETrueEnergies.size() 
+                    << " ecalEnergies.size()=" << ecalEnergies.size() << std::endl;
+          break;
+        }
         // rcEcal=rcEcalEnergies[entry];
         // rcHcal=rcHcalEnergies[entry];
         etrue = ETrueEnergies[entry];
@@ -3394,17 +3797,19 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
         // }
 
         //Eta dependence per energy bins: 2-5, 5-10, 10-20, 20-40, 40-60, 60-100, 100-200, 200-500
-        //Calculate correction according to the region
-        if(abseta < 1.5){
-          if(ecal>0) correctedEta = barrelWithEcalHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
-          else correctedEta = barrelWithHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
-        }else{
-          if(ecal>0) correctedEta = endcapWithEcalHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
-          else correctedEta = endcapWithHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
-        }
-        if(usePFEnergyCalibration){
+
+        if(usePFEnergyCalibration){ //PFEC based on powerlaw
           pec->energyEmHad(etrue_org, eecalcorr, ehcalcorr, eta, phi);
           correctedEta = eecalcorr + ehcalcorr;
+        }else{//Nominal PFHC
+          //Calculate correction according to the region
+          if(abseta < 1.5){
+            if(ecal>0) correctedEta = barrelWithEcalHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
+            else correctedEta = barrelWithHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
+          }else{
+            if(ecal>0) correctedEta = endcapWithEcalHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
+            else correctedEta = endcapWithHcalCalib->getCalibratedEnergy(etrue, ecal, hcal, abseta, 0);
+          }
         }
         //Saving in each etrue bin
         // if(correctedEta<-1&&correctedEta>-2){
@@ -3418,6 +3823,7 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
         //   else hcounter++;
 
         // } 
+        if(drawEtaRespEnergyBinnedPlots){
         if(etrue<5){
           if(ecal>0) Corr_EHhadronsEtaDependence1->Fill(abseta, (correctedEta - etrue) / etrue);
           else Corr_HhadronsEtaDependence1->Fill(abseta, (correctedEta - etrue) / etrue);
@@ -3459,12 +3865,18 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
           corrEtaDependence8->Fill(abseta, (correctedEta - etrue) / etrue);
           rawEtaDependence8->Fill(abseta, (ecal + hcal - etrue) / etrue);
         }else if(etrue<1000){
+          if(ecal>0) Corr_EHhadronsEtaDependence9->Fill(abseta, (correctedEta - etrue) / etrue);
+          else Corr_HhadronsEtaDependence9->Fill(abseta, (correctedEta - etrue) / etrue);
           corrEtaDependence9->Fill(abseta, (correctedEta - etrue) / etrue);
           rawEtaDependence9->Fill(abseta, (ecal + hcal - etrue) / etrue);
         }else if(etrue<2000){
+          if(ecal>0) Corr_EHhadronsEtaDependence10->Fill(abseta, (correctedEta - etrue) / etrue);
+          else Corr_HhadronsEtaDependence10->Fill(abseta, (correctedEta - etrue) / etrue);
           corrEtaDependence10->Fill(abseta, (correctedEta - etrue) / etrue);
           rawEtaDependence10->Fill(abseta, (ecal + hcal - etrue) / etrue);
         }else if(etrue<5000){
+          if (ecal>0) Corr_EHhadronsEtaDependence11->Fill(abseta, (correctedEta - etrue) / etrue);
+          else Corr_HhadronsEtaDependence11->Fill(abseta, (correctedEta - etrue) / etrue);
           corrEtaDependence11->Fill(abseta, (correctedEta - etrue) / etrue);
           rawEtaDependence11->Fill(abseta, (ecal + hcal - etrue) / etrue);
         }
@@ -3530,8 +3942,9 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
           if(charge!=0) chargedHadronsEtaDependence11->Fill(abseta, response);
           bothHadronsEtaDependence11->Fill(abseta, response);
         }
-
+      }
         if (WriteNTupleFile){
+    
           pec->energyEmHad(etrue, eecalcorr, ehcalcorr, eta, phi);
           correctedE_f = static_cast<float>(eecalcorr + ehcalcorr);
           // PFECclosure = (correctedE - etrue) / etrue;
@@ -3544,6 +3957,7 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
           }
           // PFHCclosure = (correctedEta - etrue) / etrue;
           correctedEta_f = static_cast<float>(correctedEta);
+          
           Ntree->Fill();
         }
         
@@ -4031,17 +4445,16 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
     // }
     cout << "Done" << endl;
     if(WriteNTupleFile){
+
       Ntree->Write();
+      cout<<" Ntuple written to file "<<outFileN<<endl;
       delete pec;
+      cout<<" PEC deleted "<<endl;
       outFileN->Close();
+      cout<<" Ntuple file closed "<<endl;
       delete outFileN;
+      cout<<" Ntuple output file deleted "<<endl;
     }
-    //if (Ntree != nullptr) {
-      //delete Ntree;
-    //}
-    //if (outFileN != nullptr) {
-      //delete outFileN;
-    //}
   //}
 
    ////////////////////////////////////////////////////////////////////////////
@@ -4059,105 +4472,107 @@ functionBarrelEcalHcalA->FixParameter(0, aEH);
   // drawGausFit(corrEta_range5, response, resolution);
 
   //drawing EtaCorrEtaDependence per Etrue bins:    
-  drawEtaDependence(corrEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(corrEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence8, responseEtaEtaEH_and_H);
-  drawEtaDependence(corrEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(corrEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(corrEtaDependence11, responseEtaEtaEH_and_H);  
-  drawEtaDependence(rawEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(rawEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(rawEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(rawEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(rawEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(rawEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(rawEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(rawEtaDependence8, responseEtaEtaEH_and_H); 
-  drawEtaDependence(rawEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(rawEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(rawEtaDependence11, responseEtaEtaEH_and_H); 
-  drawEtaDependence(chargedHadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(chargedHadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence8, responseEtaEtaEH_and_H);
-  drawEtaDependence(chargedHadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(chargedHadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(chargedHadronsEtaDependence11, responseEtaEtaEH_and_H);  
-  drawEtaDependence(neutralHadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(neutralHadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(neutralHadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(neutralHadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(neutralHadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(neutralHadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(neutralHadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(neutralHadronsEtaDependence8, responseEtaEtaEH_and_H); 
-  drawEtaDependence(neutralHadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(neutralHadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(neutralHadronsEtaDependence11, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(bothHadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence8, responseEtaEtaEH_and_H);
-  drawEtaDependence(bothHadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(bothHadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(bothHadronsEtaDependence11, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_HhadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_HhadronsEtaDependence8, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_HhadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_HhadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_HhadronsEtaDependence11, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_EHhadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence8, responseEtaEtaEH_and_H);
-  drawEtaDependence(Corr_EHhadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_EHhadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Corr_EHhadronsEtaDependence11, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_HhadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_HhadronsEtaDependence8, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_HhadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_HhadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_HhadronsEtaDependence11, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence1, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_EHhadronsEtaDependence2, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence3, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence4, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence5, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence6, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence7, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence8, responseEtaEtaEH_and_H);
-  drawEtaDependence(Raw_EHhadronsEtaDependence9, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_EHhadronsEtaDependence10, responseEtaEtaEH_and_H); 
-  drawEtaDependence(Raw_EHhadronsEtaDependence11, responseEtaEtaEH_and_H);
+  if(drawEtaRespEnergyBinnedPlots){
+    drawEtaDependence(corrEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(corrEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence8, responseEtaEtaEH_and_H);
+    drawEtaDependence(corrEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(corrEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(corrEtaDependence11, responseEtaEtaEH_and_H);  
+    drawEtaDependence(rawEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(rawEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(rawEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(rawEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(rawEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(rawEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(rawEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(rawEtaDependence8, responseEtaEtaEH_and_H); 
+    drawEtaDependence(rawEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(rawEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(rawEtaDependence11, responseEtaEtaEH_and_H); 
+    drawEtaDependence(chargedHadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(chargedHadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence8, responseEtaEtaEH_and_H);
+    drawEtaDependence(chargedHadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(chargedHadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(chargedHadronsEtaDependence11, responseEtaEtaEH_and_H);  
+    drawEtaDependence(neutralHadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(neutralHadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(neutralHadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(neutralHadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(neutralHadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(neutralHadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(neutralHadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(neutralHadronsEtaDependence8, responseEtaEtaEH_and_H); 
+    drawEtaDependence(neutralHadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(neutralHadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(neutralHadronsEtaDependence11, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(bothHadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence8, responseEtaEtaEH_and_H);
+    drawEtaDependence(bothHadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(bothHadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(bothHadronsEtaDependence11, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_HhadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_HhadronsEtaDependence8, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_HhadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_HhadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_HhadronsEtaDependence11, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_EHhadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence8, responseEtaEtaEH_and_H);
+    drawEtaDependence(Corr_EHhadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_EHhadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Corr_EHhadronsEtaDependence11, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_HhadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_HhadronsEtaDependence8, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_HhadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_HhadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_HhadronsEtaDependence11, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence1, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_EHhadronsEtaDependence2, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence3, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence4, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence5, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence6, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence7, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence8, responseEtaEtaEH_and_H);
+    drawEtaDependence(Raw_EHhadronsEtaDependence9, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_EHhadronsEtaDependence10, responseEtaEtaEH_and_H); 
+    drawEtaDependence(Raw_EHhadronsEtaDependence11, responseEtaEtaEH_and_H);
+  }
   //drawEtaDependence(EtaCorrEtaDependence, responseEtaEtaEH_and_H);
   //  rawBarrelEcalHcal->Draw("colz");
   //  rawBarrelHcal->Draw("colz");

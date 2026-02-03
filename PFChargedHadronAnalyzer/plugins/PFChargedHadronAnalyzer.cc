@@ -440,62 +440,15 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     // std::cout << "Id = " << pfc.particleId() << std::endl;
     if ( pfc.particleId() < PF_PHOTON ) { 
-      const reco::TrackRef trackRef = pfc.trackRef();
-      if ( trackRef.isNonnull() ) {
-        double dz = fabs(trackRef->dz(genParticles->at(0).vertex()));
-
-        if(dz<0.2){
-          // isCharged = true;
-          //Check DeltaR between the track and the gen particle
-          double deta = genEta - pfc.eta();
-          double dphi = dPhi(genPhi, pfc.phi());
-          double dR = std::sqrt(deta*deta+dphi*dphi);
-          double dP = std::abs(genP - pfc.p());
-          if(dR<0.025){
-            if(dP/genP<0.1){
-              if(pfc.pt()>maxPFC_Pt){
-                maxPFC_Pt = pfc.pt();
-                bestTrack = &pfc;
-              }
-            }
-          }
-        }
-        
+      isCharged = true;
+      if(pfc.particleId() == PF_CHARGED_HADRON){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
+        trkP = pfc.trackRef()->p();
+        trkEta = pfc.trackRef()->eta();
+        trkPhi = pfc.trackRef()->phi();
       }
-      
+      break;
     }
   }
-  
-  // const reco::PFCandidate* closestBestTrack = nullptr;
-  // maxPFC_Pt = -1.;
-  // //If there is a charged track, save the track info
-  if(bestTrack){
-    isCharged = true;
-    if(bestTrack->particleId() == PF_CHARGED_HADRON){//Saving charged hadron track info. If there is a charged hadron in the event, it will be saved its track info and go directly to the track case (outside the if simu loop)
-      trkP = bestTrack->trackRef()->p();
-      trkEta = bestTrack->trackRef()->eta();
-      trkPhi = bestTrack->trackRef()->phi();
-    }
-  //   //Looking for the nearest/highest energy PFCluster to the one that matched the gen particle
-  //   for( CI ci = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
-  //     double deta = bestTrack->eta() - ci->eta();
-  //     double dphi = dPhi(bestTrack->phi(), ci->phi());
-  //     double dR = std::sqrt(deta*deta+dphi*dphi);
-  //     if((dR<0.2)&&(ci->pt()>maxPFC_Pt)){
-  //       if(dR==0) continue;
-  //       maxPFC_Pt = ci->pt();
-  //       closestBestTrack = &(*ci);
-  //     }
-  //   }
-
-
-  }
-  // if(closestBestTrack){
-  //   nearClustEcal_ = closestBestTrack->rawEcalEnergy();
-  //   nearClustEta_ = closestBestTrack->eta();
-  //   nearClustPhi_ = closestBestTrack->phi();
-  //   nearClustHcal_ = closestBestTrack->rawHcalEnergy();
-  // }
 
   //to clean a bit the neutral hadrons
   //if(pfcsID.size()!=1) return;
@@ -573,7 +526,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
           // rcPhi_ = pfc.phi();
         }
       }
-      if ( pfc.particleId() == PF_NEUTRAL_HADRON || pfc.particleId() < PF_PHOTON ) { //Added the charged hadrons to catch any missed energy (specially important when working with noPU samples)
+      if ( pfc.particleId() == PF_NEUTRAL_HADRON ) { //Added the charged hadrons to catch any missed energy (specially important when working with noPU samples)
         if (dR < 0.4){ //Proposed by Kenichi 9/11/23
 
           hcal_ += pfc.rawHcalEnergy(); // PF Neutral Hadron's HCAL energy
@@ -675,11 +628,12 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
   //cout<<" Track case !!! "<<endl;
 
   // Case of a reconstructed track.
-
+  // Loop on pfCandidates
+  for( CI ci  = pfCandidates->begin(); ci!=pfCandidates->end(); ++ci)  {
 
 
   // The pf candidate
-  const reco::PFCandidate& pfc = *bestTrack;//ci;
+  const reco::PFCandidate& pfc = *ci;
   nCh[0]++;
 
 
@@ -692,11 +646,11 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
 
     // Only charged hadrons (no PF muons, no PF electrons) 1 / 5
-    if ( (pfc.particleId() != PF_CHARGED_HADRON)) return;// || (pfc.particleId() != PF_PHOTON) || (pfc.particleId() != PF_NEUTRAL_HADRON)) continue;//cmunozdi: include photons and neutral hadrons
+    if ( (pfc.particleId() != PF_CHARGED_HADRON)) continue;// || (pfc.particleId() != PF_PHOTON) || (pfc.particleId() != PF_NEUTRAL_HADRON)) continue;//cmunozdi: include photons and neutral hadrons
     nCh[1]++;
 
     // Charged hadron minimum pt (the track pt, to an excellent approximation)
-    if ( pfc.pt() < ptMin_ ) return;
+    if ( pfc.pt() < ptMin_ ) continue;
     nCh[2]++;
 
     // At least 1 GeV in HCAL
@@ -718,7 +672,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     //   cout<<"Non Zero Hcal ="<<hcalRaw<<endl;
 
 
-    if ( ecalRaw + hcalRaw < hcalMin_ ) return;
+    if ( ecalRaw + hcalRaw < hcalMin_ ) continue;
     nCh[3]++;
 
     // h_phi_1->Fill(pfc.phi());   //qwerty Feb_15 2018
@@ -726,7 +680,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     //cout<<endl<<endl<<" new event "<<endl;
     // Find the corresponding PF block elements
     const PFCandidate::ElementsInBlocks& theElements = pfc.elementsInBlocks();
-    if( theElements.empty() ) return;
+    if( theElements.empty() ) continue;
     const reco::PFBlockRef blockRef = theElements[0].first;
     PFBlock::LinkData linkData =  blockRef->linkData();
    
@@ -781,7 +735,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     }
     //bypass for neutrals
-    // if ( nTracks != 1 ) continue;
+    if ( nTracks != 1 ) continue;
     nCh[4]++;
 
     // h_phi_2->Fill(pfc.phi());   //qwerty Feb_15 2018
@@ -897,7 +851,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
     
     // A minimum p and pt
-    if ( p < pMin_ || pt < ptMin_ ) return;
+    if ( p < pMin_ || pt < ptMin_ ) continue;
     nCh[5]++;
     
 
@@ -972,7 +926,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
 
 
     // // Number of pixel hits
-    if ( inner < nPixMin_ ) return;
+    if ( inner < nPixMin_ ) continue;
     nCh[6]++;
     
     // h_phi_4->Fill(pfc.phi());   //qwerty Feb_15 2018
@@ -988,13 +942,13 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
       if ( trackerHitOK ) break;
       etaMin = etaMax;
     }
-    if ( !trackerHitOK ) return;
+    if ( !trackerHitOK ) continue;
     nCh[7]++;
     
     // h_phi_5->Fill(pfc.phi());   //qwerty Feb_15 2018
 
     // Selects only ECAL MIPs
-    if ( ecalRaw > ecalMax_ ) return;
+    if ( ecalRaw > ecalMax_ ) continue;
     nCh[8]++;
 
     
@@ -1266,7 +1220,7 @@ void PFChargedHadronAnalyzer::analyze(const Event& iEvent, const EventSetup& iSe
     bcEcalPhi.clear();
     
     return;
-  //}
+  }
   s->Fill();
 }
 
